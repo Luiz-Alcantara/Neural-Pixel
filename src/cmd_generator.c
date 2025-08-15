@@ -28,10 +28,10 @@ GString *gen_sd_string(GenerationData *data)
 	char *denoise_str = convert_double_to_string(*data->denoise_value, "%.2f");
 	
 	char *seed_str;
-	if (*data->seed_value == -1.0) {
+	if (*data->seed_value == -1) {
 		seed_str = generate_sd_seed();
 	} else {
-		seed_str = convert_double_to_string(*data->seed_value, "%.0f");
+		seed_str = convert_long_long_int_to_string(*data->seed_value);
 	}
 	
 	char *up_repeat_str = convert_double_to_string(*data->up_repeat_value, "%.0f");

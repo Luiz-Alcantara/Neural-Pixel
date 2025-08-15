@@ -42,6 +42,7 @@ const int DEFAULT_BATCH_SIZE = 0;
 const int DEFAULT_OPT_VRAM = 0;
 const double DEFAULT_CFG = 6;
 const double DEFAULT_DENOISE = 0.75;
-const double DEFAULT_SEED = -1;
+const long long int DEFAULT_SEED = -1;
 const double DEFAULT_RP_UPSCALE = 1;
+const int LONGLONG_STR_SIZE = 21;
 

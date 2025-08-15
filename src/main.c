@@ -60,7 +60,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_r6, *box_r6_c1, *box_r6_c2, *box_r6_c3, *box_r6_c4;
 	GtkWidget *cfg_lab, *denoise_lab, *seed_lab, *upscale_str_lab;
-	GtkWidget *cfg_spin, *denoise_spin, *seed_spin, *upscale_spin;
+	GtkWidget *cfg_spin, *denoise_spin, *seed_entry, *upscale_spin;
 
 	GtkWidget *box_r7, *box_r7_c1, *box_r7_c2;
 	GtkWidget *lora_lab, *embedding_lab;
@@ -291,11 +291,17 @@ app_activate (GApplication *app, gpointer user_data)
 
 	seed_lab = gtk_label_new ("Seed:");
 	gtk_box_append (GTK_BOX (box_r6_c3), seed_lab);
-	seed_spin = gtk_spin_button_new_with_range (-1.0, 4294967295.0, 1.0);
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(seed_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(seed_spin), app_data->seed_value);
-	g_signal_connect (seed_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->seed_value);
-	gtk_box_append (GTK_BOX (box_r6_c3), seed_spin);
+	seed_entry = gtk_entry_new();
+	g_signal_connect(gtk_editable_get_delegate(GTK_EDITABLE(seed_entry)),
+	"insert-text", G_CALLBACK(seed_entry_int_filter), &app_data->seed_value);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "media-playlist-shuffle-symbolic");
+	gtk_entry_set_icon_activatable(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, TRUE);
+	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "Sets to -1 = random seed");
+	g_signal_connect(seed_entry, "icon-release", G_CALLBACK(random_seed_btn_toggle), NULL);
+	char seed_str[LONGLONG_STR_SIZE];
+	snprintf(seed_str, sizeof(seed_str), "%lld", app_data->seed_value);
+	gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
+	gtk_box_append (GTK_BOX (box_r6_c3), seed_entry);
 
 	upscale_str_lab = gtk_label_new ("Upscale Runs:");
 	gtk_box_append (GTK_BOX (box_r6_c4), upscale_str_lab);
@@ -511,7 +517,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->t5xxl_dd = t5xxl_dd;
 	reset_d->cfg_spin = cfg_spin;
 	reset_d->denoise_spin = denoise_spin;
-	reset_d->seed_spin = seed_spin;
+	reset_d->seed_entry = seed_entry;
 	reset_d->upscale_spin = upscale_spin;
 	reset_d->lora_dd = lora_dd;
 	reset_d->embedding_dd = embedding_dd;
@@ -541,7 +547,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->neg_tb = neg_tb;
 	load_png_info_d->steps_dd = steps_dd;
 	load_png_info_d->cfg_spin = cfg_spin;
-	load_png_info_d->seed_spin = seed_spin;
+	load_png_info_d->seed_entry = seed_entry;
 	load_png_info_d->width_dd = width_dd;
 	load_png_info_d->height_dd = height_dd;
 	load_png_info_d->model_dd = model_dd;

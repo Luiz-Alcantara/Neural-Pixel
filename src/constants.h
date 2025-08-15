@@ -39,7 +39,8 @@ extern const int DEFAULT_BATCH_SIZE;
 extern const int DEFAULT_OPT_VRAM;
 extern const double DEFAULT_CFG;
 extern const double DEFAULT_DENOISE;
-extern const double DEFAULT_SEED;
+extern const long long int DEFAULT_SEED;
 extern const double DEFAULT_RP_UPSCALE;
+extern const int LONGLONG_STR_SIZE;
 
 #endif  // CONSTANTS_H

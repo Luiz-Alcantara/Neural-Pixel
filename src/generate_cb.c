@@ -84,9 +84,9 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		if (strstr(out_string, "sampling completed") != NULL && data->img_n == data->img_t) {
 			gtk_button_set_label(GTK_BUTTON(data->button), "Decoding latent(s)...");
 		} else if (strstr(out_string, "generating image:") != NULL) {
-			long int img_seed;
+			long long int img_seed;
 			const char *last_colon = strrchr(out_string, ':');
-			if (last_colon && sscanf(last_colon + 1, " %i/%i - seed %ld", &data->img_n, &data->img_t, &img_seed) == 3) {
+			if (last_colon && sscanf(last_colon + 1, " %i/%i - seed %lld", &data->img_n, &data->img_t, &img_seed) == 3) {
 				g_data_input_stream_set_newline_type(G_DATA_INPUT_STREAM(data->out_pipe_stream), G_DATA_STREAM_NEWLINE_TYPE_CR);
 			} else {
 				fprintf(stderr, "Error: Could not parse batch size from line: %s\n", out_string);

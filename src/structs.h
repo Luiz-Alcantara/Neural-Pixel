@@ -28,7 +28,7 @@ typedef struct {
 	int verbose_bool;
 	double cfg_value;
 	double denoise_value;
-	double seed_value;
+	long long int seed_value;
 	double up_repeat_value;
 	GString *img2img_file_path;
 } AppStartData;
@@ -85,7 +85,7 @@ typedef struct {
 	int *verbose_bool;
 	double *cfg_value;
 	double *denoise_value;
-	double *seed_value;
+	long long int *seed_value;
 	double *up_repeat_value;
 	GtkTextBuffer *pos_p;
 	GtkTextBuffer *neg_p;
@@ -109,7 +109,7 @@ typedef struct {
 	GtkTextBuffer *neg_tb;
 	GtkWidget *steps_dd;
 	GtkWidget *cfg_spin;
-	GtkWidget *seed_spin;
+	GtkWidget *seed_entry;
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;
 	GtkWidget *model_dd;
@@ -152,7 +152,7 @@ typedef struct {
 	GtkWidget *t5xxl_dd;
 	GtkWidget *cfg_spin;
 	GtkWidget *denoise_spin;
-	GtkWidget *seed_spin;
+	GtkWidget *seed_entry;
 	GtkWidget *upscale_spin;
 	GtkWidget *lora_dd;
 	GtkWidget *embedding_dd;

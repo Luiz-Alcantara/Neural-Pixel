@@ -160,8 +160,16 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 	if (ptr) {
 		long long int seed_long;
 		if (sscanf(ptr + strlen("Seed: "), "%lld", &seed_long) == 1) {
-			GtkWidget *seed_spin = data->seed_spin;
-			gtk_spin_button_set_value (GTK_SPIN_BUTTON(seed_spin), seed_long);
+			GtkEntry *seed_entry = GTK_ENTRY(data->seed_entry);
+			char *seed_str;
+			seed_str = convert_long_long_int_to_string(seed_long);
+			if (seed_str != NULL) {
+				gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
+				free(seed_str);
+			} else {
+				fprintf(stderr, "Failed to parse seed data.\n");
+				gtk_editable_set_text(GTK_EDITABLE(seed_entry), "-1");
+			}
 		} else {
 			fprintf(stderr, "Failed to parse seed data.\n");
 			n_err++;

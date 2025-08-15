@@ -78,7 +78,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
 		fprintf(cf, "%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "%.2f\n", DEFAULT_DENOISE);
-		fprintf(cf, "%.1f\n", DEFAULT_SEED);
+		fprintf(cf, "%lld\n", DEFAULT_SEED);
 		fprintf(cf, "%.1f\n", DEFAULT_RP_UPSCALE);
 		fclose(cf);
 	}
@@ -294,7 +294,7 @@ void load_cache(gpointer user_data)
 				
 				case 22: char *endptr2; data->denoise_value = strtod(line, &endptr2); break;
 				
-				case 23: char *endptr3; data->seed_value = strtod(line, &endptr3); break;
+				case 23: sscanf(line, "%lld", &data->seed_value); break;
 				
 				case 24: char *endptr4; data->up_repeat_value = strtod(line, &endptr4); break;
 				
@@ -352,7 +352,7 @@ void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar 
 	fprintf(cf, "%d\n", *data->verbose_bool);
 	fprintf(cf, "%.1f\n", *data->cfg_value);
 	fprintf(cf, "%.2f\n", *data->denoise_value);
-	fprintf(cf, "%.1f\n", *data->seed_value);
+	fprintf(cf, "%lld\n", *data->seed_value);
 	fprintf(cf, "%.1f\n", *data->up_repeat_value);
 	fclose(cf);
 

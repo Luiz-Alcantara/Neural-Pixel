@@ -6,6 +6,7 @@
 	#include <process.h>
 	#define getpid _getpid
 #endif
+#include "constants.h"
 
 int check_list_contains_item(const char* const* list, const char* item)
 {
@@ -94,6 +95,22 @@ char *convert_double_to_string(double n, char *str_format)
 	return str;
 }
 
+char *convert_long_long_int_to_string(long long int x)
+{
+	printf("Long long int is: %lld\n", x);
+	char *str = malloc(LONGLONG_STR_SIZE);
+	if (!str) {
+		return NULL;
+	}
+
+	int success = snprintf(str, LONGLONG_STR_SIZE, "%lld", x);
+	if (success < 0 || success >= LONGLONG_STR_SIZE) {
+		free(str);
+		return NULL;
+	}
+	return str;
+}
+
 char *format_lora_embedding_string(const gchar* item, int tb_type)
 {
 	if (item == NULL) return NULL;
@@ -163,13 +180,13 @@ char* generate_sd_seed()
 
 	seed ^ ((long long int)pid << 16);
 	
-	char *seed_str = malloc(21);
+	char *seed_str = malloc(LONGLONG_STR_SIZE);
 	if (!seed_str) {
 		return NULL;
 	}
 
-	int success = snprintf(seed_str, 21, "%lld", seed);
-	if (success < 0 || success >= 22) {
+	int success = snprintf(seed_str, LONGLONG_STR_SIZE, "%lld", seed);
+	if (success < 0 || success >= LONGLONG_STR_SIZE) {
 		free(seed_str);
 		return NULL;
 	}
