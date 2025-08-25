@@ -342,28 +342,56 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)
 {
 	long long int *seed_ptr = (long long int *)user_data;
-	if (text[0] == '-' && text[1] == '1' && text[2] == '\0') {
-		g_signal_handlers_block_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-		gtk_editable_insert_text (editable, text, length, position);
-		g_signal_handlers_unblock_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-		*seed_ptr = -1;
-	} else if (isdigit(text[0])) {
-		g_signal_handlers_block_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-		gtk_editable_insert_text (editable, text, length, position);
-		g_signal_handlers_unblock_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-	}
-	/* TODO: Implement input validation to:
-	  - Cap entry at 19 digits (long long int max value).
-	  - Set maximum allowed value to 2^63 - 1 (9,223,372,036,854,775,807)
-	*/
-
-	g_signal_stop_emission_by_name (editable, "insert_text");
+	const char *entry_text;
+	gboolean has_minus = FALSE;
+	int entry_length;
+	int i;
 	
-	const gchar *current_text = gtk_editable_get_text(editable);
+	g_signal_stop_emission_by_name (editable, "insert-text");
+
+	entry_text = gtk_editable_get_text(editable);
+	entry_length = g_utf8_strlen (entry_text, -1);
+	
+	for (i = 0; i < entry_length; i++) {
+		if (entry_text[i] == '-') {
+			has_minus = TRUE;
+			break;
+		}
+	}
+	
+	for (i = 0; i < length; i++) {
+		if (text[i] == '-') {
+			if (has_minus || *position != 0 || i != 0 || entry_length != 0) {
+				return;
+			}
+			has_minus = TRUE;
+		} else if (text[i] < 0x30 || text[i] > 0x39) {
+			return;
+		}
+	}
+	
+	if (strcmp(entry_text, "-1") == 0) return;
+	
+	if (strcmp(entry_text, "-") == 0 && strcmp(text, "1") != 0) return;
+	
+	if (entry_length == 0 && text[0] == '0') return;
+	
+	// Safely cap input length to 18 chars to ensure it fits in a long long without overflow
+	if (entry_length + length > 18) return;
+
+	g_signal_handlers_block_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
+	gtk_editable_insert_text (editable, text, length, position);
+	g_signal_handlers_unblock_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
+	
+	const gchar *final_text = gtk_editable_get_text(editable);
 	
 	long long int new_seed;
-	if (sscanf(current_text, "%lld", &new_seed) == 1) {
+	if (sscanf(final_text, "%lld", &new_seed) == 1) {
 		*seed_ptr = new_seed;
+	} else {
+		g_printerr("Failed to parse seed, using default value(s).\n");
+		gtk_editable_set_text(editable, "-1");
+		*seed_ptr = DEFAULT_SEED;
 	}
 }
 
@@ -401,7 +429,6 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 void set_spin_value_to_var (GtkWidget *w, double *v)
 {
 	double value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	printf("Spin value is: %d", value);
 	*v = value;
 }
 

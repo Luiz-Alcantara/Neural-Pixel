@@ -1,10 +1,13 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #ifdef _WIN32
+	#include <windows.h>
 	#include <process.h>
-	#define getpid _getpid
+#else
+	#include <unistd.h>
 #endif
 #include "constants.h"
 
@@ -164,32 +167,47 @@ char *format_lora_embedding_string(const gchar* item, int tb_type)
 char* generate_sd_seed()
 {
 	long long int seed;
-	const pid_t pid = getpid();
 
 	#ifdef _WIN32
-		seed = (long long int)time(NULL);
-	#else
-		struct timespec ts;
-		if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-			seed = (long long int)ts.tv_sec * 1000000000LL + ts.tv_nsec;
+		LARGE_INTEGER counter;
+		if (QueryPerformanceCounter(&counter)) {
+			seed = (long long int)counter.QuadPart;
 		} else {
 			seed = (long long int)time(NULL);
-			seed ^= (long long int)clock();
+			seed ^= (long long int)GetCurrentThreadId() << 16;
 		}
+		seed ^= (long long int)GetCurrentProcessId() << 32;
+	#else
+		struct timespec ts;
+		if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+			seed = (long long int)ts.tv_sec * 1000000000LL;
+			seed += (long long int)ts.tv_nsec;
+		} else {
+			seed = (long long int)time(NULL);
+		}
+		seed ^= (long long int)getpid() << 32;
 	#endif
 
-	seed ^ ((long long int)pid << 16);
-	
+	seed ^= seed >> 33;
+	seed *= 0xFF51AFD7ED558CCD;
+	seed ^= seed >> 33;
+	seed *= 0xC4CEB9FE1A85EC53;
+	seed ^= seed >> 33;
+
+	seed &= 0x7FFFFFFFFFFFFFFF;
+
 	char *seed_str = malloc(LONGLONG_STR_SIZE);
 	if (!seed_str) {
 		return NULL;
 	}
 
-	int success = snprintf(seed_str, LONGLONG_STR_SIZE, "%lld", seed);
-	if (success < 0 || success >= LONGLONG_STR_SIZE) {
+	int chars_written = snprintf(seed_str, LONGLONG_STR_SIZE, "%lld", seed);
+
+	if (chars_written < 0 || chars_written >= LONGLONG_STR_SIZE) {
 		free(seed_str);
 		return NULL;
 	}
+
 	return seed_str;
 }
 
