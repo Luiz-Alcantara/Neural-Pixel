@@ -5,12 +5,13 @@
 #include <limits.h>
 #ifdef _WIN32
 	#include <windows.h>
-	#define PATH_MAX MAX_PATH
 #endif
 #include "constants.h"
 #include "handle_cache.h"
 #include "file_utils.h"
 #include "str_utils.h"
+
+#define FULL_PATH_MAX 512
 
 int is_file_empty(const char *fn)
 {
@@ -41,7 +42,7 @@ int count_files(DIR* dir, const char * dir_path, const char* const* array)
 	int nf = 0;
 	if (dir != NULL && array == NULL) {
 		struct dirent* entry;
-		char full_path[PATH_MAX];
+		char full_path[FULL_PATH_MAX];
 		while ((entry = readdir(dir)) != NULL) {
 			snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
 			if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
@@ -69,7 +70,7 @@ int count_output_files()
 	int nf = 0;
 	
 	struct dirent* entry;
-	char full_path[PATH_MAX];
+	char full_path[FULL_PATH_MAX];
 	while ((entry = readdir(dir)) != NULL) {
 		snprintf(full_path, sizeof(full_path), "%s/%s", outputs_path, entry->d_name);
 		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
@@ -229,7 +230,7 @@ GtkStringList* get_files(const char* path, GError **error)
 
 	int i = 0;
 	struct dirent* entry;
-	char full_path[PATH_MAX];
+	char full_path[FULL_PATH_MAX];
 
 	sort_files[0] = strdup("None");
 	while ((entry = readdir(dir)) != NULL) {

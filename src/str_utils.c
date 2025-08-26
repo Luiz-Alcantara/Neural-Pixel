@@ -217,9 +217,16 @@ char *get_time_str()
 	struct tm timeinfo;
 
 	time(&rt);
-	if (localtime_r(&rt, &timeinfo) == NULL) {
-	return NULL;
-	}
+	
+	#ifdef _WIN32
+		if (localtime_s(&timeinfo, &rt) != 0) {
+			return NULL;
+		}
+	#else
+		if (localtime_r(&rt, &timeinfo) == NULL) {
+			return NULL;
+		}
+	#endif
 
 	char *t = malloc(16);
 	if (t == NULL) {
