@@ -1,6 +1,8 @@
 #ifndef WIDGETS_CB_H
 #define WIDGETS_CB_H
 
+void show_error_message (GtkWidget *win, char *err_title_text, char *err_text);
+
 void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
 
 void app_start_data_free (gpointer user_data);
@@ -52,8 +54,6 @@ void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user
 void set_spin_value_to_var(GtkWidget *w, double *v);
 
 void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position, GdkEvent *event, gpointer user_data);
-
-void show_error_message (GtkWidget *win, char *err_title_text, char *err_text);
 
 void hide_img_btn_cb(GtkButton *btn, gpointer user_data);
 

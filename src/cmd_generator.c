@@ -118,7 +118,7 @@ GString *gen_sd_string(GenerationData *data)
 	}
 	
 	if (*data->schedule_index < LIST_SCHEDULES_COUNT - 1) {
-		g_string_append_printf(l1, "|--schedule|%s", LIST_SCHEDULES[(*data->schedule_index)]);
+		g_string_append_printf(l1, "|--scheduler|%s", LIST_SCHEDULES[(*data->schedule_index)]);
 	}
 	
 	if (seed_str != NULL) {

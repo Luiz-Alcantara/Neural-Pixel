@@ -88,6 +88,7 @@ app_activate (GApplication *app, gpointer user_data)
 	PreviewImageData *preview_d;
 	LoadPNGData *load_png_info_d;
 	LoadImg2ImgData *load_img2img_file_d;
+	SeedEntryData *seed_entry_d;
 	//End defining GTK Widgets;
 
 	win = gtk_application_window_new (GTK_APPLICATION (app));
@@ -292,8 +293,6 @@ app_activate (GApplication *app, gpointer user_data)
 	seed_lab = gtk_label_new ("Seed:");
 	gtk_box_append (GTK_BOX (box_r6_c3), seed_lab);
 	seed_entry = gtk_entry_new();
-	g_signal_connect(gtk_editable_get_delegate(GTK_EDITABLE(seed_entry)),
-	"insert-text", G_CALLBACK(seed_entry_int_filter), &app_data->seed_value);
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "media-playlist-shuffle-symbolic");
 	gtk_entry_set_icon_activatable(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, TRUE);
 	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "Sets to -1 = random seed");
@@ -490,6 +489,12 @@ app_activate (GApplication *app, gpointer user_data)
 	load_img_cache(preview_img);
 	gtk_box_append (GTK_BOX (boxr_topbar), hide_img_btn);
 	gtk_box_append (GTK_BOX (boxr_img), preview_img);
+	
+	seed_entry_d = g_new0 (SeedEntryData, 1);
+	seed_entry_d->seed = &app_data->seed_value;
+	seed_entry_d->win = win;
+	g_signal_connect(gtk_editable_get_delegate(GTK_EDITABLE(seed_entry)),
+	"insert-text", G_CALLBACK(seed_entry_int_filter), seed_entry_d);
 
 	reload_d = g_new0 (ReloadDropDownData, 1);
 	reload_d->app = app;

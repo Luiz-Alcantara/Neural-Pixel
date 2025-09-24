@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <ctype.h>
+#include <errno.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -8,6 +9,28 @@
 #include "str_utils.h"
 #include "global.h"
 #include "structs.h"
+
+void show_error_message (GtkWidget *win, char *err_title_text, char *err_text)
+{
+	#if GTK_CHECK_VERSION(4, 10, 0)
+		GtkAlertDialog *error_dialog = gtk_alert_dialog_new (err_title_text);
+		gtk_alert_dialog_set_detail (error_dialog, err_text);
+		gtk_alert_dialog_show (error_dialog, GTK_WINDOW(win));
+		g_object_unref(error_dialog);
+	#else
+		GtkWidget *error_dialog = gtk_message_dialog_new(
+		GTK_WINDOW(win),
+		GTK_DIALOG_MODAL,
+		GTK_MESSAGE_ERROR,
+		GTK_BUTTONS_CLOSE,
+		err_title_text
+		);
+
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(error_dialog), err_text);
+		g_signal_connect (error_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+		gtk_widget_show(error_dialog);
+	#endif
+}
 
 void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
 {
@@ -341,57 +364,33 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)
 {
-	long long int *seed_ptr = (long long int *)user_data;
-	const char *entry_text;
-	gboolean has_minus = FALSE;
-	int entry_length;
-	int i;
+	SeedEntryData *data = user_data;
+	long long int *seed_ptr = (long long int *)data->seed;
 	
 	g_signal_stop_emission_by_name (editable, "insert-text");
-
-	entry_text = gtk_editable_get_text(editable);
-	entry_length = g_utf8_strlen (entry_text, -1);
 	
-	for (i = 0; i < entry_length; i++) {
-		if (entry_text[i] == '-') {
-			has_minus = TRUE;
-			break;
-		}
-	}
+	const char *entry_text = gtk_editable_get_text(editable);
 	
-	for (i = 0; i < length; i++) {
-		if (text[i] == '-') {
-			if (has_minus || *position != 0 || i != 0 || entry_length != 0) {
-				return;
-			}
-			has_minus = TRUE;
-		} else if (text[i] < 0x30 || text[i] > 0x39) {
-			return;
-		}
-	}
+	char full_text[32];
+	snprintf(full_text, sizeof(full_text), "%s%s", entry_text, text);
 	
-	if (strcmp(entry_text, "-1") == 0) return;
+	char *endptr;
+	errno = 0;
+	long long int potential_seed = strtoll(full_text, &endptr, 10);
 	
-	if (strcmp(entry_text, "-") == 0 && strcmp(text, "1") != 0) return;
-	
-	if (entry_length == 0 && text[0] == '0') return;
-	
-	// Safely cap input length to 18 chars to ensure it fits in a long long without overflow
-	if (entry_length + length > 18) return;
-
-	g_signal_handlers_block_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-	gtk_editable_insert_text (editable, text, length, position);
-	g_signal_handlers_unblock_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-	
-	const gchar *final_text = gtk_editable_get_text(editable);
-	
-	long long int new_seed;
-	if (sscanf(final_text, "%lld", &new_seed) == 1) {
-		*seed_ptr = new_seed;
-	} else {
-		g_printerr("Failed to parse seed, using default value(s).\n");
+	if (*endptr != '\0' || potential_seed < -1 || errno == ERANGE) {
+		show_error_message(data->win,
+			"Seed Input Error",
+			"The seed must be numeric only;\nits value must be from -1 to 9223372036854775807.");
+		
+		g_printerr("Invalid seed input, using default value.\n");
 		gtk_editable_set_text(editable, "-1");
 		*seed_ptr = DEFAULT_SEED;
+	} else {
+		g_signal_handlers_block_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
+		gtk_editable_insert_text (editable, text, length, position);
+		g_signal_handlers_unblock_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
+		*seed_ptr = potential_seed;
 	}
 }
 
@@ -439,28 +438,6 @@ void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position,
 		snprintf(seed_str, sizeof(seed_str), "%lld", DEFAULT_SEED);
 	        gtk_editable_set_text(GTK_EDITABLE(entry_wgt), seed_str);
 	}
-}
-
-void show_error_message (GtkWidget *win, char *err_title_text, char *err_text)
-{
-	#if GTK_CHECK_VERSION(4, 10, 0)
-		GtkAlertDialog *error_dialog = gtk_alert_dialog_new (err_title_text);
-		gtk_alert_dialog_set_detail (error_dialog, err_text);
-		gtk_alert_dialog_show (error_dialog, GTK_WINDOW(win));
-		g_object_unref(error_dialog);
-	#else
-		GtkWidget *error_dialog = gtk_message_dialog_new(
-		GTK_WINDOW(win),
-		GTK_DIALOG_MODAL,
-		GTK_MESSAGE_ERROR,
-		GTK_BUTTONS_CLOSE,
-		err_title_text
-		);
-
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(error_dialog), err_text);
-		g_signal_connect (error_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
-		gtk_widget_show(error_dialog);
-	#endif
 }
 
 void hide_img_btn_cb (GtkButton *btn, gpointer user_data)

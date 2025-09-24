@@ -187,6 +187,11 @@ typedef struct {
 } SDProcessErrorData;
 
 typedef struct {
+	long long int *seed;
+	GtkWidget *win;
+} SeedEntryData;
+
+typedef struct {
 	int sd_pid;
 	gint stdout_fd;
 	char* cmd;

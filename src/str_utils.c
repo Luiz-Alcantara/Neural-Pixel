@@ -100,7 +100,6 @@ char *convert_double_to_string(double n, char *str_format)
 
 char *convert_long_long_int_to_string(long long int x)
 {
-	printf("Long long int is: %lld\n", x);
 	char *str = malloc(LONGLONG_STR_SIZE);
 	if (!str) {
 		return NULL;
