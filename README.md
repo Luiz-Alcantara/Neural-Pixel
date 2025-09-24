@@ -56,10 +56,16 @@ You can directly run the "neural pixel" binary, but the variable that defines th
 
 ## Build
 
-You'll need GTK 4 and libpng development libs, then just git clone this repository and run:
+You'll need **GTK 4** and the **libpng development libraries** installed.
+Then, clone this repository using:
+```
+git clone https://github.com/Luiz-Alcantara/Neural-Pixel.git
+```
+Next, navigate into the cloned directory and run:
 ```
 mkdir build && cd build && cmake .. && make
 ```
+
 To build on Windows Use MSYS2.
 
 To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
@@ -76,7 +82,7 @@ To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cp
 
 ## Donations
 
-- My PayPal: [link](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ).
+- PayPal: [`Donate`](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ)
 
 - Bitcoin
 ```
