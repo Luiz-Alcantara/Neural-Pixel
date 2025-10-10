@@ -122,8 +122,8 @@ void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data)
 	LoadImg2ImgData *data = user_data;
 	GString *gstr = data->img2img_file_path;
 	g_string_assign(gstr, "None");
-	GtkImage *prev_img = GTK_IMAGE(data->image_wgt);
-	gtk_image_set_from_file(prev_img, "./resources/example.png");
+	GtkPicture *prev_img = GTK_PICTURE(data->image_wgt);
+	gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 }
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)
@@ -166,6 +166,7 @@ void free_preview_data (gpointer data)
 	PreviewImageData *preview_d = (PreviewImageData *)data;
 	g_free(preview_d);
 }
+
 void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
 {
 	gtk_widget_set_sensitive(GTK_WIDGET(btn), FALSE);
@@ -443,12 +444,12 @@ void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position,
 void hide_img_btn_cb (GtkButton *btn, gpointer user_data)
 {
 	PreviewImageData *data = user_data;
-	GtkImage *img = GTK_IMAGE(data->image_widget);
+	GtkPicture *img = GTK_PICTURE(data->image_widget);
 	const char *i;
 	i = gtk_button_get_icon_name (btn);
 	if (g_strcmp0 (i, "view-reveal-symbolic") == 0) {
 		gtk_button_set_icon_name (btn, "view-conceal-symbolic");
-		gtk_image_clear(GTK_IMAGE(img));
+		gtk_picture_set_filename(img, EMPTY_IMG_PATH);
 	} else {
 		gtk_button_set_icon_name (btn, "view-reveal-symbolic");
 	}

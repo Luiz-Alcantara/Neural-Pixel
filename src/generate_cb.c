@@ -136,15 +136,15 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	const char *icon_n = gtk_button_get_icon_name (GTK_BUTTON(data->show_img_btn));
 	
 	if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
-		GtkImage *prev_img = GTK_IMAGE(data->image_widget);
+		GtkPicture *prev_img = GTK_PICTURE(data->image_widget);
 		if (check_file_exists(data->result_img_path, 0) == 1) {
-			gtk_image_set_from_file(prev_img, data->result_img_path);
+			gtk_picture_set_filename(prev_img, data->result_img_path);
 		} else {
 			g_printerr(
 				"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
 				data->result_img_path
 			);
-			gtk_image_set_from_file(prev_img, "./resources/example.png");
+			gtk_picture_set_filename(prev_img, "./resources/example.png");
 		}
 	}
 	

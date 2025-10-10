@@ -175,7 +175,7 @@ void load_img_cache(GtkWidget *img_wgt)
 		FILE *imgf = fopen(".cache/img_cache", "r");
 		if (imgf == NULL) {
 			g_printerr("Failed to open file '.cache/img_cache', using default value(s).\n");
-			gtk_image_set_from_file(GTK_IMAGE(img_wgt), DEFAULT_IMG_PATH);
+			gtk_picture_set_filename(GTK_PICTURE(img_wgt), DEFAULT_IMG_PATH);
 			return;
 		}
 		char line[128];
@@ -185,7 +185,7 @@ void load_img_cache(GtkWidget *img_wgt)
 			line[strcspn(line, "\n")] = '\0';
 			if (i > 1) break;
 			switch(i) {
-				case 0: gtk_image_set_from_file(GTK_IMAGE(img_wgt), line); break;
+				case 0: gtk_picture_set_filename(GTK_PICTURE(img_wgt), line); break;
 				
 				default: break;
 			}
@@ -194,7 +194,7 @@ void load_img_cache(GtkWidget *img_wgt)
 		fclose(imgf);
 	} else {
 		g_printerr("Error loading '.cache/img_cache', using default value(s).\n");
-		gtk_image_set_from_file(GTK_IMAGE(img_wgt), DEFAULT_IMG_PATH);
+		gtk_picture_set_filename(GTK_PICTURE(img_wgt), DEFAULT_IMG_PATH);
 	}
 }
 

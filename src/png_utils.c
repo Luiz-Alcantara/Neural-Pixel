@@ -298,9 +298,9 @@ static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data
 		char *path = g_file_get_path(png_file);
 		if (path != NULL) {
 			g_string_assign(data->img2img_file_path, path);
-			GtkImage *prev_img = GTK_IMAGE(data->image_wgt);
+			GtkPicture *prev_img = GTK_PICTURE(data->image_wgt);
 			if (check_file_exists(path, 0) == 1) {
-				gtk_image_set_from_file(prev_img, path);
+				gtk_picture_set_filename(prev_img, path);
 			} else {
 				g_printerr(
 					"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
@@ -310,7 +310,7 @@ static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data
 					"Error loading image",
 					"Error loading image: The selected file is missing, corrupted, or invalid.\n"
 				);
-				gtk_image_set_from_file(prev_img, "./resources/example.png");
+				gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 			}
 			g_free(path);
 		}
@@ -348,9 +348,9 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 			char *path = g_file_get_path(png_file);
 			if (path != NULL) {
 				g_string_assign(data->img2img_file_path, path);
-				GtkImage *prev_img = GTK_IMAGE(data->image_wgt);
+				GtkPicture *prev_img = GTK_PICTURE(data->image_wgt);
 				if (check_file_exists(path, 0) == 1) {
-					gtk_image_set_from_file(prev_img, path);
+					gtk_picture_set_filename(prev_img, path);
 				} else {
 					g_printerr(
 						"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
@@ -360,7 +360,7 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 						"Error loading image",
 						"Error loading image: The selected file is missing, corrupted, or invalid.\n"
 					);
-					gtk_image_set_from_file(prev_img, "./resources/example.png");
+					gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 				}
 				g_free(path);
 			}

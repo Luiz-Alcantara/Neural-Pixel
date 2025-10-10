@@ -485,7 +485,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_vexpand (boxr_img, TRUE);
 	gtk_box_append (GTK_BOX (box_right), boxr_img);
 
-	preview_img = gtk_image_new_from_file (DEFAULT_IMG_PATH);
+	preview_img = gtk_picture_new_for_filename (DEFAULT_IMG_PATH);
 	load_img_cache(preview_img);
 	gtk_box_append (GTK_BOX (boxr_topbar), hide_img_btn);
 	gtk_box_append (GTK_BOX (boxr_img), preview_img);

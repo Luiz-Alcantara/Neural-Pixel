@@ -33,6 +33,7 @@ const char* POSITIVE_PROMPT = "A colossal ancient tree towering over a vast land
 const char* NEGATIVE_PROMPT = "blurry, grainy, low resolution, cartoon, low detail, distorted, text, watermark";
 const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
+const char* EMPTY_IMG_PATH = "./resources/empty.png";
 const int DEFAULT_MODELS = 0;
 const int DEFAULT_SAMPLE = 5;
 const int DEFAULT_SCHEDULE = 1;
