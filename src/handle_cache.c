@@ -76,9 +76,10 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
 		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
 		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "%lld\n", DEFAULT_SEED);
 		fprintf(cf, "%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "%.2f\n", DEFAULT_DENOISE);
-		fprintf(cf, "%lld\n", DEFAULT_SEED);
+		fprintf(cf, "%.1f\n", DEFAULT_CLIP_SKIP);
 		fprintf(cf, "%.1f\n", DEFAULT_RP_UPSCALE);
 		fclose(cf);
 	}
@@ -225,9 +226,11 @@ void load_cache_fallback(gpointer user_data)
 	data->taesd_bool = DEFAULT_OPT_VRAM;
 	data->verbose_bool = DEFAULT_OPT_VRAM;
 	
+	data->seed_value = DEFAULT_SEED;
+	
 	data->cfg_value = DEFAULT_CFG;
 	data->denoise_value = DEFAULT_DENOISE;
-	data->seed_value = DEFAULT_SEED;
+	data->clip_skip_value = DEFAULT_CLIP_SKIP;
 	data->up_repeat_value = DEFAULT_RP_UPSCALE;
 }
 
@@ -246,7 +249,7 @@ void load_cache(gpointer user_data)
 
 		while (fgets(line, sizeof(line), cf) != NULL) {
 			line[strcspn(line, "\n")] = '\0';
-			if (i > 24) break;
+			if (i > 25) break;
 			switch(i) {
 				case 0: g_string_assign(data->model_string, line); break;
 
@@ -290,13 +293,15 @@ void load_cache(gpointer user_data)
 				
 				case 20: sscanf(line, "%d", &data->verbose_bool); break;
 				
-				case 21: char *endptr1; data->cfg_value = strtod(line, &endptr1); break;
+				case 21: sscanf(line, "%lld", &data->seed_value); break;
 				
-				case 22: char *endptr2; data->denoise_value = strtod(line, &endptr2); break;
+				case 22: char *endptr1; data->cfg_value = strtod(line, &endptr1); break;
 				
-				case 23: sscanf(line, "%lld", &data->seed_value); break;
+				case 23: char *endptr2; data->denoise_value = strtod(line, &endptr2); break;
 				
-				case 24: char *endptr4; data->up_repeat_value = strtod(line, &endptr4); break;
+				case 24: char *endptr3; data->clip_skip_value = strtod(line, &endptr2); break;
+				
+				case 25: char *endptr4; data->up_repeat_value = strtod(line, &endptr4); break;
 				
 				default: break;
 			}
@@ -350,9 +355,10 @@ void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar 
 	fprintf(cf, "%d\n", *data->fa_bool);
 	fprintf(cf, "%d\n", *data->taesd_bool);
 	fprintf(cf, "%d\n", *data->verbose_bool);
+	fprintf(cf, "%lld\n", *data->seed_value);
 	fprintf(cf, "%.1f\n", *data->cfg_value);
 	fprintf(cf, "%.2f\n", *data->denoise_value);
-	fprintf(cf, "%lld\n", *data->seed_value);
+	fprintf(cf, "%.1f\n", *data->clip_skip_value);
 	fprintf(cf, "%.1f\n", *data->up_repeat_value);
 	fclose(cf);
 

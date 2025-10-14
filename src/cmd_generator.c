@@ -23,10 +23,7 @@ GString *gen_sd_string(GenerationData *data)
 	GtkTextIter nei;
 	gtk_text_buffer_get_bounds (neg_tb, &nsi, &nei);
 	char *n_text = gtk_text_buffer_get_text(neg_tb, &nsi, &nei, FALSE);
-	
-	char *cfg_str = convert_double_to_string(*data->cfg_value, "%.1f");
-	char *denoise_str = convert_double_to_string(*data->denoise_value, "%.2f");
-	
+
 	char *seed_str;
 	if (*data->seed_value == -1) {
 		seed_str = generate_sd_seed();
@@ -34,6 +31,9 @@ GString *gen_sd_string(GenerationData *data)
 		seed_str = convert_long_long_int_to_string(*data->seed_value);
 	}
 	
+	char *cfg_str = convert_double_to_string(*data->cfg_value, "%.1f");
+	char *denoise_str = convert_double_to_string(*data->denoise_value, "%.2f");
+	char *clip_skip_str = convert_double_to_string(*data->clip_skip_value, "%.0f");
 	char *up_repeat_str = convert_double_to_string(*data->up_repeat_value, "%.0f");
 
 	GString *l1 = g_string_new(NULL);
@@ -112,6 +112,8 @@ GString *gen_sd_string(GenerationData *data)
 	}
 
 	g_string_append_printf(l1, "|--cfg-scale|%s", cfg_str);
+	
+	g_string_append_printf(l1, "|--clip-skip|%s", clip_skip_str);
 
 	if (*data->sample_index < LIST_SAMPLES_COUNT - 1) {
 		g_string_append_printf(l1, "|--sampling-method|%s", LIST_SAMPLES[(*data->sample_index)]);
@@ -171,11 +173,12 @@ GString *gen_sd_string(GenerationData *data)
 	g_free(p_text);
 	g_free(n_text);
 	free(timestamp);
-	free(cfg_str);
-	free(denoise_str);
 	if (seed_str != NULL) {
 		free(seed_str);
 	}
+	free(cfg_str);
+	free(denoise_str);
+	free(clip_skip_str);
 	free(up_repeat_str);
 	
 	if (*data->verbose_bool == 1) {

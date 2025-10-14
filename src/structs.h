@@ -26,9 +26,10 @@ typedef struct {
 	int fa_bool;
 	int taesd_bool;
 	int verbose_bool;
+	long long int seed_value;
 	double cfg_value;
 	double denoise_value;
-	long long int seed_value;
+	double clip_skip_value;
 	double up_repeat_value;
 	GString *img2img_file_path;
 } AppStartData;
@@ -83,9 +84,10 @@ typedef struct {
 	int *fa_bool;
 	int *taesd_bool;
 	int *verbose_bool;
+	long long int *seed_value;
 	double *cfg_value;
 	double *denoise_value;
-	long long int *seed_value;
+	double *clip_skip_value;
 	double *up_repeat_value;
 	GtkTextBuffer *pos_p;
 	GtkTextBuffer *neg_p;

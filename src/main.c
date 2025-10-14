@@ -58,9 +58,9 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *clip_l_lab, *clip_g_lab, *t5xxl_lab;
 	GtkWidget *clip_l_dd, *clip_g_dd, *t5xxl_dd;
 
-	GtkWidget *box_r6, *box_r6_c1, *box_r6_c2, *box_r6_c3, *box_r6_c4;
-	GtkWidget *cfg_lab, *denoise_lab, *seed_lab, *upscale_str_lab;
-	GtkWidget *cfg_spin, *denoise_spin, *seed_entry, *upscale_spin;
+	GtkWidget *box_r6, *box_r6_c1, *box_r6_c2, *box_r6_c3, *box_r6_c4, *box_r6_c5;
+	GtkWidget *cfg_lab, *denoise_lab, *clip_skip_lab, *upscale_str_lab, *seed_lab;
+	GtkWidget *cfg_spin, *denoise_spin, *clip_skip_spin, *upscale_spin, *seed_entry;
 
 	GtkWidget *box_r7, *box_r7_c1, *box_r7_c2;
 	GtkWidget *lora_lab, *embedding_lab;
@@ -257,9 +257,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r5_c3), t5xxl_dd);
 
 
-	//Set Box Row 5, col 1, 2 and 3
+	//Set Box Row 6, col 1 to 5
 	box_r6 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
-	gtk_box_set_homogeneous (GTK_BOX (box_r6), TRUE);
 	gtk_box_append (GTK_BOX (box_left), box_r6);
 
 	box_r6_c1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
@@ -273,6 +272,10 @@ app_activate (GApplication *app, gpointer user_data)
 
 	box_r6_c4 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 	gtk_box_append (GTK_BOX (box_r6), box_r6_c4);
+	
+	box_r6_c5 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+	gtk_widget_set_hexpand (box_r6_c5, TRUE);
+	gtk_box_append (GTK_BOX (box_r6), box_r6_c5);
 
 	cfg_lab = gtk_label_new ("CFG Scale:");
 	gtk_box_append (GTK_BOX (box_r6_c1), cfg_lab);
@@ -289,18 +292,14 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), app_data->denoise_value);
 	g_signal_connect (denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->denoise_value);
 	gtk_box_append (GTK_BOX (box_r6_c2), denoise_spin);
-
-	seed_lab = gtk_label_new ("Seed:");
-	gtk_box_append (GTK_BOX (box_r6_c3), seed_lab);
-	seed_entry = gtk_entry_new();
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "media-playlist-shuffle-symbolic");
-	gtk_entry_set_icon_activatable(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, TRUE);
-	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "Sets to -1 = random seed");
-	g_signal_connect(seed_entry, "icon-release", G_CALLBACK(random_seed_btn_toggle), NULL);
-	char seed_str[LONGLONG_STR_SIZE];
-	snprintf(seed_str, sizeof(seed_str), "%lld", app_data->seed_value);
-	gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
-	gtk_box_append (GTK_BOX (box_r6_c3), seed_entry);
+	
+	clip_skip_lab = gtk_label_new ("Clip Skip:");
+	gtk_box_append (GTK_BOX (box_r6_c3), clip_skip_lab);
+	clip_skip_spin = gtk_spin_button_new_with_range (0, 12.0, 1.0);
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(clip_skip_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(clip_skip_spin), app_data->clip_skip_value);
+	g_signal_connect (clip_skip_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->clip_skip_value);
+	gtk_box_append (GTK_BOX (box_r6_c3), clip_skip_spin);
 
 	upscale_str_lab = gtk_label_new ("Upscale Runs:");
 	gtk_box_append (GTK_BOX (box_r6_c4), upscale_str_lab);
@@ -309,9 +308,21 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_spin), app_data->up_repeat_value);
 	g_signal_connect (upscale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->up_repeat_value);
 	gtk_box_append (GTK_BOX (box_r6_c4), upscale_spin);
+	
+	seed_lab = gtk_label_new ("Seed:");
+	gtk_box_append (GTK_BOX (box_r6_c5), seed_lab);
+	seed_entry = gtk_entry_new();
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "media-playlist-shuffle-symbolic");
+	gtk_entry_set_icon_activatable(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, TRUE);
+	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "Sets to -1 = random seed");
+	g_signal_connect(seed_entry, "icon-release", G_CALLBACK(random_seed_btn_toggle), NULL);
+	char seed_str[LONGLONG_STR_SIZE];
+	snprintf(seed_str, sizeof(seed_str), "%lld", app_data->seed_value);
+	gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
+	gtk_box_append (GTK_BOX (box_r6_c5), seed_entry);
 
 
-	//Set Box Row 6, col 1 to 6
+	//Set Box Row 7, col 1, and 2
 	box_r7 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_box_set_homogeneous (GTK_BOX (box_r7), TRUE);
 	gtk_box_append (GTK_BOX (box_left), box_r7);
@@ -334,7 +345,7 @@ app_activate (GApplication *app, gpointer user_data)
 	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, 48, neg_tb, 0, NULL, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r7_c2), embedding_dd);
 
-	//Set Box Row 7, col 1
+	//Set Box Row 8, col 1 to 6
 
 	box_r8 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_box_set_homogeneous (GTK_BOX (box_r8), TRUE);
@@ -391,7 +402,7 @@ app_activate (GApplication *app, gpointer user_data)
 	batch_dd = gen_const_dd(LIST_STEPS_STR, &app_data->bs_index);
 	gtk_box_append (GTK_BOX (box_r8_c6), batch_dd);
 
-	//Set Box Row 8, col 1
+	//Set Box Row 9, col 1, 2 and 3
 	box_r9 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_box_append (GTK_BOX (box_left), box_r9);
 
@@ -591,9 +602,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->fa_bool = &app_data->fa_bool;
 	gen_d->taesd_bool = &app_data->taesd_bool;
 	gen_d->verbose_bool = &app_data->verbose_bool;
+	gen_d->seed_value = &app_data->seed_value;
 	gen_d->cfg_value = &app_data->cfg_value;
 	gen_d->denoise_value = &app_data->denoise_value;
-	gen_d->seed_value = &app_data->seed_value;
+	gen_d->clip_skip_value = &app_data->clip_skip_value;
 	gen_d->up_repeat_value = &app_data->up_repeat_value;
 	gen_d->pos_p = pos_tb;
 	gen_d->neg_p = neg_tb;
