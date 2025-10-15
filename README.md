@@ -7,6 +7,21 @@
 
 With Neural Pixel, you can use Stable Diffusion on practically any GPU that supports Vulkan and has at least 3GB of VRAM. This is a simple way to generate your images without having to deal with CUDA/ROCm installations or hundreds of Python dependencies.
 
+## Notes
+
+- SDLX Needs the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
+
+- At the moment the only upscaling model that works is: [RealESRGAN_x4plus_anime_6B.pth](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth).
+
+- Flux needs to be converted to `GGUF` to work. You can either download a pre-converted model ([FLUX.1-dev](https://huggingface.co/leejet/FLUX.1-dev-gguf/tree/main) or [FLUX.1-schnell](https://huggingface.co/leejet/FLUX.1-schnell-gguf/tree/main)) or convert your own:
+
+```
+./sd -M convert -m path_to_your_model.safetensors -o your_model_converted.q8_0.gguf -v --type q8_0
+```
+You'll also need: [Flux VAE](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/ae.safetensors), [clip_l](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/clip_l.safetensors), and [t5xxl](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/t5xxl_fp16.safetensors).
+
+
+
 ## Linux Requirements
 
 - Linux Distro with kernel >= 5.14 (Tested on RHEL 9, Fedora 42, and Arch Linux).
@@ -69,12 +84,6 @@ mkdir build && cd build && cmake .. && make
 To build on Windows Use MSYS2.
 
 To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
-
-## Notes
-
-- SDLX Needs the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
-
-- At the moment the only upscaling model that works is: [RealESRGAN_x4plus_anime_6B.pth](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth).
 
 ## Credits
 
