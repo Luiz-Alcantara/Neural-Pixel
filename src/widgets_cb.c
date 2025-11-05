@@ -344,6 +344,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *batch_dd = data->batch_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(batch_dd), DEFAULT_BATCH_SIZE);
 	
+	GtkWidget *sd_based_check = data->sd_based_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	
 	GtkWidget *cpu_check = data->cpu_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(cpu_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
 

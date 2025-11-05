@@ -62,7 +62,11 @@ GString *gen_sd_string(GenerationData *data)
 	}
 
 	if (data->model_string != NULL) {
-	g_string_append_printf(l1, "|-m|./models/checkpoints/%s", data->model_string->str);
+		if (*data->sd_based_bool == 1) {
+			g_string_append_printf(l1, "|--model|./models/checkpoints/%s", data->model_string->str);
+		} else {
+			g_string_append_printf(l1, "|--diffusion-model|./models/checkpoints/%s", data->model_string->str);
+		}
 	}
 	
 	g_string_append(l1, "|--lora-model-dir|./models/loras|--embd-dir|./models/embeddings");

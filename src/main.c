@@ -45,9 +45,11 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *neg_tv;
 	GtkTextBuffer *neg_tb;
 
-	GtkWidget *box_r3, *box_r3_c1, *box_r3_c2;
+	GtkWidget *box_r3, *box_r3_c1, *box_r3_c1_model, *box_r3_c2;
 	GtkWidget *generate_btn;
-	GtkWidget *model_lab, *vae_lab;
+	GtkWidget *model_lab;
+	GtkWidget *sd_based_check;
+	GtkWidget *vae_lab;
 	GtkWidget *model_dd, *vae_dd;
 
 	GtkWidget *box_r4, *box_r4_c1, *box_r4_c2;
@@ -112,7 +114,6 @@ app_activate (GApplication *app, gpointer user_data)
 	box_right = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 	gtk_widget_set_name(box_right, "image_window");
 	gtk_box_append (GTK_BOX (box), box_right);
-
 
 	//Set Box Left Button bar
 	boxl_topbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
@@ -181,6 +182,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_left), box_r3);
 
 	box_r3_c1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+	gtk_box_set_homogeneous (GTK_BOX (box_r3_c1), FALSE);
 	gtk_box_append (GTK_BOX (box_r3), box_r3_c1);
 
 	box_r3_c2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
@@ -194,9 +196,19 @@ app_activate (GApplication *app, gpointer user_data)
 
 	gtk_box_append (GTK_BOX (box_r3_c1), model_lab);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_lab);
+	
+	box_r3_c1_model = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_box_append (GTK_BOX (box_r3_c1), box_r3_c1_model);
 
 	model_dd = gen_path_dd(CHECKPOINTS_PATH, 22, NULL, 0, app_data->model_string, generate_btn, app, 1);
-	gtk_box_append (GTK_BOX (box_r3_c1), model_dd);
+	gtk_widget_set_hexpand (model_dd, TRUE);
+	gtk_box_append (GTK_BOX (box_r3_c1_model), model_dd);
+	
+	sd_based_check = gtk_check_button_new_with_label("SD Model");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), app_data->sd_based_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_based_check), "Uncheck for non Stable Diffusion based models\n(e.g., Flux, Chroma, Qwen).");
+	g_signal_connect(sd_based_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->sd_based_bool);
+	gtk_box_append (GTK_BOX (box_r3_c1_model), sd_based_check);
 
 	vae_dd = gen_path_dd(VAES_PATH, 22, NULL, 0, app_data->vae_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_dd);
@@ -543,6 +555,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->width_dd = width_dd;
 	reset_d->height_dd = height_dd;
 	reset_d->batch_dd = batch_dd;
+	reset_d->sd_based_check = sd_based_check;
 	reset_d->cpu_check = cpu_check;
 	reset_d->tiling_check = tiling_check;
 	reset_d->clip_check = clip_check;
@@ -594,6 +607,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->w_index = &app_data->w_index;
 	gen_d->h_index = &app_data->h_index;
 	gen_d->bs_index = &app_data->bs_index;
+	gen_d->sd_based_bool = &app_data->sd_based_bool;
 	gen_d->cpu_bool = &app_data->cpu_bool;
 	gen_d->vt_bool = &app_data->vt_bool;
 	gen_d->k_clip_bool = &app_data->k_clip_bool;

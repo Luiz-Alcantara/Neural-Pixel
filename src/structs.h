@@ -18,6 +18,7 @@ typedef struct {
 	int w_index;
 	int h_index;
 	int bs_index;
+	int sd_based_bool;
 	int cpu_bool;
 	int vt_bool;
 	int k_clip_bool;
@@ -76,6 +77,7 @@ typedef struct {
 	int *w_index;
 	int *h_index;
 	int *bs_index;
+	int *sd_based_bool;
 	int *cpu_bool;
 	int *vt_bool;
 	int *k_clip_bool;
@@ -164,6 +166,7 @@ typedef struct {
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;
 	GtkWidget *batch_dd;
+	GtkWidget *sd_based_check;
 	GtkWidget *cpu_check;
 	GtkWidget *tiling_check;
 	GtkWidget *clip_check;
