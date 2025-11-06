@@ -151,9 +151,17 @@ GString *gen_sd_string(GenerationData *data)
 	if (*data->vt_bool == 1) {
 		g_string_append(l1, "|--vae-tiling");
 	}
+	
+	if (*data->ram_offload_bool == 1) {
+		g_string_append(l1, "|--offload-to-cpu");
+	}
 
 	if (*data->fa_bool == 1) {
-		g_string_append(l1, "|--diffusion-fa");
+		if (*data->sd_based_bool == 1) {
+			g_string_append(l1, "|--diffusion-fa");
+		} else {
+			g_string_append(l1, "|--diffusion-fa|--chroma-disable-dit-mask");
+		}
 	}
 
 	if (p_text != NULL) {

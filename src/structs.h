@@ -21,6 +21,7 @@ typedef struct {
 	int sd_based_bool;
 	int cpu_bool;
 	int vt_bool;
+	int ram_offload_bool;
 	int k_clip_bool;
 	int k_cnet_bool;
 	int k_vae_bool;
@@ -80,6 +81,7 @@ typedef struct {
 	int *sd_based_bool;
 	int *cpu_bool;
 	int *vt_bool;
+	int *ram_offload_bool;
 	int *k_clip_bool;
 	int *k_cnet_bool;
 	int *k_vae_bool;
@@ -169,6 +171,7 @@ typedef struct {
 	GtkWidget *sd_based_check;
 	GtkWidget *cpu_check;
 	GtkWidget *tiling_check;
+	GtkWidget *ram_offload_check;
 	GtkWidget *clip_check;
 	GtkWidget *cnet_check;
 	GtkWidget *vae_check;

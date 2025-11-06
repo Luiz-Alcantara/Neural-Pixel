@@ -352,6 +352,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 
 	GtkWidget *tiling_check = data->tiling_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(tiling_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	
+	GtkWidget *ram_offload_check = data->ram_offload_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(ram_offload_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
 
 	GtkWidget *clip_check = data->clip_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(clip_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);

@@ -78,7 +78,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *vram_popover;
 
 	GtkWidget *opts_box;
-	GtkWidget *cpu_check, *tiling_check, *clip_check, *cnet_check, *vae_check, *flash_check, *taesd_check, *verbose_check;
+	GtkWidget *cpu_check, *tiling_check, *ram_offload_check, *clip_check, *cnet_check, *vae_check, *flash_check, *taesd_check, *verbose_check;
 
 	GtkWidget *box_right, *boxr_topbar, *boxr_img;
 	GtkWidget *hide_img_btn, *load_img2img_btn, *clear_img2img_btn;
@@ -448,41 +448,56 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	cpu_check = gtk_check_button_new_with_label("Run in CPU");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(cpu_check), app_data->cpu_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(cpu_check), "Run all the processing using your CPU.\n(Very Slow)");
 	g_signal_connect(cpu_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->cpu_bool);
 	gtk_box_append (GTK_BOX (opts_box), cpu_check);
 
 	tiling_check = gtk_check_button_new_with_label("VAE Tiling");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(tiling_check), app_data->vt_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(tiling_check), "Process vae in tiles to reduce memory usage.");
 	g_signal_connect(tiling_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->vt_bool);
 	gtk_box_append (GTK_BOX (opts_box), tiling_check);
+	
+	ram_offload_check = gtk_check_button_new_with_label("RAM Offload");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(ram_offload_check), app_data->ram_offload_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(ram_offload_check),
+	"Place the weights in RAM to save VRAM, and automatically\nload them into VRAM when needed.");
+	g_signal_connect(ram_offload_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->ram_offload_bool);
+	gtk_box_append (GTK_BOX (opts_box), ram_offload_check);
 
 	clip_check = gtk_check_button_new_with_label("Keep Clip in CPU");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(clip_check), app_data->k_clip_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(clip_check), "Keep clip in cpu (for low vram).");
 	g_signal_connect(clip_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->k_clip_bool);
 	gtk_box_append (GTK_BOX (opts_box), clip_check);
 
 	cnet_check = gtk_check_button_new_with_label("Keep CNet in CPU");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(cnet_check), app_data->k_cnet_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(cnet_check), "Keep controlnet in cpu (for low vram).");
 	g_signal_connect(cnet_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->k_cnet_bool);
 	gtk_box_append (GTK_BOX (opts_box), cnet_check);
 
 	vae_check = gtk_check_button_new_with_label("Keep VAE in CPU");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(vae_check), app_data->k_vae_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(vae_check), "Keep vae in cpu (for low vram).");
 	g_signal_connect(vae_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->k_vae_bool);
 	gtk_box_append (GTK_BOX (opts_box), vae_check);
 
 	flash_check = gtk_check_button_new_with_label("Flash Attention");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(flash_check), app_data->fa_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(flash_check), "Use Flash Attention in the diffusion model.");
 	g_signal_connect(flash_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->fa_bool);
 	gtk_box_append (GTK_BOX (opts_box), flash_check);
 	
 	taesd_check = gtk_check_button_new_with_label("Enable TAESD");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), app_data->taesd_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(taesd_check), "Use Tiny AutoEncoder for fast decoding\n(low quality).");
 	g_signal_connect(taesd_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->taesd_bool);
 	gtk_box_append (GTK_BOX (opts_box), taesd_check);
 	
 	verbose_check = gtk_check_button_new_with_label("Terminal Verbose");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), app_data->verbose_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(verbose_check), "Print verbose on terminal.");
 	g_signal_connect(verbose_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->verbose_bool);
 	gtk_box_append (GTK_BOX (opts_box), verbose_check);
 
@@ -558,6 +573,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->sd_based_check = sd_based_check;
 	reset_d->cpu_check = cpu_check;
 	reset_d->tiling_check = tiling_check;
+	reset_d->ram_offload_check = ram_offload_check;
 	reset_d->clip_check = clip_check;
 	reset_d->cnet_check = cnet_check;
 	reset_d->vae_check = vae_check;
@@ -610,6 +626,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->sd_based_bool = &app_data->sd_based_bool;
 	gen_d->cpu_bool = &app_data->cpu_bool;
 	gen_d->vt_bool = &app_data->vt_bool;
+	gen_d->ram_offload_bool = &app_data->ram_offload_bool;
 	gen_d->k_clip_bool = &app_data->k_clip_bool;
 	gen_d->k_cnet_bool = &app_data->k_cnet_bool;
 	gen_d->k_vae_bool = &app_data->k_vae_bool;

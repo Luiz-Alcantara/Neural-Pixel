@@ -22,11 +22,11 @@ const size_t LIST_RESOLUTIONS_STR_COUNT = sizeof(LIST_RESOLUTIONS_STR) / sizeof(
 const char* LIST_STEPS_STR[] = {"1", "2", "4", "8", "12", "16", "20", "24", "30", "36", "42", "50", "60", NULL};
 const size_t LIST_STEPS_STR_COUNT = sizeof(LIST_STEPS_STR) / sizeof(LIST_STEPS_STR[0]);
 
-const char* LIST_SAMPLES[] = {"euler", "euler_a", "heun", "dpm2", "dpm++2s_a", "dpm++2m", "dpm++2mv2", "ipndm", "ipndm_v", "lcm", NULL};
-const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);
+const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2mv2", "dpm++2s_a", "dpm2", "euler", "euler_a", "heun", "ipndm", "ipndm_v", "lcm", "tcd", NULL};
+const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);  
 
-const char* LIST_SCHEDULES[] = {"discrete", "karras", "exponential", "ays", "gits", NULL};
-const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]);
+const char* LIST_SCHEDULES[] = {"ays", "discrete", "exponential", "gits", "karras", "sgm_uniform", "simple", "smoothstep", NULL};
+const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]); 
 
 
 const char* POSITIVE_PROMPT = "A colossal ancient tree towering over a vast landscape, its massive branches stretching into the sky, glowing blue particles gracefully drifting down from its leaves, bathed in ethereal light. The scene is filled with vibrant colors, lush greens, radiant blues, and golden hues from a dramatic sunset. An epic cinematic background with distant mountains, swirling clouds, and mystical atmosphere, ultra-detailed, 8K resolution, fantasy concept art, volumetric lighting, masterpiece, epic scale";
@@ -35,8 +35,8 @@ const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const char* EMPTY_IMG_PATH = "./resources/empty.png";
 const int DEFAULT_MODELS = 0;
-const int DEFAULT_SAMPLE = 5;
-const int DEFAULT_SCHEDULE = 1;
+const int DEFAULT_SAMPLE = 6;
+const int DEFAULT_SCHEDULE = 4;
 const int DEFAULT_N_STEPS = 7;
 const int DEFAULT_SIZE = 7;
 const int DEFAULT_BATCH_SIZE = 0;

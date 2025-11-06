@@ -77,6 +77,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
 		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
 		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
 		fprintf(cf, "%lld\n", DEFAULT_SEED);
 		fprintf(cf, "%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "%.2f\n", DEFAULT_DENOISE);
@@ -221,6 +222,7 @@ void load_cache_fallback(gpointer user_data)
 	data->sd_based_bool = DEFAULT_OPT_VRAM;
 	data->cpu_bool = DEFAULT_OPT_VRAM;
 	data->vt_bool = DEFAULT_OPT_VRAM;
+	data->ram_offload_bool = DEFAULT_OPT_VRAM;
 	data->k_clip_bool = DEFAULT_OPT_VRAM;
 	data->k_cnet_bool = DEFAULT_OPT_VRAM;
 	data->k_vae_bool = DEFAULT_OPT_VRAM;
@@ -251,7 +253,7 @@ void load_cache(gpointer user_data)
 
 		while (fgets(line, sizeof(line), cf) != NULL) {
 			line[strcspn(line, "\n")] = '\0';
-			if (i > 26) break;
+			if (i > 27) break;
 			switch(i) {
 				case 0: g_string_assign(data->model_string, line); break;
 
@@ -285,27 +287,29 @@ void load_cache(gpointer user_data)
 				
 				case 15: sscanf(line, "%d", &data->vt_bool); break;
 				
-				case 16: sscanf(line, "%d", &data->k_clip_bool); break;
+				case 16: sscanf(line, "%d", &data->ram_offload_bool); break;
 				
-				case 17: sscanf(line, "%d", &data->k_cnet_bool); break;
+				case 17: sscanf(line, "%d", &data->k_clip_bool); break;
 				
-				case 18: sscanf(line, "%d", &data->k_vae_bool); break;
+				case 18: sscanf(line, "%d", &data->k_cnet_bool); break;
 				
-				case 19: sscanf(line, "%d", &data->fa_bool); break;
+				case 19: sscanf(line, "%d", &data->k_vae_bool); break;
 				
-				case 20: sscanf(line, "%d", &data->taesd_bool); break;
+				case 20: sscanf(line, "%d", &data->fa_bool); break;
 				
-				case 21: sscanf(line, "%d", &data->verbose_bool); break;
+				case 21: sscanf(line, "%d", &data->taesd_bool); break;
 				
-				case 22: sscanf(line, "%lld", &data->seed_value); break;
+				case 22: sscanf(line, "%d", &data->verbose_bool); break;
 				
-				case 23: char *endptr1; data->cfg_value = strtod(line, &endptr1); break;
+				case 23: sscanf(line, "%lld", &data->seed_value); break;
 				
-				case 24: char *endptr2; data->denoise_value = strtod(line, &endptr2); break;
+				case 24: char *endptr1; data->cfg_value = strtod(line, &endptr1); break;
 				
-				case 25: char *endptr3; data->clip_skip_value = strtod(line, &endptr2); break;
+				case 25: char *endptr2; data->denoise_value = strtod(line, &endptr2); break;
 				
-				case 26: char *endptr4; data->up_repeat_value = strtod(line, &endptr4); break;
+				case 26: char *endptr3; data->clip_skip_value = strtod(line, &endptr2); break;
+				
+				case 27: char *endptr4; data->up_repeat_value = strtod(line, &endptr4); break;
 				
 				default: break;
 			}
@@ -354,6 +358,7 @@ void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar 
 	fprintf(cf, "%d\n", *data->sd_based_bool);
 	fprintf(cf, "%d\n", *data->cpu_bool);
 	fprintf(cf, "%d\n", *data->vt_bool);
+	fprintf(cf, "%d\n", *data->ram_offload_bool);
 	fprintf(cf, "%d\n", *data->k_clip_bool);
 	fprintf(cf, "%d\n", *data->k_cnet_bool);
 	fprintf(cf, "%d\n", *data->k_vae_bool);
