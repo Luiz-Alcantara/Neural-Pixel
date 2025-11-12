@@ -45,16 +45,16 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *neg_tv;
 	GtkTextBuffer *neg_tb;
 
-	GtkWidget *box_r3, *box_r3_c1, *box_r3_c1_model, *box_r3_c2;
+	GtkWidget *box_r3, *box_r3_c1, *box_r3_c1_checkpoint, *box_r3_c2;
 	GtkWidget *generate_btn;
-	GtkWidget *model_lab;
+	GtkWidget *checkpoint_lab;
 	GtkWidget *sd_based_check;
 	GtkWidget *vae_lab;
-	GtkWidget *model_dd, *vae_dd;
+	GtkWidget *checkpoint_dd, *vae_dd;
 
 	GtkWidget *box_r4, *box_r4_c1, *box_r4_c2;
-	GtkWidget *cnet_lab, *upscale_lab;
-	GtkWidget *cnet_dd, *upscale_dd;
+	GtkWidget *cnet_lab, *upscaler_lab;
+	GtkWidget *cnet_dd, *upscaler_dd;
 	
 	GtkWidget *box_r5, *box_r5_c1, *box_r5_c2, *box_r5_c3;
 	GtkWidget *clip_l_lab, *clip_g_lab, *t5xxl_lab;
@@ -69,8 +69,8 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *lora_dd, *embedding_dd;
 
 	GtkWidget *box_r8, *box_r8_c1, *box_r8_c2, *box_r8_c3, *box_r8_c4, *box_r8_c5, *box_r8_c6;
-	GtkWidget *sample_lab, *schedule_lab, *steps_lab, *width_lab, *height_lab, *n_images_lab;
-	GtkWidget *sample_dd, *schedule_dd, *steps_dd, *width_dd, *height_dd, *batch_dd;
+	GtkWidget *sampler_lab, *scheduler_lab, *steps_lab, *width_lab, *height_lab, *n_images_lab;
+	GtkWidget *sampler_dd, *scheduler_dd, *steps_dd, *width_dd, *height_dd, *batch_dd;
 
 	GtkWidget *box_r9, *box_r9_c1, *box_r9_c2, *box_r9_c3;
 	GtkWidget *sd_halt_btn, *low_vram_btn;
@@ -191,24 +191,24 @@ app_activate (GApplication *app, gpointer user_data)
 	generate_btn = gtk_button_new_with_label ("Generate");
 	gtk_widget_set_name(generate_btn, "gen_btn");
 
-	model_lab = gtk_label_new ("Model:");
+	checkpoint_lab = gtk_label_new ("Checkpoint:");
 	vae_lab = gtk_label_new ("VAE:");
 
-	gtk_box_append (GTK_BOX (box_r3_c1), model_lab);
+	gtk_box_append (GTK_BOX (box_r3_c1), checkpoint_lab);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_lab);
 	
-	box_r3_c1_model = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
-	gtk_box_append (GTK_BOX (box_r3_c1), box_r3_c1_model);
+	box_r3_c1_checkpoint = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_box_append (GTK_BOX (box_r3_c1), box_r3_c1_checkpoint);
 
-	model_dd = gen_path_dd(CHECKPOINTS_PATH, 22, NULL, 0, app_data->model_string, generate_btn, app, 1);
-	gtk_widget_set_hexpand (model_dd, TRUE);
-	gtk_box_append (GTK_BOX (box_r3_c1_model), model_dd);
+	checkpoint_dd = gen_path_dd(CHECKPOINTS_PATH, 22, NULL, 0, app_data->checkpoint_string, generate_btn, app, 1);
+	gtk_widget_set_hexpand (checkpoint_dd, TRUE);
+	gtk_box_append (GTK_BOX (box_r3_c1_checkpoint), checkpoint_dd);
 	
-	sd_based_check = gtk_check_button_new_with_label("SD Model");
+	sd_based_check = gtk_check_button_new_with_label("SD Ckpt");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), app_data->sd_based_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_based_check), "Uncheck for non Stable Diffusion based models\n(e.g., Flux, Chroma, Qwen).");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_based_check), "Uncheck for non Stable Diffusion based checkpoints\n(e.g., Flux, Chroma, Qwen).");
 	g_signal_connect(sd_based_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->sd_based_bool);
-	gtk_box_append (GTK_BOX (box_r3_c1_model), sd_based_check);
+	gtk_box_append (GTK_BOX (box_r3_c1_checkpoint), sd_based_check);
 
 	vae_dd = gen_path_dd(VAES_PATH, 22, NULL, 0, app_data->vae_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_dd);
@@ -225,16 +225,16 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r4), box_r4_c2);
 
 	cnet_lab = gtk_label_new ("Control Net:");
-	upscale_lab = gtk_label_new ("Upscale:");
+	upscaler_lab = gtk_label_new ("Upscaler:");
 
 	gtk_box_append (GTK_BOX (box_r4_c1), cnet_lab);
-	gtk_box_append (GTK_BOX (box_r4_c2), upscale_lab);
+	gtk_box_append (GTK_BOX (box_r4_c2), upscaler_lab);
 
 	cnet_dd = gen_path_dd(CONTROLNET_PATH, 22, NULL, 0, app_data->cnet_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r4_c1), cnet_dd);
 
-	upscale_dd = gen_path_dd(UPSCALES_PATH, 22, NULL, 0, app_data->upscale_string, NULL, app, 0);
-	gtk_box_append (GTK_BOX (box_r4_c2), upscale_dd);
+	upscaler_dd = gen_path_dd(UPSCALES_PATH, 22, NULL, 0, app_data->upscaler_string, NULL, app, 0);
+	gtk_box_append (GTK_BOX (box_r4_c2), upscaler_dd);
 
 
 	//Set Box Row 5, col 1, 2 and 3
@@ -381,26 +381,26 @@ app_activate (GApplication *app, gpointer user_data)
 	box_r8_c6 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
 	gtk_box_append (GTK_BOX (box_r8), box_r8_c6);
 
-	//Set DropDown for Sample, Schedule, Steps, Width, Height and N_images
-	sample_lab = gtk_label_new ("Sampler:");
-	schedule_lab = gtk_label_new ("Scheduler:");
+	//Set DropDown for Sampler, Scheduler, Steps, Width, Height and N_images
+	sampler_lab = gtk_label_new ("Sampler:");
+	scheduler_lab = gtk_label_new ("Scheduler:");
 	steps_lab = gtk_label_new ("Steps:");
 	width_lab = gtk_label_new ("Width:");
 	height_lab = gtk_label_new ("Height:");
 	n_images_lab = gtk_label_new ("Batch count:");
 
-	gtk_box_append (GTK_BOX (box_r8_c1), sample_lab);
-	gtk_box_append (GTK_BOX (box_r8_c2), schedule_lab);
+	gtk_box_append (GTK_BOX (box_r8_c1), sampler_lab);
+	gtk_box_append (GTK_BOX (box_r8_c2), scheduler_lab);
 	gtk_box_append (GTK_BOX (box_r8_c3), steps_lab);
 	gtk_box_append (GTK_BOX (box_r8_c4), width_lab);
 	gtk_box_append (GTK_BOX (box_r8_c5), height_lab);
 	gtk_box_append (GTK_BOX (box_r8_c6), n_images_lab);
 
-	sample_dd = gen_const_dd(LIST_SAMPLES, &app_data->sample_index);
-	gtk_box_append (GTK_BOX (box_r8_c1), sample_dd);
+	sampler_dd = gen_const_dd(LIST_SAMPLES, &app_data->sampler_index);
+	gtk_box_append (GTK_BOX (box_r8_c1), sampler_dd);
 
-	schedule_dd = gen_const_dd(LIST_SCHEDULES, &app_data->schedule_index);
-	gtk_box_append (GTK_BOX (box_r8_c2), schedule_dd);
+	scheduler_dd = gen_const_dd(LIST_SCHEDULES, &app_data->scheduler_index);
+	gtk_box_append (GTK_BOX (box_r8_c2), scheduler_dd);
 
 	steps_dd = gen_const_dd(LIST_STEPS_STR, &app_data->n_steps_index);
 	gtk_box_append (GTK_BOX (box_r8_c3), steps_dd);
@@ -536,10 +536,10 @@ app_activate (GApplication *app, gpointer user_data)
 
 	reload_d = g_new0 (ReloadDropDownData, 1);
 	reload_d->app = app;
-	reload_d->model_dd = model_dd;
+	reload_d->checkpoint_dd = checkpoint_dd;
 	reload_d->vae_dd = vae_dd;
 	reload_d->cnet_dd = cnet_dd;
-	reload_d->upscale_dd = upscale_dd;
+	reload_d->upscaler_dd = upscaler_dd;
 	reload_d->clip_l_dd = clip_l_dd;
 	reload_d->clip_g_dd = clip_g_dd;
 	reload_d->t5xxl_dd = t5xxl_dd;
@@ -551,10 +551,10 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d = g_new0 (ResetCbData, 1);
 	reset_d->pos_tb = pos_tb;
 	reset_d->neg_tb = neg_tb;
-	reset_d->model_dd = model_dd;
+	reset_d->checkpoint_dd = checkpoint_dd;
 	reset_d->vae_dd = vae_dd;
 	reset_d->cnet_dd = cnet_dd;
-	reset_d->upscale_dd = upscale_dd;
+	reset_d->upscaler_dd = upscaler_dd;
 	reset_d->clip_l_dd = clip_l_dd;
 	reset_d->clip_g_dd = clip_g_dd;
 	reset_d->t5xxl_dd = t5xxl_dd;
@@ -564,8 +564,8 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->upscale_spin = upscale_spin;
 	reset_d->lora_dd = lora_dd;
 	reset_d->embedding_dd = embedding_dd;
-	reset_d->sample_dd = sample_dd;
-	reset_d->schedule_dd = schedule_dd;
+	reset_d->sampler_dd = sampler_dd;
+	reset_d->scheduler_dd = scheduler_dd;
 	reset_d->steps_dd = steps_dd;
 	reset_d->width_dd = width_dd;
 	reset_d->height_dd = height_dd;
@@ -595,9 +595,9 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->seed_entry = seed_entry;
 	load_png_info_d->width_dd = width_dd;
 	load_png_info_d->height_dd = height_dd;
-	load_png_info_d->model_dd = model_dd;
-	load_png_info_d->sample_dd = sample_dd;
-	load_png_info_d->schedule_dd = schedule_dd;
+	load_png_info_d->checkpoint_dd = checkpoint_dd;
+	load_png_info_d->sampler_dd = sampler_dd;
+	load_png_info_d->scheduler_dd = scheduler_dd;
 	g_signal_connect (load_from_img_btn, "clicked", G_CALLBACK (load_from_img_btn_cb), load_png_info_d);
 	g_signal_connect (load_from_img_btn, "destroy", G_CALLBACK (on_load_from_img_btn_destroy), load_png_info_d);
 	
@@ -610,15 +610,15 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (clear_img2img_btn, "destroy", G_CALLBACK (on_clear_img2img_btn_destroy), load_img2img_file_d);
 
 	gen_d = g_new0 (GenerationData, 1);
-	gen_d->model_string = app_data->model_string;
+	gen_d->checkpoint_string = app_data->checkpoint_string;
 	gen_d->vae_string = app_data->vae_string;
 	gen_d->cnet_string = app_data->cnet_string;
-	gen_d->upscale_string = app_data->upscale_string;
+	gen_d->upscaler_string = app_data->upscaler_string;
 	gen_d->clip_l_string = app_data->clip_l_string;
 	gen_d->clip_g_string = app_data->clip_g_string;
 	gen_d->t5xxl_string = app_data->t5xxl_string;
-	gen_d->sample_index = &app_data->sample_index;
-	gen_d->schedule_index = &app_data->schedule_index;
+	gen_d->sampler_index = &app_data->sampler_index;
+	gen_d->scheduler_index = &app_data->scheduler_index;
 	gen_d->n_steps_index = &app_data->n_steps_index;
 	gen_d->w_index = &app_data->w_index;
 	gen_d->h_index = &app_data->h_index;
@@ -664,17 +664,17 @@ main (int argc, char **argv)
 
 	GtkApplication *app;
 	AppStartData *data = g_new0 (AppStartData, 1);
-	data->model_string = NULL;
+	data->checkpoint_string = NULL;
 	data->vae_string = NULL;
 	data->cnet_string = NULL;
-	data->upscale_string = NULL;
+	data->upscaler_string = NULL;
 	data->clip_l_string = NULL;
 	data->clip_g_string = NULL;
 	data->t5xxl_string = NULL;
 	data->img2img_file_path = NULL;
 	
-	data->model_string = g_string_new("None");
-	if (data->model_string == NULL) {
+	data->checkpoint_string = g_string_new("None");
+	if (data->checkpoint_string == NULL) {
 		g_error("Failed to allocate GString.");
 		return 1;
 	}
@@ -691,8 +691,8 @@ main (int argc, char **argv)
 		return 1;
 	}
 	
-	data->upscale_string = g_string_new("None");
-	if (data->upscale_string == NULL) {
+	data->upscaler_string = g_string_new("None");
+	if (data->upscaler_string == NULL) {
 		g_error("Failed to allocate GString.");
 		return 1;
 	}

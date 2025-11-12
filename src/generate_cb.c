@@ -32,6 +32,7 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		}
 		
 		int n_error;
+		int n_error2;
 		char file_name[256];
 		
 		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - init model loader from file failed: '%255[^']'",
@@ -41,6 +42,11 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 			strcat(error_dialog_text, file_name);
 
 			show_error_message(data->win, "Error loading file", error_dialog_text);
+		}
+		
+		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - load tensors from model loader failed",
+		&n_error2) == 1) {
+			show_error_message(data->win, "Error loading model", "Error loading tensors from model");
 		}
 		
 		g_free(err_string);

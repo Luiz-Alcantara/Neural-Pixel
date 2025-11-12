@@ -207,7 +207,7 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 		n_err++;
 	}
 	
-	//Set SD Model
+	//Set SD Checkpoint
 	ptr = strstr(l1->str, "Model: ");
 	if (ptr) {
 		const char *start = ptr + strlen("Model: ");
@@ -217,37 +217,37 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			if (len >= MAX_PROPERTY_LENGTH) {
 				len = MAX_PROPERTY_LENGTH - 1;
 			}
-			char model_str[MAX_PROPERTY_LENGTH];
-			strncpy(model_str, start, len);
-			model_str[len] = '\0';
+			char checkpoint_str[MAX_PROPERTY_LENGTH];
+			strncpy(checkpoint_str, start, len);
+			checkpoint_str[len] = '\0';
 			
-			GtkWidget *model_dd = data->model_dd;
-			GtkStringList *model_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(model_dd)));
-			int model_i = check_gtk_list_contains_item(model_items, model_str);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(model_dd), model_i);
+			GtkWidget *checkpoint_dd = data->checkpoint_dd;
+			GtkStringList *checkpoint_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(checkpoint_dd)));
+			int checkpoint_i = check_gtk_list_contains_item(checkpoint_items, checkpoint_str);
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(checkpoint_dd), checkpoint_i);
 		} else {
-			fprintf(stderr, "Failed to parse model data.\n");
+			fprintf(stderr, "Failed to parse checkpoint data.\n");
 			n_err++;
 		}
 	} else {
-		fprintf(stderr, "Failed to parse model data.\n");
+		fprintf(stderr, "Failed to parse checkpoint data.\n");
 		n_err++;
 	}
 	
-	//Set Sampler and Schedule
+	//Set Sampler and Scheduler
 	ptr = strstr(l1->str, "Sampler: ");
 	if (ptr) {
 		char sampler_str[MAX_PROPERTY_LENGTH];
-		char schedule_str[MAX_PROPERTY_LENGTH];
-		if (sscanf(ptr + strlen("Sampler: "), "%s %[^,],", &sampler_str, &schedule_str) == 2) {
-			GtkWidget *sample_dd = data->sample_dd;
-			GtkWidget *schedule_dd = data->schedule_dd;
+		char scheduler_str[MAX_PROPERTY_LENGTH];
+		if (sscanf(ptr + strlen("Sampler: "), "%s %[^,],", &sampler_str, &scheduler_str) == 2) {
+			GtkWidget *sampler_dd = data->sampler_dd;
+			GtkWidget *scheduler_dd = data->scheduler_dd;
 			
-			int sample_index = check_list_contains_item(LIST_SAMPLES, sampler_str);
-			int schedule_index = check_list_contains_item(LIST_SCHEDULES, schedule_str);
+			int sampler_index = check_list_contains_item(LIST_SAMPLES, sampler_str);
+			int scheduler_index = check_list_contains_item(LIST_SCHEDULES, scheduler_str);
 			
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(sample_dd), sample_index);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(schedule_dd), schedule_index);
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(sampler_dd), sampler_index);
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(scheduler_dd), scheduler_index);
 		} else {
 			fprintf(stderr, "Failed to parse sampler data.\n");
 			n_err++;

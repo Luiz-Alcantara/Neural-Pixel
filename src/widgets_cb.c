@@ -66,9 +66,9 @@ void app_start_data_free (gpointer user_data)
 	if (user_data == NULL) return;
 	AppStartData *data = user_data;
 	
-	if (data->model_string != NULL) {
-		g_string_free(data->model_string, TRUE);
-		data->model_string = NULL;
+	if (data->checkpoint_string != NULL) {
+		g_string_free(data->checkpoint_string, TRUE);
+		data->checkpoint_string = NULL;
 	}
 	
 	if (data->vae_string != NULL) {
@@ -81,9 +81,9 @@ void app_start_data_free (gpointer user_data)
 		data->cnet_string = NULL;
 	}
 	
-	if (data->upscale_string != NULL) {
-		g_string_free(data->upscale_string, TRUE);
-		data->upscale_string = NULL;
+	if (data->upscaler_string != NULL) {
+		g_string_free(data->upscaler_string, TRUE);
+		data->upscaler_string = NULL;
 	}
 	
 	if (data->clip_l_string != NULL) {
@@ -264,10 +264,10 @@ void quit_btn_callback (GtkWidget *wgt, GtkWidget *win)
 void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 {
 	ReloadDropDownData *data = user_data;
-	dropdown_items_update(CHECKPOINTS_PATH, GTK_WIDGET(data->model_dd), data->app);
+	dropdown_items_update(CHECKPOINTS_PATH, GTK_WIDGET(data->checkpoint_dd), data->app);
 	dropdown_items_update(VAES_PATH, GTK_WIDGET(data->vae_dd), data->app);
 	dropdown_items_update(CONTROLNET_PATH, GTK_WIDGET(data->cnet_dd), data->app);
-	dropdown_items_update(UPSCALES_PATH, GTK_WIDGET(data->upscale_dd), data->app);
+	dropdown_items_update(UPSCALES_PATH, GTK_WIDGET(data->upscaler_dd), data->app);
 	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_l_dd), data->app);
 	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_g_dd), data->app);
 	dropdown_items_update(TEXT_ENCODERS_PATH, GTK_WIDGET(data->t5xxl_dd), data->app);
@@ -285,8 +285,8 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkTextBuffer *neg_tb = data->neg_tb;
 	gtk_text_buffer_set_text (neg_tb, NEGATIVE_PROMPT, -1);
 
-	GtkWidget *model_dd = data->model_dd;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(model_dd), DEFAULT_MODELS);
+	GtkWidget *checkpoint_dd = data->checkpoint_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(checkpoint_dd), DEFAULT_MODELS);
 
 	GtkWidget *vae_dd = data->vae_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_dd), DEFAULT_MODELS);
@@ -294,8 +294,8 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *cnet_dd = data->cnet_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(cnet_dd), DEFAULT_MODELS);
 
-	GtkWidget *upscale_dd = data->upscale_dd;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(upscale_dd), DEFAULT_MODELS);
+	GtkWidget *upscaler_dd = data->upscaler_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(upscaler_dd), DEFAULT_MODELS);
 	
 	GtkWidget *clip_l_dd = data->clip_l_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(clip_l_dd), DEFAULT_MODELS);
@@ -326,11 +326,11 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *embedding_dd = data->embedding_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(embedding_dd), DEFAULT_MODELS);
 
-	GtkWidget *sample_dd = data->sample_dd;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(sample_dd), DEFAULT_SAMPLE);
+	GtkWidget *sampler_dd = data->sampler_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(sampler_dd), DEFAULT_SAMPLER);
 
-	GtkWidget *schedule_dd = data->schedule_dd;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(schedule_dd), DEFAULT_SCHEDULE);
+	GtkWidget *scheduler_dd = data->scheduler_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(scheduler_dd), DEFAULT_SCHEDULER);
 
 	GtkWidget *steps_dd = data->steps_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(steps_dd), DEFAULT_N_STEPS);
@@ -422,7 +422,7 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 		if (is_req == 1) {
 			GtkWidget *gen_btn = data->g_btn;
 			if (g_strcmp0(var_string->str, "None") == 0) {
-				gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a model first.");
+				gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a checkpoint first.");
 				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
 			} else {
 				gtk_button_set_label (GTK_BUTTON(gen_btn), "Generate");

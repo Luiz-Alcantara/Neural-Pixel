@@ -5,15 +5,15 @@ typedef struct {
 	GtkApplication *app;
 	GtkWidget *window;
 	GtkWidget *button;
-	GString *model_string;
+	GString *checkpoint_string;
 	GString *vae_string;
 	GString *cnet_string;
-	GString *upscale_string;
+	GString *upscaler_string;
 	GString *clip_l_string;
 	GString *clip_g_string;
 	GString *t5xxl_string;
-	int sample_index;
-	int schedule_index;
+	int sampler_index;
+	int scheduler_index;
 	int n_steps_index;
 	int w_index;
 	int h_index;
@@ -65,15 +65,15 @@ typedef struct {
 } EndGenerationData;
 
 typedef struct {
-	GString *model_string;
+	GString *checkpoint_string;
 	GString *vae_string;
 	GString *cnet_string;
-	GString *upscale_string;
+	GString *upscaler_string;
 	GString *clip_l_string;
 	GString *clip_g_string;
 	GString *t5xxl_string;
-	int *sample_index;
-	int *schedule_index;
+	int *sampler_index;
+	int *scheduler_index;
 	int *n_steps_index;
 	int *w_index;
 	int *h_index;
@@ -118,9 +118,9 @@ typedef struct {
 	GtkWidget *seed_entry;
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;
-	GtkWidget *model_dd;
-	GtkWidget *sample_dd;
-	GtkWidget *schedule_dd;
+	GtkWidget *checkpoint_dd;
+	GtkWidget *sampler_dd;
+	GtkWidget *scheduler_dd;
 	GCancellable *cancellable;
 } LoadPNGData;
 
@@ -135,10 +135,10 @@ typedef struct {
 
 typedef struct {
 	GApplication* app;
-	GtkWidget* model_dd;
+	GtkWidget* checkpoint_dd;
 	GtkWidget* vae_dd;
 	GtkWidget* cnet_dd;
-	GtkWidget* upscale_dd;
+	GtkWidget* upscaler_dd;
 	GtkWidget* clip_l_dd;
 	GtkWidget* clip_g_dd;
 	GtkWidget* t5xxl_dd;
@@ -149,10 +149,10 @@ typedef struct {
 typedef struct {
 	GtkTextBuffer *pos_tb;
 	GtkTextBuffer *neg_tb;
-	GtkWidget *model_dd;
+	GtkWidget *checkpoint_dd;
 	GtkWidget *vae_dd;
 	GtkWidget *cnet_dd;
-	GtkWidget *upscale_dd;
+	GtkWidget *upscaler_dd;
 	GtkWidget *clip_l_dd;
 	GtkWidget *clip_g_dd;
 	GtkWidget *t5xxl_dd;
@@ -162,8 +162,8 @@ typedef struct {
 	GtkWidget *upscale_spin;
 	GtkWidget *lora_dd;
 	GtkWidget *embedding_dd;
-	GtkWidget *sample_dd;
-	GtkWidget *schedule_dd;
+	GtkWidget *sampler_dd;
+	GtkWidget *scheduler_dd;
 	GtkWidget *steps_dd;
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;

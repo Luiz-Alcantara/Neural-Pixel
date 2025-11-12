@@ -49,43 +49,80 @@ void create_cache(char *n, GError **error)
 		fclose(imgcf);
 	}
 
-	if (strcmp(n, ".cache/sd_cache") == 0) {
-		FILE *cf = fopen(".cache/sd_cache", "wb");
+	if (strcmp(n, ".cache/np_cache.ini") == 0) {
+		FILE *cf = fopen(".cache/np_cache.ini", "wb");
 		if (cf == NULL) {
-			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/sd_cache' does not exist or cannot be accessed.");
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache.ini' does not exist or cannot be accessed.");
 			return;
 		}
-		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "%d\n", DEFAULT_SAMPLE);
-		fprintf(cf, "%d\n", DEFAULT_SCHEDULE);
-		fprintf(cf, "%d\n", DEFAULT_N_STEPS);
-		fprintf(cf, "%d\n", DEFAULT_SIZE);
-		fprintf(cf, "%d\n", DEFAULT_SIZE);
-		fprintf(cf, "%d\n", DEFAULT_BATCH_SIZE);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "%lld\n", DEFAULT_SEED);
-		fprintf(cf, "%.1f\n", DEFAULT_CFG);
-		fprintf(cf, "%.2f\n", DEFAULT_DENOISE);
-		fprintf(cf, "%.1f\n", DEFAULT_CLIP_SKIP);
-		fprintf(cf, "%.1f\n", DEFAULT_RP_UPSCALE);
+		fprintf(cf, "checkpoint=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "vae=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "cnet=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "upscaler=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "clip_l=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "clip_g=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "t5xxl=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "sampler_index=%d\n", DEFAULT_SAMPLER);
+		fprintf(cf, "scheduler_index=%d\n", DEFAULT_SCHEDULER);
+		fprintf(cf, "n_steps_index=%d\n", DEFAULT_N_STEPS);
+		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);
+		fprintf(cf, "img_height_index=%d\n", DEFAULT_SIZE);
+		fprintf(cf, "batch_size_index=%d\n", DEFAULT_BATCH_SIZE);
+		fprintf(cf, "sd_based_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "cpu_mode_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "vae_tiling_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "ram_offload_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "keep_clip_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "keep_cnet_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "keep_vae_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "flash_attention_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "taesd_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "verbose_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
+		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
+		fprintf(cf, "denoise_strength=%.2f\n", DEFAULT_DENOISE);
+		fprintf(cf, "clip_skip=%.1f\n", DEFAULT_CLIP_SKIP);
+		fprintf(cf, "repeat_upscale=%.1f\n", DEFAULT_RP_UPSCALE);
 		fclose(cf);
 	}
 	return;
+}
+
+char* ini_file_get_value(const char *filename, const char *search_key)
+{
+	FILE *file = fopen(filename, "r");
+	if (file == NULL) {
+		g_printerr("Failed to open file '%s', using default value(s).\n", filename);
+		return NULL;
+	}
+
+	static char value[256];
+	char line[256];
+
+	while (fgets(line, sizeof(line), file)) {
+		if (line[0] == '#' || line[0] == ';' || line[0] == '\n')
+		continue;
+		
+		line[strcspn(line, "\n")] = '\0';
+		
+		char *equal_sign = strchr(line, '=');
+		if (!equal_sign)
+		continue;
+		
+		*equal_sign = '\0';
+		char *key = line;
+		char *val = equal_sign + 1;
+		
+		if (strcmp(key, search_key) == 0) {
+		strncpy(value, val, sizeof(value) - 1);
+		fclose(file);
+		return value;
+		}
+	}
+
+	g_printerr("Error: Could not find key '%s' in file '%s', using default value(s).\n", search_key, filename);
+	fclose(file);
+	return NULL;
 }
 
 void load_pp_cache(GtkTextBuffer *pos_tb)
@@ -205,16 +242,16 @@ void load_cache_fallback(gpointer user_data)
 {
 	AppStartData *data = user_data;
 	
-	g_string_assign(data->model_string, OPTIONAL_ITEMS);
+	g_string_assign(data->checkpoint_string, OPTIONAL_ITEMS);
 	g_string_assign(data->vae_string, OPTIONAL_ITEMS);
 	g_string_assign(data->cnet_string, OPTIONAL_ITEMS);
-	g_string_assign(data->upscale_string, OPTIONAL_ITEMS);
+	g_string_assign(data->upscaler_string, OPTIONAL_ITEMS);
 	g_string_assign(data->clip_l_string, OPTIONAL_ITEMS);
 	g_string_assign(data->clip_g_string, OPTIONAL_ITEMS);
 	g_string_assign(data->t5xxl_string, OPTIONAL_ITEMS);
 	
-	data->sample_index = DEFAULT_SAMPLE;
-	data->schedule_index = DEFAULT_SCHEDULE;
+	data->sampler_index = DEFAULT_SAMPLER;
+	data->scheduler_index = DEFAULT_SCHEDULER;
 	data->n_steps_index = DEFAULT_N_STEPS;
 	data->w_index = DEFAULT_SIZE;
 	data->h_index = DEFAULT_SIZE;
@@ -240,94 +277,223 @@ void load_cache_fallback(gpointer user_data)
 
 void load_cache(gpointer user_data)
 {
-	if (check_file_exists(".cache/sd_cache", 1) == 1) {
-		FILE *cf = fopen(".cache/sd_cache", "r");
-		if (cf == NULL) {
-			g_printerr("Failed to open file \".cache/sd_cache\".\n");
-			load_cache_fallback(user_data);
-		}
-		char line[128];
-		int i = 0;
-		
+
+	char *cache_filename = ".cache/np_cache.ini";
+
+	if (check_file_exists(cache_filename, 1) == 1) {
 		AppStartData *data = user_data;
-
-		while (fgets(line, sizeof(line), cf) != NULL) {
-			line[strcspn(line, "\n")] = '\0';
-			if (i > 27) break;
-			switch(i) {
-				case 0: g_string_assign(data->model_string, line); break;
-
-				case 1: g_string_assign(data->vae_string, line); break;
-
-				case 2: g_string_assign(data->cnet_string, line); break;
-
-				case 3: g_string_assign(data->upscale_string, line); break;
-				
-				case 4: g_string_assign(data->clip_l_string, line); break;
-				
-				case 5: g_string_assign(data->clip_g_string, line); break;
-				
-				case 6: g_string_assign(data->t5xxl_string, line); break;
-
-				case 7: sscanf(line, "%d", &data->sample_index); break;
-				
-				case 8: sscanf(line, "%d", &data->schedule_index); break;
-				
-				case 9: sscanf(line, "%d", &data->n_steps_index); break;
-				
-				case 10: sscanf(line, "%d", &data->w_index); break;
-				
-				case 11: sscanf(line, "%d", &data->h_index); break;
-				
-				case 12: sscanf(line, "%d", &data->bs_index); break;
-				
-				case 13: sscanf(line, "%d", &data->sd_based_bool); break;
-				
-				case 14: sscanf(line, "%d", &data->cpu_bool); break;
-				
-				case 15: sscanf(line, "%d", &data->vt_bool); break;
-				
-				case 16: sscanf(line, "%d", &data->ram_offload_bool); break;
-				
-				case 17: sscanf(line, "%d", &data->k_clip_bool); break;
-				
-				case 18: sscanf(line, "%d", &data->k_cnet_bool); break;
-				
-				case 19: sscanf(line, "%d", &data->k_vae_bool); break;
-				
-				case 20: sscanf(line, "%d", &data->fa_bool); break;
-				
-				case 21: sscanf(line, "%d", &data->taesd_bool); break;
-				
-				case 22: sscanf(line, "%d", &data->verbose_bool); break;
-				
-				case 23: sscanf(line, "%lld", &data->seed_value); break;
-				
-				case 24: char *endptr1; data->cfg_value = strtod(line, &endptr1); break;
-				
-				case 25: char *endptr2; data->denoise_value = strtod(line, &endptr2); break;
-				
-				case 26: char *endptr3; data->clip_skip_value = strtod(line, &endptr2); break;
-				
-				case 27: char *endptr4; data->up_repeat_value = strtod(line, &endptr4); break;
-				
-				default: break;
-			}
-			i++;
+		
+		char *checkpoint_str = ini_file_get_value(cache_filename, "checkpoint");
+		if (checkpoint_str) {
+			g_string_assign(data->checkpoint_string, checkpoint_str);
+		} else {
+			g_string_assign(data->checkpoint_string, OPTIONAL_ITEMS);
 		}
-		fclose(cf);
+		
+		char *vae_str = ini_file_get_value(cache_filename, "vae");
+		if (vae_str) {
+			g_string_assign(data->vae_string, vae_str);
+		} else {
+			g_string_assign(data->vae_string, OPTIONAL_ITEMS);
+		}
+		
+		char *cnet_str = ini_file_get_value(cache_filename, "cnet");
+		if (cnet_str) {
+			g_string_assign(data->cnet_string, cnet_str);
+		} else {
+			g_string_assign(data->cnet_string, OPTIONAL_ITEMS);
+		}
+		
+		char *upscaler_str = ini_file_get_value(cache_filename, "upscaler");
+		if (upscaler_str) {
+			g_string_assign(data->upscaler_string, upscaler_str);
+		} else {
+			g_string_assign(data->upscaler_string, OPTIONAL_ITEMS);
+		}
+		
+		char *clip_l_str = ini_file_get_value(cache_filename, "clip_l");
+		if (clip_l_str) {
+			g_string_assign(data->clip_l_string, clip_l_str);
+		} else {
+			g_string_assign(data->clip_l_string, OPTIONAL_ITEMS);
+		}
+		
+		char *clip_g_str = ini_file_get_value(cache_filename, "clip_g");
+		if (clip_g_str) {
+			g_string_assign(data->clip_g_string, clip_g_str);
+		} else {
+			g_string_assign(data->clip_g_string, OPTIONAL_ITEMS);
+		}
+		
+		char *t5xxl_str = ini_file_get_value(cache_filename, "t5xxl");
+		if (t5xxl_str) {
+			g_string_assign(data->t5xxl_string, t5xxl_str);
+		} else {
+			g_string_assign(data->t5xxl_string, OPTIONAL_ITEMS);
+		}
+
+		char *sampler_index_str = ini_file_get_value(cache_filename, "sampler_index");
+		if (sampler_index_str) {
+			sscanf(sampler_index_str, "%d", &data->sampler_index);
+		} else {
+			data->sampler_index = DEFAULT_SAMPLER;
+		}
+		
+		char *scheduler_index_str = ini_file_get_value(cache_filename, "scheduler_index");
+		if (scheduler_index_str) {
+			sscanf(scheduler_index_str, "%d", &data->scheduler_index);
+		} else {
+			data->scheduler_index = DEFAULT_SCHEDULER;
+		}
+		
+		char *n_steps_index_str = ini_file_get_value(cache_filename, "n_steps_index");
+		if (n_steps_index_str) {
+			sscanf(n_steps_index_str, "%d", &data->n_steps_index);
+		} else {
+			data->n_steps_index = DEFAULT_N_STEPS;
+		}
+		
+		char *img_width_index_str = ini_file_get_value(cache_filename, "img_width_index");
+		if (img_width_index_str) {
+			sscanf(img_width_index_str, "%d", &data->w_index);
+		} else {
+			data->w_index = DEFAULT_SIZE;
+		}
+		
+		char *img_height_index_str = ini_file_get_value(cache_filename, "img_height_index");
+		if (img_height_index_str) {
+			sscanf(img_height_index_str, "%d", &data->h_index);
+		} else {
+			data->h_index = DEFAULT_SIZE;
+		}
+		
+		char *batch_size_index_str = ini_file_get_value(cache_filename, "batch_size_index");
+		if (batch_size_index_str) {
+			sscanf(batch_size_index_str, "%d", &data->bs_index);
+		} else {
+			data->bs_index = DEFAULT_BATCH_SIZE;
+		}
+
+		char *sd_based_bool_str = ini_file_get_value(cache_filename, "sd_based_bool");
+		if (sd_based_bool_str) {
+			sscanf(sd_based_bool_str, "%d", &data->sd_based_bool);
+		} else {
+			data->sd_based_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *cpu_mode_bool_str = ini_file_get_value(cache_filename, "cpu_mode_bool");
+		if (cpu_mode_bool_str) {
+			sscanf(cpu_mode_bool_str, "%d", &data->cpu_bool);
+		} else {
+			data->cpu_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *vae_tiling_bool_str = ini_file_get_value(cache_filename, "vae_tiling_bool");
+		if (vae_tiling_bool_str) {
+			sscanf(vae_tiling_bool_str, "%d", &data->vt_bool);
+		} else {
+			data->vt_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *ram_offload_bool_str = ini_file_get_value(cache_filename, "ram_offload_bool");
+		if (ram_offload_bool_str) {
+			sscanf(ram_offload_bool_str, "%d", &data->ram_offload_bool);
+		} else {
+			data->ram_offload_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *keep_clip_bool_str = ini_file_get_value(cache_filename, "keep_clip_bool");
+		if (keep_clip_bool_str) {
+			sscanf(keep_clip_bool_str, "%d", &data->k_clip_bool);
+		} else {
+			data->k_clip_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *keep_cnet_bool_str = ini_file_get_value(cache_filename, "keep_cnet_bool");
+		if (keep_cnet_bool_str) {
+			sscanf(keep_cnet_bool_str, "%d", &data->k_cnet_bool);
+		} else {
+			data->k_cnet_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *keep_vae_bool_str = ini_file_get_value(cache_filename, "keep_vae_bool");
+		if (*keep_vae_bool_str) {
+			sscanf(keep_vae_bool_str, "%d", &data->k_vae_bool);
+		} else {
+			data->k_vae_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *flash_attention_bool_str = ini_file_get_value(cache_filename, "flash_attention_bool");
+		if (flash_attention_bool_str) {
+			sscanf(flash_attention_bool_str, "%d", &data->fa_bool);
+		} else {
+			data->fa_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *taesd_bool_str = ini_file_get_value(cache_filename, "taesd_bool");
+		if (taesd_bool_str) {
+			sscanf(taesd_bool_str, "%d", &data->taesd_bool);
+		} else {
+			data->taesd_bool = DEFAULT_OPT_VRAM;
+		}
+		
+		char *verbose_bool_str = ini_file_get_value(cache_filename, "verbose_bool");
+		if (verbose_bool_str) {
+			sscanf(verbose_bool_str, "%d", &data->verbose_bool);
+		} else {
+			data->verbose_bool = DEFAULT_OPT_VRAM;
+		}
+
+		char *seed_str = ini_file_get_value(cache_filename, "seed");
+		if (seed_str) {
+			sscanf(seed_str, "%lld", &data->seed_value);
+		} else {
+			data->seed_value = DEFAULT_SEED;
+		}
+		
+		char *cfg_scale_str = ini_file_get_value(cache_filename, "cfg_scale");
+		if (cfg_scale_str) {
+			char *endptr1;
+			data->cfg_value = strtod(cfg_scale_str, &endptr1);
+		} else {
+			data->cfg_value = DEFAULT_CFG;
+		}
+		
+		char *denoise_strength_str = ini_file_get_value(cache_filename, "denoise_strength");
+		if (denoise_strength_str) {
+			char *endptr2;
+			data->denoise_value = strtod(denoise_strength_str, &endptr2);
+		} else {
+			data->denoise_value = DEFAULT_DENOISE;
+		}
+		
+		char *clip_skip_str = ini_file_get_value(cache_filename, "clip_skip");
+		if (clip_skip_str) {
+			char *endptr3;
+			data->clip_skip_value = strtod(clip_skip_str, &endptr3);
+		} else {
+			data->clip_skip_value = DEFAULT_CLIP_SKIP;
+		}
+		
+		char *repeat_upscale_str = ini_file_get_value(cache_filename, "repeat_upscale");
+		if (repeat_upscale_str) {
+			char *endptr4;
+			data->up_repeat_value = strtod(repeat_upscale_str, &endptr4);
+		} else {
+			data->up_repeat_value = DEFAULT_RP_UPSCALE;
+		}
 	} else {
-		g_printerr("Error loading '.cache/sd_cache', using default value(s).\n");
+		g_printerr("Error loading '.cache/np_cache.ini', using default value(s).\n");
 		load_cache_fallback(user_data);
 	}
 }
 
-void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscale, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_t5xxl, char *pp, char *np, char *img_num)
+void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscaler, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_t5xxl, char *pp, char *np, char *img_num)
 {
 	FILE *pcf = fopen(".cache/pp_cache", "wb");
 	FILE *ncf = fopen(".cache/np_cache", "wb");
 	FILE *imgcf = fopen(".cache/img_cache", "wb");
-	FILE *cf = fopen(".cache/sd_cache", "wb");
+	FILE *cf = fopen(".cache/np_cache.ini", "wb");
 	if (pcf == NULL || ncf == NULL || imgcf == NULL || cf == NULL) {
 		g_printerr("Error updating cache. If the error persists, try deleting the '.cache' directory.\n");
 		return;
@@ -342,34 +508,34 @@ void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar 
 	fprintf(imgcf, "./outputs/IMG_%s.png\n", img_num);
 	fclose(imgcf);
 
-	fprintf(cf, "%s\n", sel_model);
-	fprintf(cf, "%s\n", sel_vae);
-	fprintf(cf, "%s\n", sel_cnet);
-	fprintf(cf, "%s\n", sel_upscale);
-	fprintf(cf, "%s\n", sel_clip_l);
-	fprintf(cf, "%s\n", sel_clip_g);
-	fprintf(cf, "%s\n", sel_t5xxl);
-	fprintf(cf, "%d\n", *data->sample_index);
-	fprintf(cf, "%d\n", *data->schedule_index);
-	fprintf(cf, "%d\n", *data->n_steps_index);
-	fprintf(cf, "%d\n", *data->w_index);
-	fprintf(cf, "%d\n", *data->h_index);
-	fprintf(cf, "%d\n", *data->bs_index);
-	fprintf(cf, "%d\n", *data->sd_based_bool);
-	fprintf(cf, "%d\n", *data->cpu_bool);
-	fprintf(cf, "%d\n", *data->vt_bool);
-	fprintf(cf, "%d\n", *data->ram_offload_bool);
-	fprintf(cf, "%d\n", *data->k_clip_bool);
-	fprintf(cf, "%d\n", *data->k_cnet_bool);
-	fprintf(cf, "%d\n", *data->k_vae_bool);
-	fprintf(cf, "%d\n", *data->fa_bool);
-	fprintf(cf, "%d\n", *data->taesd_bool);
-	fprintf(cf, "%d\n", *data->verbose_bool);
-	fprintf(cf, "%lld\n", *data->seed_value);
-	fprintf(cf, "%.1f\n", *data->cfg_value);
-	fprintf(cf, "%.2f\n", *data->denoise_value);
-	fprintf(cf, "%.1f\n", *data->clip_skip_value);
-	fprintf(cf, "%.1f\n", *data->up_repeat_value);
+	fprintf(cf, "checkpoint=%s\n", sel_checkpoint);
+	fprintf(cf, "vae=%s\n", sel_vae);
+	fprintf(cf, "cnet=%s\n", sel_cnet);
+	fprintf(cf, "upscaler=%s\n", sel_upscaler);
+	fprintf(cf, "clip_l=%s\n", sel_clip_l);
+	fprintf(cf, "clip_g=%s\n", sel_clip_g);
+	fprintf(cf, "t5xxl=%s\n", sel_t5xxl);
+	fprintf(cf, "sampler_index=%d\n", *data->sampler_index);
+	fprintf(cf, "scheduler_index=%d\n", *data->scheduler_index);
+	fprintf(cf, "n_steps_index=%d\n", *data->n_steps_index);
+	fprintf(cf, "img_width_index=%d\n", *data->w_index);
+	fprintf(cf, "img_height_index=%d\n", *data->h_index);
+	fprintf(cf, "batch_size_index=%d\n", *data->bs_index);
+	fprintf(cf, "sd_based_bool=%d\n", *data->sd_based_bool);
+	fprintf(cf, "cpu_mode_bool=%d\n", *data->cpu_bool);
+	fprintf(cf, "vae_tiling_bool=%d\n", *data->vt_bool);
+	fprintf(cf, "ram_offload_bool=%d\n", *data->ram_offload_bool);
+	fprintf(cf, "keep_clip_bool=%d\n", *data->k_clip_bool);
+	fprintf(cf, "keep_cnet_bool=%d\n", *data->k_cnet_bool);
+	fprintf(cf, "keep_vae_bool=%d\n", *data->k_vae_bool);
+	fprintf(cf, "flash_attention_bool=%d\n", *data->fa_bool);
+	fprintf(cf, "taesd_bool=%d\n", *data->taesd_bool);
+	fprintf(cf, "verbose_bool=%d\n", *data->verbose_bool);
+	fprintf(cf, "seed=%lld\n", *data->seed_value);
+	fprintf(cf, "cfg_scale=%.1f\n", *data->cfg_value);
+	fprintf(cf, "denoise_strength=%.2f\n", *data->denoise_value);
+	fprintf(cf, "clip_skip=%.1f\n", *data->clip_skip_value);
+	fprintf(cf, "repeat_upscale=%.1f\n", *data->up_repeat_value);
 	fclose(cf);
 
 	return;

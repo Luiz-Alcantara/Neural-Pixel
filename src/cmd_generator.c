@@ -61,11 +61,11 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|-M|img2img|-i|%s", data->img2img_file_path->str);
 	}
 
-	if (data->model_string != NULL) {
+	if (data->checkpoint_string != NULL) {
 		if (*data->sd_based_bool == 1) {
-			g_string_append_printf(l1, "|--model|./models/checkpoints/%s", data->model_string->str);
+			g_string_append_printf(l1, "|--model|./models/checkpoints/%s", data->checkpoint_string->str);
 		} else {
-			g_string_append_printf(l1, "|--diffusion-model|./models/checkpoints/%s", data->model_string->str);
+			g_string_append_printf(l1, "|--diffusion-model|./models/checkpoints/%s", data->checkpoint_string->str);
 		}
 	}
 	
@@ -85,8 +85,8 @@ GString *gen_sd_string(GenerationData *data)
 		}
 	}
 
-	if (data->upscale_string != NULL && strcmp(data->upscale_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--upscale-model|./models/upscale_models/%s|--upscale-repeats|%s", data->upscale_string->str, up_repeat_str);
+	if (data->upscaler_string != NULL && strcmp(data->upscaler_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--upscale-model|./models/upscale_models/%s|--upscale-repeats|%s", data->upscaler_string->str, up_repeat_str);
 	}
 	
 	if (data->clip_l_string != NULL && strcmp(data->clip_l_string->str, "None") != 0) {
@@ -119,12 +119,12 @@ GString *gen_sd_string(GenerationData *data)
 	
 	g_string_append_printf(l1, "|--clip-skip|%s", clip_skip_str);
 
-	if (*data->sample_index < LIST_SAMPLES_COUNT - 1) {
-		g_string_append_printf(l1, "|--sampling-method|%s", LIST_SAMPLES[(*data->sample_index)]);
+	if (*data->sampler_index < LIST_SAMPLES_COUNT - 1) {
+		g_string_append_printf(l1, "|--sampling-method|%s", LIST_SAMPLES[(*data->sampler_index)]);
 	}
 	
-	if (*data->schedule_index < LIST_SCHEDULES_COUNT - 1) {
-		g_string_append_printf(l1, "|--scheduler|%s", LIST_SCHEDULES[(*data->schedule_index)]);
+	if (*data->scheduler_index < LIST_SCHEDULES_COUNT - 1) {
+		g_string_append_printf(l1, "|--scheduler|%s", LIST_SCHEDULES[(*data->scheduler_index)]);
 	}
 	
 	if (seed_str != NULL) {
@@ -180,7 +180,7 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|-o|./outputs/IMG_%s.png", timestamp);
 	#endif
 
-	update_cache(data, data->model_string->str, data->vae_string->str, data->cnet_string->str, data->upscale_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, timestamp);
+	update_cache(data, data->checkpoint_string->str, data->vae_string->str, data->cnet_string->str, data->upscaler_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, timestamp);
 
 	g_free(p_text);
 	g_free(n_text);
