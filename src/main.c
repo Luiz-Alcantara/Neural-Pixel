@@ -78,7 +78,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *vram_popover;
 
 	GtkWidget *opts_box;
-	GtkWidget *cpu_check, *tiling_check, *ram_offload_check, *clip_check, *cnet_check, *vae_check, *flash_check, *taesd_check, *verbose_check;
+	GtkWidget *cpu_check, *tiling_check, *ram_offload_check, *clip_check, *cnet_check, *vae_check, *flash_check, *taesd_check, *update_cache_check, *verbose_check;
 
 	GtkWidget *box_right, *boxr_topbar, *boxr_img;
 	GtkWidget *hide_img_btn, *load_img2img_btn, *clear_img2img_btn;
@@ -495,6 +495,12 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect(taesd_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->taesd_bool);
 	gtk_box_append (GTK_BOX (opts_box), taesd_check);
 	
+	update_cache_check = gtk_check_button_new_with_label("Update Cache");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), app_data->update_cache_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(update_cache_check), "Uncheck to prevent settings from saving in cache; resets on restart.");
+	g_signal_connect(update_cache_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->update_cache_bool);
+	gtk_box_append (GTK_BOX (opts_box), update_cache_check);
+	
 	verbose_check = gtk_check_button_new_with_label("Terminal Verbose");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), app_data->verbose_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(verbose_check), "Print verbose on terminal.");
@@ -578,6 +584,9 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->cnet_check = cnet_check;
 	reset_d->vae_check = vae_check;
 	reset_d->flash_check = flash_check;
+	reset_d->taesd_check = taesd_check;
+	reset_d->update_cache_check = update_cache_check;
+	reset_d->verbose_check = verbose_check;
 	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_default_btn_cb), reset_d);
 	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 
@@ -632,6 +641,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->k_vae_bool = &app_data->k_vae_bool;
 	gen_d->fa_bool = &app_data->fa_bool;
 	gen_d->taesd_bool = &app_data->taesd_bool;
+	gen_d->update_cache_bool = &app_data->update_cache_bool;
 	gen_d->verbose_bool = &app_data->verbose_bool;
 	gen_d->seed_value = &app_data->seed_value;
 	gen_d->cfg_value = &app_data->cfg_value;

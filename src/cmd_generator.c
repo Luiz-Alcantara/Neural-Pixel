@@ -180,7 +180,9 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|-o|./outputs/IMG_%s.png", timestamp);
 	#endif
 
-	update_cache(data, data->checkpoint_string->str, data->vae_string->str, data->cnet_string->str, data->upscaler_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, timestamp);
+	if (*data->update_cache_bool == 1) {
+		update_cache(data, data->checkpoint_string->str, data->vae_string->str, data->cnet_string->str, data->upscaler_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, timestamp);
+	}
 
 	g_free(p_text);
 	g_free(n_text);

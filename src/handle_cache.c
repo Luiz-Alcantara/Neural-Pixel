@@ -68,16 +68,17 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);
 		fprintf(cf, "img_height_index=%d\n", DEFAULT_SIZE);
 		fprintf(cf, "batch_size_index=%d\n", DEFAULT_BATCH_SIZE);
-		fprintf(cf, "sd_based_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "cpu_mode_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "vae_tiling_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "ram_offload_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "keep_clip_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "keep_cnet_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "keep_vae_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "flash_attention_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "taesd_bool=%d\n", DEFAULT_OPT_VRAM);
-		fprintf(cf, "verbose_bool=%d\n", DEFAULT_OPT_VRAM);
+		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
+		fprintf(cf, "cpu_mode_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "vae_tiling_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "ram_offload_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "keep_clip_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "keep_cnet_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "keep_vae_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "flash_attention_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "taesd_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
+		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
 		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "denoise_strength=%.2f\n", DEFAULT_DENOISE);
@@ -256,16 +257,17 @@ void load_cache_fallback(gpointer user_data)
 	data->w_index = DEFAULT_SIZE;
 	data->h_index = DEFAULT_SIZE;
 	data->bs_index = DEFAULT_BATCH_SIZE;
-	data->sd_based_bool = DEFAULT_OPT_VRAM;
-	data->cpu_bool = DEFAULT_OPT_VRAM;
-	data->vt_bool = DEFAULT_OPT_VRAM;
-	data->ram_offload_bool = DEFAULT_OPT_VRAM;
-	data->k_clip_bool = DEFAULT_OPT_VRAM;
-	data->k_cnet_bool = DEFAULT_OPT_VRAM;
-	data->k_vae_bool = DEFAULT_OPT_VRAM;
-	data->fa_bool = DEFAULT_OPT_VRAM;
-	data->taesd_bool = DEFAULT_OPT_VRAM;
-	data->verbose_bool = DEFAULT_OPT_VRAM;
+	data->sd_based_bool = ENABLED_OPT;
+	data->cpu_bool = DISABLED_OPT;
+	data->vt_bool = DISABLED_OPT;
+	data->ram_offload_bool = DISABLED_OPT;
+	data->k_clip_bool = DISABLED_OPT;
+	data->k_cnet_bool = DISABLED_OPT;
+	data->k_vae_bool = DISABLED_OPT;
+	data->fa_bool = DISABLED_OPT;
+	data->taesd_bool = DISABLED_OPT;
+	data->update_cache_bool = ENABLED_OPT;
+	data->verbose_bool = DISABLED_OPT;
 	
 	data->seed_value = DEFAULT_SEED;
 	
@@ -378,70 +380,77 @@ void load_cache(gpointer user_data)
 		if (sd_based_bool_str) {
 			sscanf(sd_based_bool_str, "%d", &data->sd_based_bool);
 		} else {
-			data->sd_based_bool = DEFAULT_OPT_VRAM;
+			data->sd_based_bool = ENABLED_OPT;
 		}
 		
 		char *cpu_mode_bool_str = ini_file_get_value(cache_filename, "cpu_mode_bool");
 		if (cpu_mode_bool_str) {
 			sscanf(cpu_mode_bool_str, "%d", &data->cpu_bool);
 		} else {
-			data->cpu_bool = DEFAULT_OPT_VRAM;
+			data->cpu_bool = DISABLED_OPT;
 		}
 		
 		char *vae_tiling_bool_str = ini_file_get_value(cache_filename, "vae_tiling_bool");
 		if (vae_tiling_bool_str) {
 			sscanf(vae_tiling_bool_str, "%d", &data->vt_bool);
 		} else {
-			data->vt_bool = DEFAULT_OPT_VRAM;
+			data->vt_bool = DISABLED_OPT;
 		}
 		
 		char *ram_offload_bool_str = ini_file_get_value(cache_filename, "ram_offload_bool");
 		if (ram_offload_bool_str) {
 			sscanf(ram_offload_bool_str, "%d", &data->ram_offload_bool);
 		} else {
-			data->ram_offload_bool = DEFAULT_OPT_VRAM;
+			data->ram_offload_bool = DISABLED_OPT;
 		}
 		
 		char *keep_clip_bool_str = ini_file_get_value(cache_filename, "keep_clip_bool");
 		if (keep_clip_bool_str) {
 			sscanf(keep_clip_bool_str, "%d", &data->k_clip_bool);
 		} else {
-			data->k_clip_bool = DEFAULT_OPT_VRAM;
+			data->k_clip_bool = DISABLED_OPT;
 		}
 		
 		char *keep_cnet_bool_str = ini_file_get_value(cache_filename, "keep_cnet_bool");
 		if (keep_cnet_bool_str) {
 			sscanf(keep_cnet_bool_str, "%d", &data->k_cnet_bool);
 		} else {
-			data->k_cnet_bool = DEFAULT_OPT_VRAM;
+			data->k_cnet_bool = DISABLED_OPT;
 		}
 		
 		char *keep_vae_bool_str = ini_file_get_value(cache_filename, "keep_vae_bool");
 		if (*keep_vae_bool_str) {
 			sscanf(keep_vae_bool_str, "%d", &data->k_vae_bool);
 		} else {
-			data->k_vae_bool = DEFAULT_OPT_VRAM;
+			data->k_vae_bool = DISABLED_OPT;
 		}
 		
 		char *flash_attention_bool_str = ini_file_get_value(cache_filename, "flash_attention_bool");
 		if (flash_attention_bool_str) {
 			sscanf(flash_attention_bool_str, "%d", &data->fa_bool);
 		} else {
-			data->fa_bool = DEFAULT_OPT_VRAM;
+			data->fa_bool = DISABLED_OPT;
 		}
 		
 		char *taesd_bool_str = ini_file_get_value(cache_filename, "taesd_bool");
 		if (taesd_bool_str) {
 			sscanf(taesd_bool_str, "%d", &data->taesd_bool);
 		} else {
-			data->taesd_bool = DEFAULT_OPT_VRAM;
+			data->taesd_bool = DISABLED_OPT;
+		}
+		
+		char *update_cache_bool_str = ini_file_get_value(cache_filename, "update_cache_bool");
+		if (update_cache_bool_str) {
+			sscanf(update_cache_bool_str, "%d", &data->update_cache_bool);
+		} else {
+			data->update_cache_bool = ENABLED_OPT;
 		}
 		
 		char *verbose_bool_str = ini_file_get_value(cache_filename, "verbose_bool");
 		if (verbose_bool_str) {
 			sscanf(verbose_bool_str, "%d", &data->verbose_bool);
 		} else {
-			data->verbose_bool = DEFAULT_OPT_VRAM;
+			data->verbose_bool = DISABLED_OPT;
 		}
 
 		char *seed_str = ini_file_get_value(cache_filename, "seed");
@@ -530,6 +539,7 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(cf, "keep_vae_bool=%d\n", *data->k_vae_bool);
 	fprintf(cf, "flash_attention_bool=%d\n", *data->fa_bool);
 	fprintf(cf, "taesd_bool=%d\n", *data->taesd_bool);
+	fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 	fprintf(cf, "verbose_bool=%d\n", *data->verbose_bool);
 	fprintf(cf, "seed=%lld\n", *data->seed_value);
 	fprintf(cf, "cfg_scale=%.1f\n", *data->cfg_value);

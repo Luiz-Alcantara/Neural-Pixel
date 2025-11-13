@@ -345,28 +345,37 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(batch_dd), DEFAULT_BATCH_SIZE);
 	
 	GtkWidget *sd_based_check = data->sd_based_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), ENABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *cpu_check = data->cpu_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(cpu_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(cpu_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 
 	GtkWidget *tiling_check = data->tiling_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(tiling_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(tiling_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *ram_offload_check = data->ram_offload_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(ram_offload_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(ram_offload_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 
 	GtkWidget *clip_check = data->clip_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(clip_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(clip_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 
 	GtkWidget *cnet_check = data->cnet_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(cnet_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(cnet_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 
 	GtkWidget *vae_check = data->vae_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(vae_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(vae_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 
 	GtkWidget *flash_check = data->flash_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(flash_check), DEFAULT_OPT_VRAM == 1 ? TRUE : FALSE);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(flash_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
+	GtkWidget *taesd_check = data->taesd_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
+	GtkWidget *update_cache_check = data->update_cache_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), ENABLED_OPT == 1 ? TRUE : FALSE);
+	
+	GtkWidget *verbose_check = data->verbose_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 }
 
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)
