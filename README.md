@@ -7,26 +7,52 @@
 
 With Neural Pixel, you can use Stable Diffusion on practically any GPU that supports Vulkan and has at least 3GB of VRAM. This is a simple way to generate your images without having to deal with CUDA/ROCm installations or hundreds of Python dependencies.
 
+
+## Features
+- Supported models:
+    - SD 1.4, SD 1.5, SD 1.5 LCM, SD 1.5 Turbo, SD 1.5 Hyper, SD 2.0 and SD 2.1
+        - Some SD 1.X and SDXL Distilled models work too, see [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md).
+        - If you get a black image when using SDXL, try using the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
+    - SDXL 1.0, SDXL Lightning, SDXL Hyper, Pony and Illustrious
+    - SD 3.0 and SD 3.5
+    - Flux-dev and Flux-schnell
+        - Flux models needs to be converted to `GGUF` to work. You can either download a pre-converted model ([FLUX.1-dev](https://huggingface.co/leejet/FLUX.1-dev-gguf/tree/main) or [FLUX.1-schnell](https://huggingface.co/leejet/FLUX.1-schnell-gguf/tree/main))
+        - Or convert your own:
+        ```
+		./sd -M convert -m path_to_your_model.safetensors -o your_model_converted.q8_0.gguf -v --type q8_0
+		```
+        - You'll also need: [Flux VAE](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/ae.safetensors), [clip_l](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/clip_l.safetensors), and [t5xxl](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/t5xxl_fp16.safetensors).
+    - Chroma and Chroma1-Radiance
+    - Qwen Image
+- Supported add-ons:
+    - LoRA and LCM-LoRA
+    - Embeddings
+    - Control Net for SD 1.5
+    - TAESD (Faster latent decoding/Worse quality)
+    - ESRGAN Upscaler (Only [RealESRGAN_x4plus_anime_6B.pth](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth) works for now.)
+
+- Supported weight formats:
+    - Pytorch checkpoint (.ckpt or .pth)
+    - Safetensors
+    - GGUF
+
+- Supported platforms:
+    - Linux
+    - Windows
+
+- Supported backends:
+    - The files available on the releases page support only CPU and Vulkan.
+    - But you can compile sd.cpp for your own backend by following [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/build.md), then simply replace the 'sd' binary in the Neural-Pixel folder with your newly compiled binary, and the app will work as expected.
+
 ## Notes
 
-- SDLX Needs the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
-
-- At the moment the only upscaling model that works is: [RealESRGAN_x4plus_anime_6B.pth](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth).
-
-- Flux needs to be converted to `GGUF` to work. You can either download a pre-converted model ([FLUX.1-dev](https://huggingface.co/leejet/FLUX.1-dev-gguf/tree/main) or [FLUX.1-schnell](https://huggingface.co/leejet/FLUX.1-schnell-gguf/tree/main)) or convert your own:
-
-```
-./sd -M convert -m path_to_your_model.safetensors -o your_model_converted.q8_0.gguf -v --type q8_0
-```
-You'll also need: [Flux VAE](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/ae.safetensors), [clip_l](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/clip_l.safetensors), and [t5xxl](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/t5xxl_fp16.safetensors).
-
-
+- No video support at the moment.
 
 ## Linux Requirements
 
 - Linux Distro with kernel >= 5.14 (Tested on RHEL 9, Fedora 42, and Arch Linux).
 
-- GTK 4, Vulkan(If using GPU) and libpng installed.
+- GTK >= 4.12, Vulkan(If using GPU) and libpng installed.
 - Install deps on Arch (Change vulkan packages according to your GPU, this is for AMD GPUs):
 ```
 sudo pacman -S gtk4 libpng zlib vulkan-icd-loader vulkan-radeon vulkan-tools
@@ -104,4 +130,8 @@ bc1qhxxgy52s2ps9j2gyzfxtykccrrpkzpu9uvnhhe
 - Litecoin
 ```
 ltc1q8fu7j3zyckl0w4e6m2q85xc69ywvtpnjzdjhvq
+```
+- BAT (Brave's Basic Attention Tokens)
+```
+0x8c6bB60AAC4565582471B8BA812058aeafc05cd7
 ```
