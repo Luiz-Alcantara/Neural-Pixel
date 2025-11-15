@@ -354,7 +354,7 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 				} else {
 					g_printerr(
 						"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
-						data->result_img_path
+						path
 					);
 					show_error_message(data->win,
 						"Error loading image",
