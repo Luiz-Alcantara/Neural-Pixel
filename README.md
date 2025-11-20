@@ -12,8 +12,8 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 - Supported models:
     - SD 1.4, SD 1.5, SD 1.5 LCM, SD 1.5 Turbo, SD 1.5 Hyper, SD 2.0 and SD 2.1
         - Some SD 1.X and SDXL Distilled models work too, see [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md).
-        - If you get a black image when using SDXL, try using the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
     - SDXL 1.0, SDXL Lightning, SDXL Hyper, Pony and Illustrious
+        - If you get a black image when using SDXL based models, try using the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
     - SD 3.0 and SD 3.5
     - Flux-dev and Flux-schnell
         - Flux models needs to be converted to `GGUF` to work. You can either download a pre-converted model ([FLUX.1-dev](https://huggingface.co/leejet/FLUX.1-dev-gguf/tree/main) or [FLUX.1-schnell](https://huggingface.co/leejet/FLUX.1-schnell-gguf/tree/main))
