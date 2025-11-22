@@ -1,6 +1,8 @@
 <div align="center">
 
 # Neural-Pixel
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Luiz-Alcantara/Neural-Pixel)
+
 **A simple GUI wrapper for stable-diffusion.cpp written using C and GTK 4.**
 ![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/screenshots/img1.png?raw=true)
 </div>
