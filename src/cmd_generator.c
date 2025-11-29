@@ -31,6 +31,8 @@ GString *gen_sd_string(GenerationData *data)
 		seed_str = convert_long_long_int_to_string(*data->seed_value);
 	}
 	
+	char *steps_str = convert_double_to_string(*data->steps_value, "%.0f");
+	char *batch_count_str = convert_double_to_string(*data->batch_count_value, "%.0f");
 	char *cfg_str = convert_double_to_string(*data->cfg_value, "%.1f");
 	char *denoise_str = convert_double_to_string(*data->denoise_value, "%.2f");
 	char *clip_skip_str = convert_double_to_string(*data->clip_skip_value, "%.0f");
@@ -58,7 +60,7 @@ GString *gen_sd_string(GenerationData *data)
 	#endif
 	
 	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path->str, "None") != 0) {
-		g_string_append_printf(l1, "|-M|img2img|-i|%s", data->img2img_file_path->str);
+		g_string_append_printf(l1, "|-M|img_gen|-i|%s", data->img2img_file_path->str);
 	}
 
 	if (data->checkpoint_string != NULL) {
@@ -133,12 +135,16 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append(l1,"|-s|-1");
 	}
 	
-	if (*data->n_steps_index < LIST_STEPS_STR_COUNT - 1) {
-		g_string_append_printf(l1, "|--steps|%s", LIST_STEPS_STR[(*data->n_steps_index)]);
+	if (steps_str) {
+		g_string_append_printf(l1, "|--steps|%s", steps_str);
+	} else {
+		g_string_append_printf(l1, "|--steps|%f", DEFAULT_N_STEPS);
 	}
 	
-	if (*data->bs_index < LIST_STEPS_STR_COUNT - 1) {
-		g_string_append_printf(l1, "|-b|%s", LIST_STEPS_STR[(*data->bs_index)]);
+	if (batch_count_str) {
+		g_string_append_printf(l1, "|-b|%s", batch_count_str);
+	} else {
+		g_string_append_printf(l1, "|-b|%f", DEFAULT_BATCH_COUNT);
 	}
 
 	if (data->img2img_file_path == NULL || strcmp(data->img2img_file_path->str, "None") == 0) {
@@ -190,6 +196,8 @@ GString *gen_sd_string(GenerationData *data)
 	if (seed_str != NULL) {
 		free(seed_str);
 	}
+	free(steps_str);
+	free(batch_count_str);
 	free(cfg_str);
 	free(denoise_str);
 	free(clip_skip_str);

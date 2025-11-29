@@ -123,13 +123,9 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 	if (ptr) {
 		int steps_int;
 		if (sscanf(ptr + strlen("Steps: "), "%d", &steps_int) == 1) {
-			char steps_str[MAX_PROPERTY_LENGTH];
-			snprintf(steps_str, sizeof(steps_str), "%d", steps_int);
 			
-			int steps_index = check_list_contains_item(LIST_STEPS_STR, steps_str);
-			
-			GtkWidget *steps_dd = data->steps_dd;
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(steps_dd), steps_index);
+			GtkWidget *steps_spin = data->steps_spin;
+			gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), steps_int);
 		} else {
 			fprintf(stderr, "Failed to parse steps data.\n");
 			n_err++;

@@ -14,10 +14,8 @@ typedef struct {
 	GString *t5xxl_string;
 	int sampler_index;
 	int scheduler_index;
-	int n_steps_index;
 	int w_index;
 	int h_index;
-	int bs_index;
 	int sd_based_bool;
 	int cpu_bool;
 	int vt_bool;
@@ -34,6 +32,8 @@ typedef struct {
 	double denoise_value;
 	double clip_skip_value;
 	double up_repeat_value;
+	double steps_value;
+	double batch_count_value;
 	GString *img2img_file_path;
 } AppStartData;
 
@@ -75,10 +75,8 @@ typedef struct {
 	GString *t5xxl_string;
 	int *sampler_index;
 	int *scheduler_index;
-	int *n_steps_index;
 	int *w_index;
 	int *h_index;
-	int *bs_index;
 	int *sd_based_bool;
 	int *cpu_bool;
 	int *vt_bool;
@@ -95,6 +93,8 @@ typedef struct {
 	double *denoise_value;
 	double *clip_skip_value;
 	double *up_repeat_value;
+	double *steps_value;
+	double *batch_count_value;
 	GtkTextBuffer *pos_p;
 	GtkTextBuffer *neg_p;
 	GtkWidget *image_widget;
@@ -115,7 +115,7 @@ typedef struct {
 	GtkWidget *win;
 	GtkTextBuffer *pos_tb;
 	GtkTextBuffer *neg_tb;
-	GtkWidget *steps_dd;
+	GtkWidget *steps_spin;
 	GtkWidget *cfg_spin;
 	GtkWidget *seed_entry;
 	GtkWidget *width_dd;
@@ -166,10 +166,10 @@ typedef struct {
 	GtkWidget *embedding_dd;
 	GtkWidget *sampler_dd;
 	GtkWidget *scheduler_dd;
-	GtkWidget *steps_dd;
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;
-	GtkWidget *batch_dd;
+	GtkWidget *steps_spin;
+	GtkWidget *batch_count_spin;
 	GtkWidget *sd_based_check;
 	GtkWidget *cpu_check;
 	GtkWidget *tiling_check;

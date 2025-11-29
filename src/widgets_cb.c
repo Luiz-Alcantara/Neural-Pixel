@@ -332,17 +332,17 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *scheduler_dd = data->scheduler_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(scheduler_dd), DEFAULT_SCHEDULER);
 
-	GtkWidget *steps_dd = data->steps_dd;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(steps_dd), DEFAULT_N_STEPS);
-
 	GtkWidget *width_dd = data->width_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(width_dd), DEFAULT_SIZE);
 
 	GtkWidget *height_dd = data->height_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(height_dd), DEFAULT_SIZE);
+	
+	GtkWidget *steps_spin = data->steps_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), DEFAULT_N_STEPS);
 
-	GtkWidget *batch_dd = data->batch_dd;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(batch_dd), DEFAULT_BATCH_SIZE);
+	GtkWidget *batch_count_spin = data->batch_count_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(batch_count_spin), DEFAULT_BATCH_COUNT);
 	
 	GtkWidget *sd_based_check = data->sd_based_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), ENABLED_OPT == 1 ? TRUE : FALSE);

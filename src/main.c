@@ -69,8 +69,9 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *lora_dd, *embedding_dd;
 
 	GtkWidget *box_r8, *box_r8_c1, *box_r8_c2, *box_r8_c3, *box_r8_c4, *box_r8_c5, *box_r8_c6;
-	GtkWidget *sampler_lab, *scheduler_lab, *steps_lab, *width_lab, *height_lab, *n_images_lab;
-	GtkWidget *sampler_dd, *scheduler_dd, *steps_dd, *width_dd, *height_dd, *batch_dd;
+	GtkWidget *sampler_lab, *scheduler_lab, *width_lab, *height_lab, *steps_lab, *batch_count_lab;
+	GtkWidget *sampler_dd, *scheduler_dd, *width_dd, *height_dd;
+	GtkWidget *steps_spin, *batch_count_spin;
 
 	GtkWidget *box_r9, *box_r9_c1, *box_r9_c2, *box_r9_c3;
 	GtkWidget *sd_halt_btn, *low_vram_btn;
@@ -122,11 +123,20 @@ app_activate (GApplication *app, gpointer user_data)
 
 	quit_btn = gtk_button_new_with_label ("Close App");
 	gtk_box_append (GTK_BOX (boxl_topbar), quit_btn);
-	reload_btn = gtk_button_new_with_label ("Refresh Files");
+	
+	reload_btn = gtk_button_new_with_label ("Refresh");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(reload_btn),
+	"Detect newly added files (models, LoRAs, embeddings, etc.) and refresh all available file lists.");
 	gtk_box_append (GTK_BOX (boxl_topbar), reload_btn);
-	reset_default_btn = gtk_button_new_with_label ("Reset to Default");
+	
+	reset_default_btn = gtk_button_new_with_label ("Reset All Settings");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(reset_default_btn),
+	"Reset all settings to their default values.");
 	gtk_box_append (GTK_BOX (boxl_topbar), reset_default_btn);
-	load_from_img_btn = gtk_button_new_with_label ("Load PNG Info");
+	
+	load_from_img_btn = gtk_button_new_with_label ("Load Image Settings");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_img_btn),
+	"Load the prompt, model, sampler settings, and other parameters\nfrom the embedded metadata of the selected image file.");
 	gtk_box_append (GTK_BOX (boxl_topbar), load_from_img_btn);
 
 	//Set Box Row=1
@@ -295,6 +305,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(cfg_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), app_data->cfg_value);
 	g_signal_connect (cfg_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->cfg_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(cfg_spin),
+	"Controls how strongly the prompt influences the generated image.\nHigher values make the output more closely follow the prompt.\nTypical range: 6-12.");
 	gtk_box_append (GTK_BOX (box_r6_c1), cfg_spin);
 
 	denoise_lab = gtk_label_new ("Denoise Str:");
@@ -303,6 +315,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(denoise_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), app_data->denoise_value);
 	g_signal_connect (denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->denoise_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(denoise_spin),
+	"Controls how much the original image is changed.\nValues near 1.0 heavily modify or replace the image.\nValues near 0.0 preserve the original image with minimal changes.");
 	gtk_box_append (GTK_BOX (box_r6_c2), denoise_spin);
 	
 	clip_skip_lab = gtk_label_new ("Clip Skip:");
@@ -311,6 +325,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(clip_skip_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(clip_skip_spin), app_data->clip_skip_value);
 	g_signal_connect (clip_skip_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->clip_skip_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(clip_skip_spin),
+	"Skips the last N layers of the text encoder output, reducing the influence of later CLIP layers.\nIf set to 0, the optimal value is automatically selected based on the checkpoint model.");
 	gtk_box_append (GTK_BOX (box_r6_c3), clip_skip_spin);
 
 	upscale_str_lab = gtk_label_new ("Upscale Runs:");
@@ -319,6 +335,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(upscale_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_spin), app_data->up_repeat_value);
 	g_signal_connect (upscale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->up_repeat_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(upscale_spin),
+	"Number of times to run the upscaler sequentially.\nEach run applies the upscale process to the previous result,\nfurther increasing the image dimensions.");
 	gtk_box_append (GTK_BOX (box_r6_c4), upscale_spin);
 	
 	seed_lab = gtk_label_new ("Seed:");
@@ -384,17 +402,17 @@ app_activate (GApplication *app, gpointer user_data)
 	//Set DropDown for Sampler, Scheduler, Steps, Width, Height and N_images
 	sampler_lab = gtk_label_new ("Sampler:");
 	scheduler_lab = gtk_label_new ("Scheduler:");
-	steps_lab = gtk_label_new ("Steps:");
 	width_lab = gtk_label_new ("Width:");
 	height_lab = gtk_label_new ("Height:");
-	n_images_lab = gtk_label_new ("Batch count:");
+	steps_lab = gtk_label_new ("Steps:");
+	batch_count_lab = gtk_label_new ("Batch count:");
 
 	gtk_box_append (GTK_BOX (box_r8_c1), sampler_lab);
 	gtk_box_append (GTK_BOX (box_r8_c2), scheduler_lab);
-	gtk_box_append (GTK_BOX (box_r8_c3), steps_lab);
-	gtk_box_append (GTK_BOX (box_r8_c4), width_lab);
-	gtk_box_append (GTK_BOX (box_r8_c5), height_lab);
-	gtk_box_append (GTK_BOX (box_r8_c6), n_images_lab);
+	gtk_box_append (GTK_BOX (box_r8_c3), width_lab);
+	gtk_box_append (GTK_BOX (box_r8_c4), height_lab);
+	gtk_box_append (GTK_BOX (box_r8_c5), steps_lab);
+	gtk_box_append (GTK_BOX (box_r8_c6), batch_count_lab);
 
 	sampler_dd = gen_const_dd(LIST_SAMPLES, &app_data->sampler_index);
 	gtk_box_append (GTK_BOX (box_r8_c1), sampler_dd);
@@ -402,17 +420,27 @@ app_activate (GApplication *app, gpointer user_data)
 	scheduler_dd = gen_const_dd(LIST_SCHEDULES, &app_data->scheduler_index);
 	gtk_box_append (GTK_BOX (box_r8_c2), scheduler_dd);
 
-	steps_dd = gen_const_dd(LIST_STEPS_STR, &app_data->n_steps_index);
-	gtk_box_append (GTK_BOX (box_r8_c3), steps_dd);
-
 	width_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->w_index);
-	gtk_box_append (GTK_BOX (box_r8_c4), width_dd);
+	gtk_box_append (GTK_BOX (box_r8_c3), width_dd);
 
 	height_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->h_index);
-	gtk_box_append (GTK_BOX (box_r8_c5), height_dd);
-
-	batch_dd = gen_const_dd(LIST_STEPS_STR, &app_data->bs_index);
-	gtk_box_append (GTK_BOX (box_r8_c6), batch_dd);
+	gtk_box_append (GTK_BOX (box_r8_c4), height_dd);
+	
+	steps_spin = gtk_spin_button_new_with_range (1.0, 150.0, 1.0);
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(steps_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), app_data->steps_value);
+	g_signal_connect (steps_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->steps_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(steps_spin),
+	"Number of refinement steps. More steps = higher detail but slower.\n20–40 is usually best.");
+	gtk_box_append (GTK_BOX (box_r8_c5), steps_spin);
+	
+	batch_count_spin = gtk_spin_button_new_with_range (1.0, 50.0, 1.0);
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(batch_count_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(batch_count_spin), app_data->batch_count_value);
+	g_signal_connect (batch_count_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->batch_count_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(batch_count_spin),
+	"How many images to generate one after another.\nDoesn’t use extra VRAM.");
+	gtk_box_append (GTK_BOX (box_r8_c6), batch_count_spin);
 
 	//Set Box Row 9, col 1, 2 and 3
 	box_r9 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
@@ -572,10 +600,10 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->embedding_dd = embedding_dd;
 	reset_d->sampler_dd = sampler_dd;
 	reset_d->scheduler_dd = scheduler_dd;
-	reset_d->steps_dd = steps_dd;
 	reset_d->width_dd = width_dd;
 	reset_d->height_dd = height_dd;
-	reset_d->batch_dd = batch_dd;
+	reset_d->steps_spin = steps_spin;
+	reset_d->batch_count_spin = batch_count_spin;
 	reset_d->sd_based_check = sd_based_check;
 	reset_d->cpu_check = cpu_check;
 	reset_d->tiling_check = tiling_check;
@@ -599,7 +627,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->win = win;
 	load_png_info_d->pos_tb = pos_tb;
 	load_png_info_d->neg_tb = neg_tb;
-	load_png_info_d->steps_dd = steps_dd;
+	load_png_info_d->steps_spin = steps_spin;
 	load_png_info_d->cfg_spin = cfg_spin;
 	load_png_info_d->seed_entry = seed_entry;
 	load_png_info_d->width_dd = width_dd;
@@ -628,10 +656,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->t5xxl_string = app_data->t5xxl_string;
 	gen_d->sampler_index = &app_data->sampler_index;
 	gen_d->scheduler_index = &app_data->scheduler_index;
-	gen_d->n_steps_index = &app_data->n_steps_index;
 	gen_d->w_index = &app_data->w_index;
 	gen_d->h_index = &app_data->h_index;
-	gen_d->bs_index = &app_data->bs_index;
+	gen_d->steps_value = &app_data->steps_value;
+	gen_d->batch_count_value = &app_data->batch_count_value;
 	gen_d->sd_based_bool = &app_data->sd_based_bool;
 	gen_d->cpu_bool = &app_data->cpu_bool;
 	gen_d->vt_bool = &app_data->vt_bool;

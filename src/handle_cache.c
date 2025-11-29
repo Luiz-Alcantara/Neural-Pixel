@@ -64,10 +64,10 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "t5xxl=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "sampler_index=%d\n", DEFAULT_SAMPLER);
 		fprintf(cf, "scheduler_index=%d\n", DEFAULT_SCHEDULER);
-		fprintf(cf, "n_steps_index=%d\n", DEFAULT_N_STEPS);
 		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);
 		fprintf(cf, "img_height_index=%d\n", DEFAULT_SIZE);
-		fprintf(cf, "batch_size_index=%d\n", DEFAULT_BATCH_SIZE);
+		fprintf(cf, "n_steps=%.1f\n", DEFAULT_N_STEPS);
+		fprintf(cf, "batch_count=%.1f\n", DEFAULT_BATCH_COUNT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "cpu_mode_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "vae_tiling_bool=%d\n", DISABLED_OPT);
@@ -253,10 +253,10 @@ void load_cache_fallback(gpointer user_data)
 	
 	data->sampler_index = DEFAULT_SAMPLER;
 	data->scheduler_index = DEFAULT_SCHEDULER;
-	data->n_steps_index = DEFAULT_N_STEPS;
 	data->w_index = DEFAULT_SIZE;
 	data->h_index = DEFAULT_SIZE;
-	data->bs_index = DEFAULT_BATCH_SIZE;
+	data->steps_value = DEFAULT_N_STEPS;
+	data->batch_count_value = DEFAULT_BATCH_COUNT;
 	data->sd_based_bool = ENABLED_OPT;
 	data->cpu_bool = DISABLED_OPT;
 	data->vt_bool = DISABLED_OPT;
@@ -348,13 +348,6 @@ void load_cache(gpointer user_data)
 			data->scheduler_index = DEFAULT_SCHEDULER;
 		}
 		
-		char *n_steps_index_str = ini_file_get_value(cache_filename, "n_steps_index");
-		if (n_steps_index_str) {
-			sscanf(n_steps_index_str, "%d", &data->n_steps_index);
-		} else {
-			data->n_steps_index = DEFAULT_N_STEPS;
-		}
-		
 		char *img_width_index_str = ini_file_get_value(cache_filename, "img_width_index");
 		if (img_width_index_str) {
 			sscanf(img_width_index_str, "%d", &data->w_index);
@@ -369,11 +362,20 @@ void load_cache(gpointer user_data)
 			data->h_index = DEFAULT_SIZE;
 		}
 		
-		char *batch_size_index_str = ini_file_get_value(cache_filename, "batch_size_index");
-		if (batch_size_index_str) {
-			sscanf(batch_size_index_str, "%d", &data->bs_index);
+		char *n_steps_str = ini_file_get_value(cache_filename, "n_steps");
+		if (n_steps_str) {
+			char *endptr1;
+			data->steps_value = strtod(n_steps_str, &endptr1);
 		} else {
-			data->bs_index = DEFAULT_BATCH_SIZE;
+			data->steps_value = DEFAULT_N_STEPS;
+		}
+		
+		char *batch_count_str = ini_file_get_value(cache_filename, "batch_count");
+		if (batch_count_str) {
+			char *endptr2;
+			data->batch_count_value = strtod(batch_count_str, &endptr2);
+		} else {
+			data->batch_count_value = DEFAULT_BATCH_COUNT;
 		}
 
 		char *sd_based_bool_str = ini_file_get_value(cache_filename, "sd_based_bool");
@@ -462,32 +464,32 @@ void load_cache(gpointer user_data)
 		
 		char *cfg_scale_str = ini_file_get_value(cache_filename, "cfg_scale");
 		if (cfg_scale_str) {
-			char *endptr1;
-			data->cfg_value = strtod(cfg_scale_str, &endptr1);
+			char *endptr3;
+			data->cfg_value = strtod(cfg_scale_str, &endptr3);
 		} else {
 			data->cfg_value = DEFAULT_CFG;
 		}
 		
 		char *denoise_strength_str = ini_file_get_value(cache_filename, "denoise_strength");
 		if (denoise_strength_str) {
-			char *endptr2;
-			data->denoise_value = strtod(denoise_strength_str, &endptr2);
+			char *endptr4;
+			data->denoise_value = strtod(denoise_strength_str, &endptr4);
 		} else {
 			data->denoise_value = DEFAULT_DENOISE;
 		}
 		
 		char *clip_skip_str = ini_file_get_value(cache_filename, "clip_skip");
 		if (clip_skip_str) {
-			char *endptr3;
-			data->clip_skip_value = strtod(clip_skip_str, &endptr3);
+			char *endptr5;
+			data->clip_skip_value = strtod(clip_skip_str, &endptr5);
 		} else {
 			data->clip_skip_value = DEFAULT_CLIP_SKIP;
 		}
 		
 		char *repeat_upscale_str = ini_file_get_value(cache_filename, "repeat_upscale");
 		if (repeat_upscale_str) {
-			char *endptr4;
-			data->up_repeat_value = strtod(repeat_upscale_str, &endptr4);
+			char *endptr6;
+			data->up_repeat_value = strtod(repeat_upscale_str, &endptr6);
 		} else {
 			data->up_repeat_value = DEFAULT_RP_UPSCALE;
 		}
@@ -526,10 +528,10 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(cf, "t5xxl=%s\n", sel_t5xxl);
 	fprintf(cf, "sampler_index=%d\n", *data->sampler_index);
 	fprintf(cf, "scheduler_index=%d\n", *data->scheduler_index);
-	fprintf(cf, "n_steps_index=%d\n", *data->n_steps_index);
 	fprintf(cf, "img_width_index=%d\n", *data->w_index);
 	fprintf(cf, "img_height_index=%d\n", *data->h_index);
-	fprintf(cf, "batch_size_index=%d\n", *data->bs_index);
+	fprintf(cf, "n_steps=%.1f\n", *data->steps_value);
+	fprintf(cf, "batch_count=%.1f\n", *data->batch_count_value);
 	fprintf(cf, "sd_based_bool=%d\n", *data->sd_based_bool);
 	fprintf(cf, "cpu_mode_bool=%d\n", *data->cpu_bool);
 	fprintf(cf, "vae_tiling_bool=%d\n", *data->vt_bool);
