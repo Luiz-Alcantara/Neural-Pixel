@@ -46,5 +46,5 @@ const double DEFAULT_CFG = 6;
 const double DEFAULT_DENOISE = 0.75;
 const double DEFAULT_CLIP_SKIP = 0;
 const double DEFAULT_RP_UPSCALE = 1;
-const double DEFAULT_N_STEPS = 7;
+const double DEFAULT_N_STEPS = 20;
 const double DEFAULT_BATCH_COUNT = 1;

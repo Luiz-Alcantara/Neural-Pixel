@@ -171,11 +171,11 @@ GString *gen_sd_string(GenerationData *data)
 	}
 
 	if (p_text != NULL) {
-		g_string_append_printf(l1, "|-p|\"%s\"", p_text);
+		g_string_append_printf(l1, "|-p|%s", p_text);
 	}
 
 	if (n_text != NULL) {
-		g_string_append_printf(l1, "|-n|\"%s\"", n_text);
+		g_string_append_printf(l1, "|-n|%s", n_text);
 	}
 	
 	char *timestamp = get_time_str();

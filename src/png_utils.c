@@ -68,10 +68,10 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 	const char *ptr;
 
 	//Set Positive Prompt
-	ptr = strstr(l1->str, "parameters \"");
+	ptr = strstr(l1->str, "parameters ");
 	if (ptr) {
-		const char *start = ptr + strlen("parameters \"");
-		const char *end = strstr(start, "\"");
+		const char *start = ptr + strlen("parameters ");
+		const char *end = strstr(start, "\nNegative prompt:");
 		if (start && end && start < end) {
 			size_t len = end - start;
 			if (len >= MAX_METADATA_PROMPT_LENGTH) {
@@ -94,10 +94,10 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 	
 	
 	//Set Negative Prompt
-	ptr = strstr(l1->str, "Negative prompt: \"");
+	ptr = strstr(l1->str, "Negative prompt: ");
 	if (ptr) {
-		const char *start = ptr + strlen("Negative prompt: \"");
-		const char *end = strstr(start, "\"");
+		const char *start = ptr + strlen("Negative prompt: ");
+		const char *end = strstr(start, "\nSteps:");
 		if (start && end && start < end) {
 			size_t len = end - start;
 			if (len >= MAX_METADATA_PROMPT_LENGTH) {
