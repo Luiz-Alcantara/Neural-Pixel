@@ -77,6 +77,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "keep_vae_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "flash_attention_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "taesd_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
@@ -266,6 +267,7 @@ void load_cache_fallback(gpointer user_data)
 	data->k_vae_bool = DISABLED_OPT;
 	data->fa_bool = DISABLED_OPT;
 	data->taesd_bool = DISABLED_OPT;
+	data->llm_bool = DISABLED_OPT;
 	data->update_cache_bool = ENABLED_OPT;
 	data->verbose_bool = DISABLED_OPT;
 	
@@ -441,6 +443,13 @@ void load_cache(gpointer user_data)
 			data->taesd_bool = DISABLED_OPT;
 		}
 		
+		char *llm_bool_str = ini_file_get_value(cache_filename, "llm_bool");
+		if (llm_bool_str) {
+			sscanf(llm_bool_str, "%d", &data->llm_bool);
+		} else {
+			data->llm_bool = DISABLED_OPT;
+		}
+		
 		char *update_cache_bool_str = ini_file_get_value(cache_filename, "update_cache_bool");
 		if (update_cache_bool_str) {
 			sscanf(update_cache_bool_str, "%d", &data->update_cache_bool);
@@ -541,6 +550,7 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(cf, "keep_vae_bool=%d\n", *data->k_vae_bool);
 	fprintf(cf, "flash_attention_bool=%d\n", *data->fa_bool);
 	fprintf(cf, "taesd_bool=%d\n", *data->taesd_bool);
+	fprintf(cf, "llm_bool=%d\n", *data->llm_bool);
 	fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 	fprintf(cf, "verbose_bool=%d\n", *data->verbose_bool);
 	fprintf(cf, "seed=%lld\n", *data->seed_value);

@@ -371,6 +371,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *taesd_check = data->taesd_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
+	GtkWidget *llm_check = data->llm_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(llm_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
 	GtkWidget *update_cache_check = data->update_cache_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), ENABLED_OPT == 1 ? TRUE : FALSE);
 	

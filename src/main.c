@@ -79,7 +79,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *vram_popover;
 
 	GtkWidget *opts_box;
-	GtkWidget *cpu_check, *tiling_check, *ram_offload_check, *clip_check, *cnet_check, *vae_check, *flash_check, *taesd_check, *update_cache_check, *verbose_check;
+	GtkWidget *cpu_check, *tiling_check, *ram_offload_check, *clip_check, *cnet_check, *vae_check, *flash_check, *taesd_check, *llm_check, *update_cache_check, *verbose_check;
 
 	GtkWidget *box_right, *boxr_topbar, *boxr_img;
 	GtkWidget *hide_img_btn, *load_img2img_btn, *clear_img2img_btn;
@@ -263,7 +263,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	clip_l_lab = gtk_label_new ("Clip_l:");
 	clip_g_lab = gtk_label_new ("Clip_g:");
-	t5xxl_lab = gtk_label_new ("T5xxl:");
+	t5xxl_lab = gtk_label_new ("Text Encoder(T5xxl/LLM):");
 	
 	gtk_box_append (GTK_BOX (box_r5_c1), clip_l_lab);
 	gtk_box_append (GTK_BOX (box_r5_c2), clip_g_lab);
@@ -523,6 +523,12 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect(taesd_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->taesd_bool);
 	gtk_box_append (GTK_BOX (opts_box), taesd_check);
 	
+	llm_check = gtk_check_button_new_with_label("Use LLM Encoding");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(llm_check), app_data->llm_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(llm_check), "Enables LLM-based text encoding instead of the default T5xxl encoder.");
+	g_signal_connect(llm_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->llm_bool);
+	gtk_box_append (GTK_BOX (opts_box), llm_check);
+	
 	update_cache_check = gtk_check_button_new_with_label("Update Cache");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), app_data->update_cache_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(update_cache_check), "Uncheck to prevent settings from saving in cache; resets on restart.");
@@ -613,6 +619,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->vae_check = vae_check;
 	reset_d->flash_check = flash_check;
 	reset_d->taesd_check = taesd_check;
+	reset_d->llm_check = llm_check;
 	reset_d->update_cache_check = update_cache_check;
 	reset_d->verbose_check = verbose_check;
 	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_default_btn_cb), reset_d);

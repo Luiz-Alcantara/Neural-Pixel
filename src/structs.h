@@ -25,6 +25,7 @@ typedef struct {
 	int k_vae_bool;
 	int fa_bool;
 	int taesd_bool;
+	int llm_bool;
 	int update_cache_bool;
 	int verbose_bool;
 	long long int seed_value;
@@ -86,6 +87,7 @@ typedef struct {
 	int *k_vae_bool;
 	int *fa_bool;
 	int *taesd_bool;
+	int *llm_bool;
 	int *update_cache_bool;
 	int *verbose_bool;
 	long long int *seed_value;
@@ -179,6 +181,7 @@ typedef struct {
 	GtkWidget *vae_check;
 	GtkWidget *flash_check;
 	GtkWidget *taesd_check;
+	GtkWidget *llm_check;
 	GtkWidget *update_cache_check;
 	GtkWidget *verbose_check;
 } ResetCbData;

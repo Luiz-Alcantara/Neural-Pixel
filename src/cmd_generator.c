@@ -100,7 +100,11 @@ GString *gen_sd_string(GenerationData *data)
 	}
 	
 	if (data->t5xxl_string != NULL && strcmp(data->t5xxl_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->t5xxl_string->str);
+		if (*data->llm_bool == 1) {
+			g_string_append_printf(l1, "|--llm|./models/text_encoders/%s", data->t5xxl_string->str);
+		} else {
+			g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->t5xxl_string->str);
+		}
 	}
 	
 	if (*data->k_clip_bool == 1) {
