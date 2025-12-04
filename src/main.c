@@ -676,6 +676,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->k_vae_bool = &app_data->k_vae_bool;
 	gen_d->fa_bool = &app_data->fa_bool;
 	gen_d->taesd_bool = &app_data->taesd_bool;
+	gen_d->llm_bool = &app_data->llm_bool;
 	gen_d->update_cache_bool = &app_data->update_cache_bool;
 	gen_d->verbose_bool = &app_data->verbose_bool;
 	gen_d->seed_value = &app_data->seed_value;
