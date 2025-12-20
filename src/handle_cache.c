@@ -38,16 +38,6 @@ void create_cache(char *n, GError **error)
 		fprintf(ncf, "%s", NEGATIVE_PROMPT);
 		fclose(ncf);
 	}
-	
-	if (strcmp(n, ".cache/img_cache") == 0) {
-		FILE *imgcf = fopen(".cache/img_cache", "wb");
-		if (imgcf == NULL) {
-			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/img_cache' does not exist or cannot be accessed.");
-			return;
-		}
-		fprintf(imgcf, "%s", DEFAULT_IMG_PATH);
-		fclose(imgcf);
-	}
 
 	if (strcmp(n, ".cache/np_cache.ini") == 0) {
 		FILE *cf = fopen(".cache/np_cache.ini", "wb");
@@ -55,13 +45,14 @@ void create_cache(char *n, GError **error)
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache.ini' does not exist or cannot be accessed.");
 			return;
 		}
+		fprintf(cf, "last_image_path=%s\n", DEFAULT_IMG_PATH);
 		fprintf(cf, "checkpoint=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "vae=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "cnet=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "upscaler=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "clip_l=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "clip_g=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "t5xxl=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "text_enc=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "sampler_index=%d\n", DEFAULT_SAMPLER);
 		fprintf(cf, "scheduler_index=%d\n", DEFAULT_SCHEDULER);
 		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);
@@ -69,6 +60,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "n_steps=%.1f\n", DEFAULT_N_STEPS);
 		fprintf(cf, "batch_count=%.1f\n", DEFAULT_BATCH_COUNT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
+		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "cpu_mode_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "vae_tiling_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "ram_offload_bool=%d\n", DISABLED_OPT);
@@ -77,7 +69,6 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "keep_vae_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "flash_attention_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "taesd_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
@@ -211,35 +202,6 @@ void load_np_cache(GtkTextBuffer *neg_tb)
 	}
 }
 
-void load_img_cache(GtkWidget *img_wgt)
-{
-	if (check_file_exists(".cache/img_cache", 1) == 1) {
-		FILE *imgf = fopen(".cache/img_cache", "r");
-		if (imgf == NULL) {
-			g_printerr("Failed to open file '.cache/img_cache', using default value(s).\n");
-			gtk_picture_set_filename(GTK_PICTURE(img_wgt), DEFAULT_IMG_PATH);
-			return;
-		}
-		char line[128];
-		int i = 0;
-		
-		while (fgets(line, sizeof(line), imgf) != NULL) {
-			line[strcspn(line, "\n")] = '\0';
-			if (i > 1) break;
-			switch(i) {
-				case 0: gtk_picture_set_filename(GTK_PICTURE(img_wgt), line); break;
-				
-				default: break;
-			}
-			i++;
-		}
-		fclose(imgf);
-	} else {
-		g_printerr("Error loading '.cache/img_cache', using default value(s).\n");
-		gtk_picture_set_filename(GTK_PICTURE(img_wgt), DEFAULT_IMG_PATH);
-	}
-}
-
 void load_cache_fallback(gpointer user_data)
 {
 	AppStartData *data = user_data;
@@ -250,7 +212,7 @@ void load_cache_fallback(gpointer user_data)
 	g_string_assign(data->upscaler_string, OPTIONAL_ITEMS);
 	g_string_assign(data->clip_l_string, OPTIONAL_ITEMS);
 	g_string_assign(data->clip_g_string, OPTIONAL_ITEMS);
-	g_string_assign(data->t5xxl_string, OPTIONAL_ITEMS);
+	g_string_assign(data->text_enc_string, OPTIONAL_ITEMS);
 	
 	data->sampler_index = DEFAULT_SAMPLER;
 	data->scheduler_index = DEFAULT_SCHEDULER;
@@ -259,6 +221,7 @@ void load_cache_fallback(gpointer user_data)
 	data->steps_value = DEFAULT_N_STEPS;
 	data->batch_count_value = DEFAULT_BATCH_COUNT;
 	data->sd_based_bool = ENABLED_OPT;
+	data->llm_bool = DISABLED_OPT;
 	data->cpu_bool = DISABLED_OPT;
 	data->vt_bool = DISABLED_OPT;
 	data->ram_offload_bool = DISABLED_OPT;
@@ -267,7 +230,6 @@ void load_cache_fallback(gpointer user_data)
 	data->k_vae_bool = DISABLED_OPT;
 	data->fa_bool = DISABLED_OPT;
 	data->taesd_bool = DISABLED_OPT;
-	data->llm_bool = DISABLED_OPT;
 	data->update_cache_bool = ENABLED_OPT;
 	data->verbose_bool = DISABLED_OPT;
 	
@@ -286,6 +248,15 @@ void load_cache(gpointer user_data)
 
 	if (check_file_exists(cache_filename, 1) == 1) {
 		AppStartData *data = user_data;
+		
+		get_png_files(data->image_files);
+		
+		char *img_str = ini_file_get_value(cache_filename, "last_image_path");
+		if (img_str && check_file_exists(img_str, 1) == 1) {
+			set_current_image_index(img_str, data->image_files, &data->current_image_index);
+		} else {
+			g_printerr("Error loading image: The file '%s' is missing, corrupted, or invalid.\n", img_str);
+		}
 		
 		char *checkpoint_str = ini_file_get_value(cache_filename, "checkpoint");
 		if (checkpoint_str) {
@@ -329,11 +300,11 @@ void load_cache(gpointer user_data)
 			g_string_assign(data->clip_g_string, OPTIONAL_ITEMS);
 		}
 		
-		char *t5xxl_str = ini_file_get_value(cache_filename, "t5xxl");
-		if (t5xxl_str) {
-			g_string_assign(data->t5xxl_string, t5xxl_str);
+		char *text_enc_str = ini_file_get_value(cache_filename, "text_enc");
+		if (text_enc_str) {
+			g_string_assign(data->text_enc_string, text_enc_str);
 		} else {
-			g_string_assign(data->t5xxl_string, OPTIONAL_ITEMS);
+			g_string_assign(data->text_enc_string, OPTIONAL_ITEMS);
 		}
 
 		char *sampler_index_str = ini_file_get_value(cache_filename, "sampler_index");
@@ -385,6 +356,13 @@ void load_cache(gpointer user_data)
 			sscanf(sd_based_bool_str, "%d", &data->sd_based_bool);
 		} else {
 			data->sd_based_bool = ENABLED_OPT;
+		}
+		
+		char *llm_bool_str = ini_file_get_value(cache_filename, "llm_bool");
+		if (llm_bool_str) {
+			sscanf(llm_bool_str, "%d", &data->llm_bool);
+		} else {
+			data->llm_bool = DISABLED_OPT;
 		}
 		
 		char *cpu_mode_bool_str = ini_file_get_value(cache_filename, "cpu_mode_bool");
@@ -441,13 +419,6 @@ void load_cache(gpointer user_data)
 			sscanf(taesd_bool_str, "%d", &data->taesd_bool);
 		} else {
 			data->taesd_bool = DISABLED_OPT;
-		}
-		
-		char *llm_bool_str = ini_file_get_value(cache_filename, "llm_bool");
-		if (llm_bool_str) {
-			sscanf(llm_bool_str, "%d", &data->llm_bool);
-		} else {
-			data->llm_bool = DISABLED_OPT;
 		}
 		
 		char *update_cache_bool_str = ini_file_get_value(cache_filename, "update_cache_bool");
@@ -508,13 +479,12 @@ void load_cache(gpointer user_data)
 	}
 }
 
-void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscaler, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_t5xxl, char *pp, char *np, char *img_num)
+void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscaler, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_text_enc, char *pp, char *np, char *img_num)
 {
 	FILE *pcf = fopen(".cache/pp_cache", "wb");
 	FILE *ncf = fopen(".cache/np_cache", "wb");
-	FILE *imgcf = fopen(".cache/img_cache", "wb");
 	FILE *cf = fopen(".cache/np_cache.ini", "wb");
-	if (pcf == NULL || ncf == NULL || imgcf == NULL || cf == NULL) {
+	if (pcf == NULL || ncf == NULL || cf == NULL) {
 		g_printerr("Error updating cache. If the error persists, try deleting the '.cache' directory.\n");
 		return;
 	}
@@ -525,16 +495,18 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(ncf, "%s", np);
 	fclose(ncf);
 
-	fprintf(imgcf, "./outputs/IMG_%s.png\n", img_num);
-	fclose(imgcf);
-
+	#ifdef _WIN32
+		fprintf(cf, "last_image_path=.\\outputs\\IMG_%s.png\n", img_num);
+	#else
+		fprintf(cf, "last_image_path=./outputs/IMG_%s.png\n", img_num);
+	#endif
 	fprintf(cf, "checkpoint=%s\n", sel_checkpoint);
 	fprintf(cf, "vae=%s\n", sel_vae);
 	fprintf(cf, "cnet=%s\n", sel_cnet);
 	fprintf(cf, "upscaler=%s\n", sel_upscaler);
 	fprintf(cf, "clip_l=%s\n", sel_clip_l);
 	fprintf(cf, "clip_g=%s\n", sel_clip_g);
-	fprintf(cf, "t5xxl=%s\n", sel_t5xxl);
+	fprintf(cf, "text_enc=%s\n", sel_text_enc);
 	fprintf(cf, "sampler_index=%d\n", *data->sampler_index);
 	fprintf(cf, "scheduler_index=%d\n", *data->scheduler_index);
 	fprintf(cf, "img_width_index=%d\n", *data->w_index);
@@ -542,6 +514,7 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(cf, "n_steps=%.1f\n", *data->steps_value);
 	fprintf(cf, "batch_count=%.1f\n", *data->batch_count_value);
 	fprintf(cf, "sd_based_bool=%d\n", *data->sd_based_bool);
+	fprintf(cf, "llm_bool=%d\n", *data->llm_bool);
 	fprintf(cf, "cpu_mode_bool=%d\n", *data->cpu_bool);
 	fprintf(cf, "vae_tiling_bool=%d\n", *data->vt_bool);
 	fprintf(cf, "ram_offload_bool=%d\n", *data->ram_offload_bool);
@@ -550,7 +523,6 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(cf, "keep_vae_bool=%d\n", *data->k_vae_bool);
 	fprintf(cf, "flash_attention_bool=%d\n", *data->fa_bool);
 	fprintf(cf, "taesd_bool=%d\n", *data->taesd_bool);
-	fprintf(cf, "llm_bool=%d\n", *data->llm_bool);
 	fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 	fprintf(cf, "verbose_bool=%d\n", *data->verbose_bool);
 	fprintf(cf, "seed=%lld\n", *data->seed_value);

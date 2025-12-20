@@ -11,12 +11,15 @@ typedef struct {
 	GString *upscaler_string;
 	GString *clip_l_string;
 	GString *clip_g_string;
-	GString *t5xxl_string;
+	GString *text_enc_string;
+	GPtrArray *image_files;
+	int sdpid;
 	int sampler_index;
 	int scheduler_index;
 	int w_index;
 	int h_index;
 	int sd_based_bool;
+	int llm_bool;
 	int cpu_bool;
 	int vt_bool;
 	int ram_offload_bool;
@@ -25,9 +28,9 @@ typedef struct {
 	int k_vae_bool;
 	int fa_bool;
 	int taesd_bool;
-	int llm_bool;
 	int update_cache_bool;
 	int verbose_bool;
+	gint current_image_index;
 	long long int seed_value;
 	double cfg_value;
 	double denoise_value;
@@ -56,7 +59,9 @@ typedef struct {
 } DropDownTextBufferData;
 
 typedef struct {
-	int pid;
+	int *sdpid;
+	GPtrArray *image_files;
+	gint *current_image_index;
 	gchar *result_img_path;
 	gchar **cmd_chunks;
 	GString *cmd_string;
@@ -73,12 +78,15 @@ typedef struct {
 	GString *upscaler_string;
 	GString *clip_l_string;
 	GString *clip_g_string;
-	GString *t5xxl_string;
+	GString *text_enc_string;
+	GPtrArray *image_files;
+	int *sdpid;
 	int *sampler_index;
 	int *scheduler_index;
 	int *w_index;
 	int *h_index;
 	int *sd_based_bool;
+	int *llm_bool;
 	int *cpu_bool;
 	int *vt_bool;
 	int *ram_offload_bool;
@@ -87,9 +95,9 @@ typedef struct {
 	int *k_vae_bool;
 	int *fa_bool;
 	int *taesd_bool;
-	int *llm_bool;
 	int *update_cache_bool;
 	int *verbose_bool;
+	gint *current_image_index;
 	long long int *seed_value;
 	double *cfg_value;
 	double *denoise_value;
@@ -114,6 +122,8 @@ typedef struct {
 } LoadImg2ImgData;
 
 typedef struct {
+	GPtrArray *image_files;
+	gint *current_image_index;
 	GtkWidget *win;
 	GtkTextBuffer *pos_tb;
 	GtkTextBuffer *neg_tb;
@@ -134,7 +144,10 @@ typedef struct {
 } NumStrData;
 
 typedef struct {
-	GtkWidget *image_widget;
+	GPtrArray *image_files;
+	gint *current_image_index;
+	GtkWidget* image_widget;
+	GtkWidget* status_label;
 } PreviewImageData;
 
 typedef struct {
@@ -145,7 +158,7 @@ typedef struct {
 	GtkWidget* upscaler_dd;
 	GtkWidget* clip_l_dd;
 	GtkWidget* clip_g_dd;
-	GtkWidget* t5xxl_dd;
+	GtkWidget* text_enc_dd;
 	GtkWidget* lora_dd;
 	GtkWidget* embedding_dd;
 } ReloadDropDownData;
@@ -159,7 +172,7 @@ typedef struct {
 	GtkWidget *upscaler_dd;
 	GtkWidget *clip_l_dd;
 	GtkWidget *clip_g_dd;
-	GtkWidget *t5xxl_dd;
+	GtkWidget *text_enc_dd;
 	GtkWidget *cfg_spin;
 	GtkWidget *denoise_spin;
 	GtkWidget *seed_entry;
@@ -173,6 +186,7 @@ typedef struct {
 	GtkWidget *steps_spin;
 	GtkWidget *batch_count_spin;
 	GtkWidget *sd_based_check;
+	GtkWidget *llm_check;
 	GtkWidget *cpu_check;
 	GtkWidget *tiling_check;
 	GtkWidget *ram_offload_check;
@@ -181,7 +195,6 @@ typedef struct {
 	GtkWidget *vae_check;
 	GtkWidget *flash_check;
 	GtkWidget *taesd_check;
-	GtkWidget *llm_check;
 	GtkWidget *update_cache_check;
 	GtkWidget *verbose_check;
 } ResetCbData;
@@ -191,14 +204,14 @@ typedef struct {
 	int img_t;
 	int verbose_bool;
 	GtkWidget *button;
-	int sdpid;
+	int *sdpid;
 	GDataInputStream *out_pipe_stream;
 } SDProcessOutputData;
 
 typedef struct {
 	int verbose_bool;
 	GtkWidget *win;
-	int sdpid;
+	int *sdpid;
 	GDataInputStream *err_pipe_stream;
 } SDProcessErrorData;
 

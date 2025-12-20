@@ -2,6 +2,13 @@
 #include <stdio.h>
 #include "constants.h"
 
+const char* APP_NAME_VERSION = "Neural Pixel v0.4.0";
+const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
+const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
+const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
+const char* NP_GITHUB = "https://github.com/Luiz-Alcantara/Neural-Pixel";
+const char* SDCPP_GITHUB = "https://github.com/leejet/stable-diffusion.cpp";
+
 const char* CACHE_PATH = "./.cache";
 const char* MODELS_PATH = "./models";
 const char* CHECKPOINTS_PATH = "./models/checkpoints";
@@ -41,6 +48,13 @@ const int DEFAULT_SIZE = 7;
 const int ENABLED_OPT = 1;
 const int DISABLED_OPT = 0;
 const int LONGLONG_STR_SIZE = 21;
+const int ZERO_SPACING = 0;
+const int SMALL_SPACING = 2;
+const int MEDIUM_SPACING = 6;
+const int LARGE_SPACING = 12;
+const int HUGE_SPACING = 24;
+const int LABEL_ALIGNMENT = 3;
+const int DD_STRING_LEN = 40;
 const long long int DEFAULT_SEED = -1;
 const double DEFAULT_CFG = 6;
 const double DEFAULT_DENOISE = 0.75;

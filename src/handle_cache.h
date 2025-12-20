@@ -11,12 +11,10 @@ void load_pp_cache(GtkTextBuffer *pos_tb);
 
 void load_np_cache(GtkTextBuffer *neg_tb);
 
-void load_img_cache(GtkWidget *img_wgt);
-
 void load_cache_fallback(gpointer user_data);
 
 void load_cache(gpointer user_data);
 
-void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscaler, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_t5xxl, char *pp, char *np, char *img_num);
+void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscaler, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_text_enc, char *pp, char *np, char *img_num);
 
 #endif // HANDLE_CACHE_H

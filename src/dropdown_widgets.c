@@ -13,6 +13,8 @@ static void factory_setup_cb (GtkListItemFactory *factory, GtkListItem *list_ite
 
 static void factory_bind_cb (GtkListItemFactory *factory, GtkListItem *list_item, gpointer user_data)
 {
+	int str_size = GPOINTER_TO_INT(user_data);
+	
 	GtkLabel *label;
 	GtkStringObject *string_object;
 	const gchar *string;
@@ -22,11 +24,11 @@ static void factory_bind_cb (GtkListItemFactory *factory, GtkListItem *list_item
 	label = GTK_LABEL(gtk_list_item_get_child(list_item));
 	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
 	gtk_widget_set_hexpand (GTK_WIDGET(label), FALSE);
-	size_t length = 28;
+	size_t str_length = (size_t)str_size;
 
-	size_t truncated_length = length;
+	size_t truncated_length = str_length;
 
-	if (strlen(string) < length) {
+	if (strlen(string) < str_length) {
 		truncated_length = strlen(string);
 		char *shortened_string = g_malloc(truncated_length + 1);
 		strncpy(shortened_string, string, truncated_length);
@@ -46,6 +48,7 @@ static void factory_bind_cb (GtkListItemFactory *factory, GtkListItem *list_item
 GtkWidget* gen_const_dd(const char** items, int *def_item)
 {
 	GtkWidget* dd = gtk_drop_down_new_from_strings(items);
+	gtk_widget_add_css_class(dd, "custom_dd");
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), *def_item);
 	g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_const_item), def_item);
 	g_signal_connect(dd, "destroy", G_CALLBACK(on_dropdown_destroy), NULL);
@@ -74,10 +77,11 @@ GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, 
 		}
 		
 		g_signal_connect (fact, "setup", G_CALLBACK (factory_setup_cb), NULL);
-		g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), NULL);
+		g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), GINT_TO_POINTER(str_size));
 
 		g_object_ref_sink(my_list);
 		GtkWidget* dd = gtk_drop_down_new(G_LIST_MODEL(my_list), NULL);
+		gtk_widget_add_css_class(dd, "custom_dd");
 		g_object_unref(my_list);
 		
 		gtk_drop_down_set_factory(GTK_DROP_DOWN(dd), fact);

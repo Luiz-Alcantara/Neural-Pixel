@@ -10,10 +10,9 @@
 #define MAX_METADATA_PROMPT_LENGTH 2048
 #define MAX_PROPERTY_LENGTH 512
 
-static void set_png_metadata(GFile *png_file, gpointer user_data)
+static void set_png_metadata(gchar *path, gpointer user_data)
 {
 	LoadPNGData *data = user_data;
-	char *path = g_file_get_path(png_file);
 
 	FILE *fp = fopen(path, "rb");
 	if (!fp) {
@@ -266,12 +265,14 @@ static void read_png_metadata(GObject* client, GAsyncResult* res, gpointer user_
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GFile) png_file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(client), res, &error);
 	
+	gchar *img_path = g_file_get_path(png_file);
+	
 	if (error != NULL) {
 		g_warning("Opening file for metadata failed: %s", error->message);
 	}
 
-	if (png_file != NULL) {
-		set_png_metadata(png_file, user_data);
+	if (img_path != NULL) {
+		set_png_metadata(img_path, user_data);
 	}
 	if (data->cancellable != NULL) {
 		g_object_unref(data->cancellable);
@@ -325,8 +326,10 @@ static void read_png_metadata_deprecated(GtkDialog* dialog, int response, gpoint
 		GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
 		g_autoptr(GFile) png_file = gtk_file_chooser_get_file (chooser);
 
-		if (png_file != NULL) {
-			set_png_metadata(png_file, user_data);
+		gchar *img_path = g_file_get_path(png_file);
+
+		if (img_path != NULL) {
+			set_png_metadata(img_path, user_data);
 		}
 	}
 	gtk_window_destroy (GTK_WINDOW (dialog));
@@ -366,6 +369,19 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 }
 
 #endif
+
+void load_from_img_preview(GtkWidget *btn, gpointer user_data)
+{
+	LoadPNGData *data = user_data;
+	
+	gchar *img_path = g_strdup(g_ptr_array_index(data->image_files, *data->current_image_index));
+	
+	if (img_path != NULL) {
+		set_png_metadata(img_path, user_data);
+	} else {
+		fprintf(stderr, "Failed to get image path.\n");
+	}
+}
 
 void load_from_img_btn_cb(GtkWidget *btn, gpointer user_data)
 {

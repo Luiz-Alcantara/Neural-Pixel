@@ -1,0 +1,3 @@
+#!/bin/bash
+
+export GTK_THEME=Adwaita:dark && ./neural_pixel

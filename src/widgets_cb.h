@@ -3,6 +3,8 @@
 
 void show_error_message (GtkWidget *win, char *err_title_text, char *err_text);
 
+void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
+
 void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
 
 void app_start_data_free (gpointer user_data);
@@ -20,6 +22,10 @@ void free_cache_data(MyCacheData *s);
 void free_preview_data(gpointer data);
 
 void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
+
+void navigate_img_prev(GtkButton* btn, gpointer user_data);
+
+void navigate_img_next(GtkButton* btn, gpointer user_data);
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data);
 

@@ -1,8 +1,8 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
+#include "constants.h"
 #include "cmd_generator.h"
 #include "file_utils.h"
-#include "global.h"
 #include "structs.h"
 #include "str_utils.h"
 #include "widgets_cb.h"
@@ -10,7 +10,7 @@
 static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_data)
 {
 	SDProcessErrorData *data = user_data;
-	if (globalSDPID == 0) {
+	if (*data->sdpid == 0) {
 		if (data->err_pipe_stream) {
 			g_input_stream_close(G_INPUT_STREAM(data->err_pipe_stream), NULL, NULL);
 			g_object_unref(data->err_pipe_stream);
@@ -66,7 +66,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 {
 	SDProcessOutputData *data = user_data;
 	
-	if (globalSDPID == 0) {
+	if (*data->sdpid == 0) {
 		if (data->out_pipe_stream) {
 			g_input_stream_close(G_INPUT_STREAM(data->out_pipe_stream), NULL, NULL);
 			g_object_unref(data->out_pipe_stream);
@@ -138,20 +138,30 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointer user_data)
 {
 	EndGenerationData *data = user_data;
-	globalSDPID = 0;
+	*data->sdpid = 0;
 	const char *icon_n = gtk_button_get_icon_name (GTK_BUTTON(data->show_img_btn));
+	GtkPicture *prev_img = GTK_PICTURE(data->image_widget);
 	
-	if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
-		GtkPicture *prev_img = GTK_PICTURE(data->image_widget);
-		if (check_file_exists(data->result_img_path, 0) == 1) {
-			gtk_picture_set_filename(prev_img, data->result_img_path);
+	if (check_file_exists(data->result_img_path, 0) == 1) {
+		get_png_files(data->image_files);
+		set_current_image_index(data->result_img_path, data->image_files, data->current_image_index);
+		
+		if (data->image_files->len > 0) {
+			if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
+				gtk_picture_set_filename(prev_img, data->result_img_path);
+			} else {
+				gtk_picture_set_filename(prev_img, EMPTY_IMG_PATH);
+			}
 		} else {
-			g_printerr(
-				"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
-				data->result_img_path
-			);
-			gtk_picture_set_filename(prev_img, "./resources/example.png");
+			g_printerr("No images in 'outputs' directory.\n");
+			gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 		}
+	} else {
+		g_printerr(
+			"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
+			data->result_img_path
+		);
+		gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 	}
 	
 	gtk_button_set_label(GTK_BUTTON(data->button), "Generate");
@@ -245,9 +255,9 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		int npid = strtol(sd_pid, &endptr, 10);
 
 		if (*endptr == '\0') {
-			globalSDPID = npid;
+			*data->sdpid = npid;
 		} else {
-			globalSDPID = 0;
+			*data->sdpid = 0;
 		}
 
 		GInputStream *stdout_stream = g_subprocess_get_stdout_pipe(sd_process);
@@ -260,7 +270,9 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		g_data_input_stream_set_newline_type (data_err_stream, G_DATA_STREAM_NEWLINE_TYPE_LF);
 
 		EndGenerationData *check_d = g_new0 (EndGenerationData, 1);
-		check_d->pid = npid;
+		check_d->sdpid = data->sdpid;
+		check_d->image_files = data->image_files;
+		check_d->current_image_index = data->current_image_index;
 		check_d->result_img_path = result_img_path;
 		check_d->cmd_chunks = cmd_chunks;
 		check_d->cmd_string = cmd_string;
@@ -274,16 +286,16 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		output_d->img_t = 1;
 		output_d->verbose_bool = *data->verbose_bool;
 		output_d->button = GTK_WIDGET(gen_btn);
-		output_d->sdpid = npid;
+		output_d->sdpid = data->sdpid;
 		output_d->out_pipe_stream = data_out_stream;
 		
 		SDProcessErrorData *error_d = g_new0 (SDProcessErrorData, 1);
 		error_d->verbose_bool = *data->verbose_bool;
 		error_d->win = data->win;
-		error_d->sdpid = npid;
+		error_d->sdpid = data->sdpid;
 		error_d->err_pipe_stream = data_err_stream;
 
-		printf("Binary launched in subprocess: %d\n", npid);
+		printf("Binary launched in subprocess: %d\n", *data->sdpid);
 
 		GCancellable* cnlb = g_cancellable_new ();
 

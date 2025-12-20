@@ -1,17 +1,258 @@
 /* resources/styles.css */
 
-#gen_btn {
-  color: white;
+/* Greenish color
+@define-color primary-color #1F281F;
+@define-color primary-color-light #3A463A;
+@define-color primary-color-lighter #12B212;
+@define-color primary-color-dark #252F25;
+@define-color primary-color-darker #161D16;
+@define-color primary-color-accent #57FF3D;
+@define-color text-light #E0E0E0;
+@define-color text-dark #333333;
+@define-color separator #415841;
+/*
+
+
+/* Bluish color
+@define-color primary-color #1F1F28;
+@define-color primary-color-light #3A3A46;
+@define-color primary-color-lighter #1212B2;
+@define-color primary-color-dark #25252F;
+@define-color primary-color-darker #16161D;
+@define-color primary-color-accent #3D57FF;
+@define-color text-light #E0E0E0;
+@define-color text-dark #333333;
+@define-color separator #414158;
+*/
+
+
+/* Reddish color*/
+@define-color primary-color #281F1F;
+@define-color primary-color-light #463A3A;
+@define-color primary-color-lighter #B21212;
+@define-color primary-color-dark #2F2525;
+@define-color primary-color-darker #1D1616;
+@define-color primary-color-accent #FF573D;
+@define-color text-light #E0E0E0;
+@define-color text-dark #333333;
+@define-color separator #584141;
+
+
+
+/* Focus outline color
+*:focus {
+	border: 1px solid var(--separator);
+	outline-color: var(--primary-color-accent);
+	outline-style: solid;
+	outline-width: 1px;
+	outline-offset: -2px;
+}*/
+
+
+/* Title Bar */
+.titlebar {
+	background-image: none;
+	background-color: @primary-color;
+	border: 1px solid @separator;
+	color: @text-light;
 }
 
-#gen_btn:disabled {
-  color: orange;
+
+/* Title Bar Buttons */
+.custom_btn_title {
+	background-image: none;
+	background-color: @primary-color;
+	border: 0px solid @separator;
 }
 
-#image_window {
-  background-color: #111111;
+.custom_btn_title:hover {
+	background-color: @primary-color-light;
 }
 
-#item_lab {
-  font-family: JetBrains Mono, monospace;
+
+/* Window Controls */
+.minimize > *, .maximize > *, .close > * {
+	background-color: @primary-color;
 }
+
+.minimize > image:hover, .maximize > image:hover, .close > image:hover {
+	background-color: @primary-color-light;
+}
+
+
+/* Generate Button */
+.gen_btn {
+	background-image: none;
+	background-color: @primary-color-light;
+	color: white;
+}
+
+.gen_btn:hover {
+	background-color: @primary-color-dark;
+}
+
+.gen_btn:disabled {
+	background-image: none;
+	background-color: @primary-color-light;
+	color: orange;
+}
+
+
+/* Other Buttons */
+.custom_btn {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_btn:hover {
+	background-color: @primary-color-dark;
+}
+
+
+/* DropDown Widgets */
+.custom_dd > button {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_dd > popover.menu > contents {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_dd > popover.menu > contents > box > scrolledwindow > listview {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_dd > popover.menu > contents > box > scrolledwindow > listview > row:hover {
+	background-image: none;
+	background-color: @primary-color-dark;
+}
+
+.custom_dd > popover.menu > contents > box > scrolledwindow > listview > row:selected {
+	background-image: none;
+	background-color: @primary-color-dark;
+}
+
+
+/* Entry Fields */
+.custom_entry {
+	background-image: none;
+	background-color: @primary-color-dark;
+	color: @text-light;
+	font-size: 11pt;
+	font-weight: 500;
+}
+
+
+/* 'Extra Opts.' Menu Button */
+.custom_menu_btn > button {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_menu_btn > popover > contents {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_menu_btn > popover > contents > box {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+
+/* Seed Button */
+.custom_seed_entry {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+
+/* Spin Buttons */
+.custom_spin {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_spin:active {
+	border: 1px solid @separator;
+}
+
+.custom_spin > button {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
+.custom_spin > button:hover {
+	background-image: none;
+	background-color: @primary-color-dark;
+}
+
+
+/* Check Buttons */
+.custom_check > check {
+	background-image: none;
+	background-color: @primary-color-light;
+	border-color: @primary-color-dark;
+}
+
+.custom_check > check:checked {
+	color: @primary-color-accent;
+}
+
+
+/* Left Window Inner Boxes */
+.inner_box {
+	border: 1px solid @separator;
+	border-top-right-radius: 6pt;
+	border-top-left-radius: 6pt;
+	border-bottom-right-radius: 3pt;
+	border-bottom-left-radius: 3pt;
+}
+
+
+/* Left Box */
+.left_box {
+	background-color: @primary-color;
+}
+
+/* Right Box */
+.right_box {
+	background-color: @primary-color-darker;
+}
+
+
+/* Widget Labels */
+.param_label {
+	color: @text-light;
+	/*font-family: JetBrains Mono, monospace;*/
+	font-size: 12pt;
+	font-weight: bold;
+}
+
+
+/* Info Labels */
+.info_box {
+	background-color: @primary-color;
+}
+
+.info_title_label {
+	color: @text-light;
+	font-size: 24pt;
+	font-weight: bold;
+}
+
+.info_credits_label {
+	color: @text-light;
+	font-size: 14pt;
+	font-weight: bold;
+}
+
+.info_label {
+	color: @text-light;
+	font-size: 12pt;
+	font-weight: bold;
+}
+

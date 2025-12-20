@@ -253,3 +253,61 @@ GtkStringList* get_files(const char* path, GError **error)
 
 	return files;
 }
+
+void get_png_files(GPtrArray *image_files)
+{
+	g_ptr_array_set_size(image_files, 0);
+	
+	gchar *current_dir = g_get_current_dir();
+	gchar *full_path = g_build_filename(current_dir, "outputs", NULL);
+	g_free(current_dir);
+	
+	GDir *dir = g_dir_open(full_path, 0, NULL);
+	g_free(full_path);
+	
+	if (!dir) {
+		g_printerr("Could not open directory 'outputs'.");
+		return;
+	}
+	
+	const gchar *filename;
+	while ((filename = g_dir_read_name(dir))) {
+		if (g_str_has_suffix(filename, ".png") || g_str_has_suffix(filename, ".PNG")) {
+			gchar *full_file_path = g_build_filename("outputs", filename, NULL);
+			g_ptr_array_add(image_files, full_file_path);
+		}
+	}
+	
+	g_dir_close(dir);
+	
+	g_ptr_array_sort(image_files, (GCompareFunc)compare_strings);
+	
+	g_print("Found %u PNG files.\n", image_files->len);
+}
+
+void set_current_image_index(char *img_str, GPtrArray *image_files, gint *current_image_index)
+{
+	int *index = (int *)current_image_index;
+	gsize img_count = image_files->len;
+	
+	if (img_count > 0) {
+		guint new_index;
+
+		gboolean found = g_ptr_array_find_with_equal_func(
+		image_files,
+		img_str + 2,
+		string_equal,
+		&new_index
+		);
+
+		if (found == TRUE && new_index < img_count) {
+			*index = new_index;
+		} else {
+			g_printerr("Could not load last generated image, using default value(s).\n");
+			*index = img_count - 1;
+		}
+	} else {
+		g_printerr("No images in 'outputs' directory.\n");
+		*index = 0;
+	}
+}

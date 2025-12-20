@@ -7,7 +7,6 @@
 #include "constants.h"
 #include "file_utils.h"
 #include "str_utils.h"
-#include "global.h"
 #include "structs.h"
 
 void show_error_message (GtkWidget *win, char *err_title_text, char *err_text)
@@ -30,6 +29,56 @@ void show_error_message (GtkWidget *win, char *err_title_text, char *err_text)
 		g_signal_connect (error_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
 		gtk_widget_show(error_dialog);
 	#endif
+}
+
+void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
+{
+	GtkWidget *info_win = gtk_window_new ();
+	gtk_widget_add_css_class(info_win, "info_box");
+	gtk_window_set_transient_for(GTK_WINDOW(info_win), GTK_WINDOW(main_win));
+	gtk_window_set_default_size (GTK_WINDOW(info_win), 400, 100);
+	gtk_window_set_resizable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_deletable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_decorated (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_destroy_with_parent (GTK_WINDOW(info_win), TRUE);
+	
+	GtkWidget *info_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
+	gtk_widget_set_margin_bottom (info_box, LARGE_SPACING);
+	gtk_widget_set_margin_end (info_box, LARGE_SPACING);
+	gtk_widget_set_margin_start (info_box, LARGE_SPACING);
+	gtk_widget_set_margin_top (info_box, LARGE_SPACING);
+	gtk_widget_add_css_class(info_box, "info_box");
+	
+	GtkWidget *title_lab = gtk_label_new (APP_NAME_VERSION);
+	gtk_widget_add_css_class(title_lab, "info_title_label");
+	gtk_box_append (GTK_BOX (info_box), title_lab);
+	
+	GtkWidget *desc_lab = gtk_label_new (APP_DESC);
+	gtk_widget_add_css_class(desc_lab, "info_label");
+	gtk_box_append (GTK_BOX (info_box), desc_lab);
+	
+	GtkWidget *copyright_lab = gtk_label_new (APP_AUTHOR);
+	gtk_widget_add_css_class(copyright_lab, "info_label");
+	gtk_box_append (GTK_BOX (info_box), copyright_lab);
+	
+	GtkWidget *np_github_link_btn = gtk_link_button_new_with_label (NP_GITHUB, "Neural Pixel source");
+	gtk_box_append (GTK_BOX (info_box), np_github_link_btn);
+	
+	GtkWidget *credits_lab = gtk_label_new ("Credits:");
+	gtk_widget_add_css_class(credits_lab, "info_credits_label");
+	gtk_box_append (GTK_BOX (info_box), credits_lab);
+	
+	GtkWidget *sdcpp_lab = gtk_label_new (APP_DESC2);
+	gtk_widget_add_css_class(sdcpp_lab, "info_label");
+	gtk_label_set_justify(GTK_LABEL(sdcpp_lab), GTK_JUSTIFY_CENTER);
+	gtk_box_append (GTK_BOX (info_box), sdcpp_lab);
+	
+	GtkWidget *sdcpp_github_link_btn = gtk_link_button_new_with_label (SDCPP_GITHUB, "sd.cpp source");
+	gtk_box_append (GTK_BOX (info_box), sdcpp_github_link_btn);
+	
+	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
+	
+	gtk_window_present (GTK_WINDOW(info_win));
 }
 
 void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
@@ -96,14 +145,19 @@ void app_start_data_free (gpointer user_data)
 		data->clip_g_string = NULL;
 	}
 	
-	if (data->t5xxl_string != NULL) {
-		g_string_free(data->t5xxl_string, TRUE);
-		data->t5xxl_string = NULL;
+	if (data->text_enc_string != NULL) {
+		g_string_free(data->text_enc_string, TRUE);
+		data->text_enc_string = NULL;
 	}
 	
 	if (data->img2img_file_path != NULL) {
 		g_string_free(data->img2img_file_path, TRUE);
 		data->img2img_file_path = NULL;
+	}
+	
+	if (data->image_files != NULL) {
+		g_ptr_array_free(data->image_files, TRUE);
+		data->image_files = NULL;
 	}
 }
 
@@ -123,7 +177,7 @@ void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data)
 	GString *gstr = data->img2img_file_path;
 	g_string_assign(gstr, "None");
 	GtkPicture *prev_img = GTK_PICTURE(data->image_wgt);
-	gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
+	gtk_picture_set_filename(prev_img, EMPTY_IMG_PATH);
 }
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)
@@ -169,29 +223,80 @@ void free_preview_data (gpointer data)
 
 void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
 {
+	int *sdpid = (int *)user_data;
 	gtk_widget_set_sensitive(GTK_WIDGET(btn), FALSE);
-
-	#ifdef _WIN32
-		HANDLE hp = OpenProcess(PROCESS_TERMINATE, FALSE, (DWORD)globalSDPID);
-		if (hp == NULL) {
-			fprintf(stderr, "Failed to open process %d. Error: %lu\n", globalSDPID, GetLastError());
-		} else {
-			if (TerminateProcess(hp, 1)) {
-				printf("Process %d terminated successfully.\n", globalSDPID);
-				globalSDPID = 0;
+	
+	if (*sdpid > 0) {
+		#ifdef _WIN32
+			HANDLE hp = OpenProcess(PROCESS_TERMINATE, FALSE, (DWORD)*sdpid);
+			if (hp == NULL) {
+				g_printerr("Failed to open process %d. Error: %lu\n", *sdpid, GetLastError());
 			} else {
-				fprintf(stderr, "Failed to terminate process %d. Error: %lu\n", globalSDPID, GetLastError());
+				if (TerminateProcess(hp, 1)) {
+					printf("Process %d terminated successfully.\n", *sdpid);
+					*sdpid = 0;
+				} else {
+					g_printerr("Failed to terminate process %d. Error: %lu\n", *sdpid, GetLastError());
+				}
+				CloseHandle(hp);
 			}
-			CloseHandle(hp);
+		#else
+			if (kill(*sdpid, SIGKILL) == 0) {
+				printf("Process %d killed successfully.\n", *sdpid);
+				*sdpid = 0;
+			} else {
+				g_printerr("Error killing process.\n");
+			}
+		#endif
+	} else {
+		g_printerr("Error killing process.\n");
+	}
+}
+
+void navigate_img_prev(GtkButton* btn, gpointer user_data)
+{
+	PreviewImageData *data = user_data;
+	
+	gsize img_count = data->image_files->len;
+	
+	if (img_count > 0) {
+		(*(data->current_image_index))--;
+		
+		if (*data->current_image_index < 0) {
+			*data->current_image_index = img_count - 1;
+		} else if (*data->current_image_index >= img_count) {
+			*data->current_image_index = 0;
 		}
-	#else
-		if (kill(globalSDPID, SIGKILL) == 0) {
-			printf("Process %d killed successfully.\n", globalSDPID);
-			globalSDPID = 0;
-		} else {
-			fprintf(stderr, "Error killing process.\n");
+		
+		const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
+			
+		gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
+	} else {
+		g_printerr("Error: There are no images in the 'output' directory.\n");
+	}
+}
+
+void navigate_img_next(GtkButton* btn, gpointer user_data)
+{
+	PreviewImageData *data = user_data;
+	
+	gsize img_count = data->image_files->len;
+	
+	if (img_count > 0) {
+		(*(data->current_image_index))++;
+		
+		if (*data->current_image_index < 0) {
+			*data->current_image_index = img_count - 1;
+		} else if (*data->current_image_index >= img_count) {
+			*data->current_image_index = 0;
 		}
-	#endif
+		
+		const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
+			
+		gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
+	} else {
+		g_printerr("Error: There are no images in the 'output' directory.\n");
+	}
 }
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data)
@@ -270,7 +375,7 @@ void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 	dropdown_items_update(UPSCALES_PATH, GTK_WIDGET(data->upscaler_dd), data->app);
 	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_l_dd), data->app);
 	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_g_dd), data->app);
-	dropdown_items_update(TEXT_ENCODERS_PATH, GTK_WIDGET(data->t5xxl_dd), data->app);
+	dropdown_items_update(TEXT_ENCODERS_PATH, GTK_WIDGET(data->text_enc_dd), data->app);
 	dropdown_items_update(LORAS_PATH, GTK_WIDGET(data->lora_dd), data->app);
 	dropdown_items_update(EMBEDDINGS_PATH, GTK_WIDGET(data->embedding_dd), data->app);
 }
@@ -303,8 +408,8 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *clip_g_dd = data->clip_g_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(clip_g_dd), DEFAULT_MODELS);
 	
-	GtkWidget *t5xxl_dd = data->t5xxl_dd;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(t5xxl_dd), DEFAULT_MODELS);
+	GtkWidget *text_enc_dd = data->text_enc_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(text_enc_dd), DEFAULT_MODELS);
 
 	GtkWidget *cfg_spin = data->cfg_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), DEFAULT_CFG);
@@ -347,6 +452,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *sd_based_check = data->sd_based_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), ENABLED_OPT == 1 ? TRUE : FALSE);
 	
+	GtkWidget *llm_check = data->llm_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(llm_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
 	GtkWidget *cpu_check = data->cpu_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(cpu_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 
@@ -370,9 +478,6 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *taesd_check = data->taesd_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), DISABLED_OPT == 1 ? TRUE : FALSE);
-	
-	GtkWidget *llm_check = data->llm_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(llm_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *update_cache_check = data->update_cache_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), ENABLED_OPT == 1 ? TRUE : FALSE);
@@ -470,6 +575,11 @@ void hide_img_btn_cb (GtkButton *btn, gpointer user_data)
 		gtk_picture_set_filename(img, EMPTY_IMG_PATH);
 	} else {
 		gtk_button_set_icon_name (btn, "view-reveal-symbolic");
+		if (data->image_files->len > 0) {
+			gtk_picture_set_filename(img, g_ptr_array_index(data->image_files, *data->current_image_index));
+		} else {
+			gtk_picture_set_filename(img, DEFAULT_IMG_PATH);
+		}
 	}
 }
 

@@ -99,17 +99,21 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|--clip_g|./models/clips/%s", data->clip_g_string->str);
 	}
 	
-	if (data->t5xxl_string != NULL && strcmp(data->t5xxl_string->str, "None") != 0) {
+	if (data->text_enc_string != NULL && strcmp(data->text_enc_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->text_enc_string->str);
+	}
+	
+	if (data->text_enc_string != NULL && strcmp(data->text_enc_string->str, "None") != 0) {
 		if (*data->llm_bool == 1) {
-			g_string_append_printf(l1, "|--llm|./models/text_encoders/%s", data->t5xxl_string->str);
+			g_string_append_printf(l1, "|--llm|./models/text_encoders/%s", data->text_enc_string->str);
 		} else {
-			g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->t5xxl_string->str);
+			g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->text_enc_string->str);
 		}
 	}
 	
 	if (*data->k_clip_bool == 1) {
-		if (data->clip_l_string != NULL || data->clip_g_string != NULL || data->t5xxl_string != NULL) {
-			if (strcmp(data->clip_l_string->str, "None") != 0 || strcmp(data->clip_g_string->str, "None") != 0 || strcmp(data->t5xxl_string->str, "None") != 0) {
+		if (data->clip_l_string != NULL || data->clip_g_string != NULL || data->text_enc_string != NULL) {
+			if (strcmp(data->clip_l_string->str, "None") != 0 || strcmp(data->clip_g_string->str, "None") != 0 || strcmp(data->text_enc_string->str, "None") != 0) {
 				g_string_append(l1, "|--clip-on-cpu");
 			}
 		}
@@ -118,7 +122,7 @@ GString *gen_sd_string(GenerationData *data)
 	g_string_append_printf(l1, "|--strength|%s", denoise_str);
 
 	if (*data->taesd_bool == 1) {
-		g_string_append(l1, "|--taesd|.models/TAESD/taesd_decoder.safetensors");
+		g_string_append(l1, "|--taesd|.models/vae/taesd_decoder.safetensors");
 	}
 
 	g_string_append_printf(l1, "|--cfg-scale|%s", cfg_str);
@@ -191,7 +195,7 @@ GString *gen_sd_string(GenerationData *data)
 	#endif
 
 	if (*data->update_cache_bool == 1) {
-		update_cache(data, data->checkpoint_string->str, data->vae_string->str, data->cnet_string->str, data->upscaler_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, timestamp);
+		update_cache(data, data->checkpoint_string->str, data->vae_string->str, data->cnet_string->str, data->upscaler_string->str, data->clip_l_string->str, data->clip_g_string->str, data->text_enc_string->str, p_text, n_text, timestamp);
 	}
 
 	g_free(p_text);

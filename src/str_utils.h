@@ -21,4 +21,6 @@ char* generate_sd_seed();
 
 char *get_time_str();
 
+gboolean string_equal(gconstpointer a, gconstpointer b);
+
 #endif // STR_UTILS_H

@@ -239,3 +239,8 @@ char *get_time_str()
 
 	return t;
 }
+
+gboolean string_equal(gconstpointer a, gconstpointer b)
+{
+	return g_strcmp0(a, b) == 0;
+}
