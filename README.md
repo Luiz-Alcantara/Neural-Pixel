@@ -4,7 +4,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Luiz-Alcantara/Neural-Pixel)
 
 **A simple GUI wrapper for stable-diffusion.cpp written using C and GTK 4.**
-![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/screenshots/img1.png?raw=true)
+![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/screenshots/img2.png?raw=true)
 </div>
 
 With Neural Pixel, you can use Stable Diffusion on practically any GPU that supports Vulkan and has at least 3GB of VRAM. This is a simple way to generate your images without having to deal with CUDA/ROCm installations or hundreds of Python dependencies.
@@ -49,6 +49,7 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 ## Notes
 
 - No video support at the moment.
+- You can change the application's theme color in the `resources/styles.css` file.
 
 ## Linux Requirements
 
@@ -79,7 +80,7 @@ sudo zypper install libgtk-4-1 libpng16-16 libz1 vulkan-tools libvulkan_radeon l
 
 ## Running on Linux
 
-Download the Linux bundle in the releases tab, extract it and run the "neural_pixel" binary.
+Download the Linux bundle in the releases tab, extract it and run the "run_neural_pixel" file.
 If you want to see errors and details, start the application from a terminal and enable the "Terminal Verbose" option in "Extra Opts."
 
 ## Windows Requirements
