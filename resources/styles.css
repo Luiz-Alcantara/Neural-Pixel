@@ -10,7 +10,7 @@
 @define-color text-light #E0E0E0;
 @define-color text-dark #333333;
 @define-color separator #415841;
-/*
+*/
 
 
 /* Bluish color
@@ -26,7 +26,7 @@
 */
 
 
-/* Reddish color*/
+/* Reddish color */
 @define-color primary-color #281F1F;
 @define-color primary-color-light #463A3A;
 @define-color primary-color-lighter #B21212;
@@ -225,7 +225,7 @@
 
 
 /* Widget Labels */
-.param_label {
+.param_label, .pos_prompt_label, .neg_prompt_label {
 	color: @text-light;
 	/*font-family: JetBrains Mono, monospace;*/
 	font-size: 12pt;

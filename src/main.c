@@ -233,14 +233,14 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_prompts), box_neg_prompt);
 
 	//Set Prompts Box Labels
-	pp_lab = gtk_label_new ("Positive Prompt:");
-	np_lab = gtk_label_new ("Negative Prompt:");
+	pp_lab = gtk_label_new ("Positive Prompt");
+	np_lab = gtk_label_new ("Negative Prompt");
 	
 	gtk_widget_set_halign(pp_lab, LABEL_ALIGNMENT);
 	gtk_widget_set_halign(np_lab, LABEL_ALIGNMENT);
 	
-	gtk_widget_add_css_class(pp_lab, "param_label");
-	gtk_widget_add_css_class(np_lab, "param_label");
+	gtk_widget_add_css_class(pp_lab, "pos_prompt_label");
+	gtk_widget_add_css_class(np_lab, "neg_prompt_label");
 
 	gtk_box_append (GTK_BOX (box_pos_prompt), pp_lab);
 	gtk_box_append (GTK_BOX (box_neg_prompt), np_lab);
@@ -278,7 +278,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(box_checkpoint, "inner_box");
 	gtk_box_append (GTK_BOX (box_properties), box_checkpoint);
 	
-	checkpoint_lab = gtk_label_new ("Checkpoint:");
+	checkpoint_lab = gtk_label_new ("Checkpoint");
 	gtk_widget_set_halign(checkpoint_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(checkpoint_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_checkpoint), checkpoint_lab);
@@ -313,7 +313,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set VAE Widgets
 
-	vae_lab = gtk_label_new ("VAE:");
+	vae_lab = gtk_label_new ("VAE");
 	gtk_widget_set_halign(vae_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(vae_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), vae_lab);
@@ -323,7 +323,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	//Set CNet Widgets
 	
-	cnet_lab = gtk_label_new ("Control Net:");
+	cnet_lab = gtk_label_new ("Control Net");
 	gtk_widget_set_halign(cnet_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(cnet_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), cnet_lab);
@@ -333,7 +333,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Upscaler Widgets
 
-	upscaler_lab = gtk_label_new ("Upscaler:");
+	upscaler_lab = gtk_label_new ("Upscaler");
 	gtk_widget_set_halign(upscaler_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(upscaler_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), upscaler_lab);
@@ -343,7 +343,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	//Set Clip_l Widgets
 	
-	clip_l_lab = gtk_label_new ("Clip_l:");
+	clip_l_lab = gtk_label_new ("Clip_l");
 	gtk_widget_set_halign(clip_l_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(clip_l_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), clip_l_lab);
@@ -353,7 +353,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Clip_g Widgets
 	
-	clip_g_lab = gtk_label_new ("Clip_g:");
+	clip_g_lab = gtk_label_new ("Clip_g");
 	gtk_widget_set_halign(clip_g_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(clip_g_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), clip_g_lab);
@@ -366,7 +366,7 @@ app_activate (GApplication *app, gpointer user_data)
 	box_text_encoder = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_addons), box_text_encoder);
 	
-	text_enc_lab = gtk_label_new ("Text Encoder(T5xxl/LLM):");
+	text_enc_lab = gtk_label_new ("Text Encoder(T5xxl/LLM)");
 	gtk_widget_set_halign(text_enc_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(text_enc_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_text_encoder), text_enc_lab);
@@ -394,7 +394,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	//Set LoRA Widgets
 
-	lora_lab = gtk_label_new ("Add LoRA:");
+	lora_lab = gtk_label_new ("Add LoRA");
 	gtk_widget_set_halign(lora_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(lora_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_model_adapters), lora_lab);
@@ -404,7 +404,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	//Set Embeddings Widgets
 
-	embedding_lab = gtk_label_new ("Add Embedding:");
+	embedding_lab = gtk_label_new ("Add Embedding");
 	gtk_widget_set_halign(embedding_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(embedding_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_model_adapters), embedding_lab);
@@ -432,7 +432,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Width Widgets
 	
-	width_lab = gtk_label_new ("Width:");
+	width_lab = gtk_label_new ("Width");
 	gtk_widget_add_css_class(width_lab, "param_label");
 	gtk_widget_set_halign(width_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_params_row1_col1), width_lab);
@@ -442,7 +442,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Height Widgets
 	
-	height_lab = gtk_label_new ("Height:");
+	height_lab = gtk_label_new ("Height");
 	gtk_widget_add_css_class(height_lab, "param_label");
 	gtk_widget_set_halign(height_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_params_row1_col2), height_lab);
@@ -465,7 +465,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Steps Widgets
 	
-	steps_lab = gtk_label_new ("Steps:");
+	steps_lab = gtk_label_new ("Steps");
 	gtk_widget_add_css_class(steps_lab, "param_label");
 	gtk_widget_set_halign(steps_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_params_row2_col1), steps_lab);
@@ -481,7 +481,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Batch count Widgets
 	
-	batch_count_lab = gtk_label_new ("Batch count:");
+	batch_count_lab = gtk_label_new ("Batch count");
 	gtk_widget_add_css_class(batch_count_lab, "param_label");
 	gtk_widget_set_halign(batch_count_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_params_row2_col2), batch_count_lab);
@@ -510,7 +510,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Sampler Widgets
 	
-	sampler_lab = gtk_label_new ("Sampler:");
+	sampler_lab = gtk_label_new ("Sampler");
 	gtk_widget_add_css_class(sampler_lab, "param_label");
 	gtk_widget_set_halign(sampler_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_params_row3_col1), sampler_lab);
@@ -520,7 +520,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Scheduler Widgets
 	
-	scheduler_lab = gtk_label_new ("Scheduler:");
+	scheduler_lab = gtk_label_new ("Scheduler");
 	gtk_widget_add_css_class(scheduler_lab, "param_label");
 	gtk_widget_set_halign(scheduler_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_params_row3_col2), scheduler_lab);
@@ -543,7 +543,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set CFG Widgets
 	
-	cfg_lab = gtk_label_new ("CFG Scale:");
+	cfg_lab = gtk_label_new ("CFG Scale");
 	gtk_widget_set_halign(cfg_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(cfg_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_params_row4_col1), cfg_lab);
@@ -559,7 +559,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Denoise Widgets
 	
-	denoise_lab = gtk_label_new ("Denoise Str:");
+	denoise_lab = gtk_label_new ("Denoise Str");
 	gtk_widget_set_halign(denoise_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(denoise_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_params_row4_col2), denoise_lab);
@@ -580,7 +580,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Seed Widgets
 	
-	seed_lab = gtk_label_new ("Seed:");
+	seed_lab = gtk_label_new ("Seed");
 	gtk_widget_set_halign(seed_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(seed_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_params_row5), seed_lab);
@@ -611,7 +611,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Clip Skip Widgets
 	
-	clip_skip_lab = gtk_label_new ("Clip Skip:");
+	clip_skip_lab = gtk_label_new ("Clip Skip");
 	gtk_widget_set_halign(clip_skip_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(clip_skip_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_params_row6_col1), clip_skip_lab);
@@ -627,7 +627,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	//Set Repeat Upscale Widgets
 
-	upscale_str_lab = gtk_label_new ("Upscale Runs:");
+	upscale_str_lab = gtk_label_new ("Upscale Runs");
 	gtk_widget_set_halign(upscale_str_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(upscale_str_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_str_lab);
