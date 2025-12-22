@@ -75,27 +75,26 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_params;
 	GtkWidget *box_params_row1, *box_params_row1_col1, *box_params_row1_col2;
 	GtkWidget *box_params_row2, *box_params_row2_col1, *box_params_row2_col2;
-	GtkWidget *box_params_row3;
+	GtkWidget *box_params_row3, *box_params_row3_col1, *box_params_row3_col2;
 	GtkWidget *box_params_row4, *box_params_row4_col1, *box_params_row4_col2;
-	GtkWidget *box_params_row5, *box_params_row5_col1, *box_params_row5_col2;
+	GtkWidget *box_params_row5;
 	GtkWidget *box_params_row6, *box_params_row6_col1, *box_params_row6_col2;
 	
-	GtkWidget *cfg_lab, *cfg_spin;
-	GtkWidget *denoise_lab, *denoise_spin;
-	GtkWidget *clip_skip_lab, *clip_skip_spin;
-	GtkWidget *upscale_str_lab, *upscale_spin;
-	GtkWidget *seed_lab, *seed_entry;
-
 	GtkWidget *box_model_adapters;
 	GtkWidget *lora_lab, *lora_dd;
 	GtkWidget *embedding_lab, *embedding_dd;
 
-	GtkWidget *sampler_lab, *sampler_dd;
-	GtkWidget *scheduler_lab, *scheduler_dd;
 	GtkWidget *width_lab, *width_dd;
 	GtkWidget *height_lab, *height_dd;
 	GtkWidget *steps_lab, *steps_spin;
 	GtkWidget *batch_count_lab, *batch_count_spin;
+	GtkWidget *sampler_lab, *sampler_dd;
+	GtkWidget *scheduler_lab, *scheduler_dd;
+	GtkWidget *cfg_lab, *cfg_spin;
+	GtkWidget *denoise_lab, *denoise_spin;
+	GtkWidget *seed_lab, *seed_entry;
+	GtkWidget *clip_skip_lab, *clip_skip_spin;
+	GtkWidget *upscale_str_lab, *upscale_spin;
 	
 	GtkWidget *extra_opts_expander, *box_extra_opts, *box_extra_opts_col1, *box_extra_opts_col2;
 	
@@ -104,7 +103,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_generation;
 	GtkWidget *sd_halt_btn;
 
-	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar;
+	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_spacer, *boxr_bottom_right_spacer;
 	GtkWidget *preview_img;
 	GtkWidget *prev_img_button, *load_from_current_btn, *hide_img_btn, *next_img_button;
 
@@ -431,39 +430,27 @@ app_activate (GApplication *app, gpointer user_data)
 	box_params_row1_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_params_row1), box_params_row1_col2);
 	
-	//Set CFG Widgets
+	//Set Width Widgets
 	
-	cfg_lab = gtk_label_new ("CFG Scale:");
-	gtk_widget_set_halign(cfg_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(cfg_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_params_row1_col1), cfg_lab);
+	width_lab = gtk_label_new ("Width:");
+	gtk_widget_add_css_class(width_lab, "param_label");
+	gtk_widget_set_halign(width_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_params_row1_col1), width_lab);
 	
-	cfg_spin = gtk_spin_button_new_with_range (1, 30.0, 0.5);
-	gtk_widget_add_css_class(cfg_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(cfg_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), app_data->cfg_value);
-	g_signal_connect (cfg_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->cfg_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(cfg_spin),
-	"Controls how strongly the prompt influences the generated image.\nHigher values make the output more closely follow the prompt.\nTypical range: 6-12.");
-	gtk_box_append (GTK_BOX (box_params_row1_col1), cfg_spin);
+	width_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->w_index);
+	gtk_box_append (GTK_BOX (box_params_row1_col1), width_dd);
 	
-	//Set Denoise Widgets
+	//Set Height Widgets
 	
-	denoise_lab = gtk_label_new ("Denoise Str:");
-	gtk_widget_set_halign(denoise_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(denoise_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_params_row1_col2), denoise_lab);
+	height_lab = gtk_label_new ("Height:");
+	gtk_widget_add_css_class(height_lab, "param_label");
+	gtk_widget_set_halign(height_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_params_row1_col2), height_lab);
 	
-	denoise_spin = gtk_spin_button_new_with_range (0, 1.0, 0.05);
-	gtk_widget_add_css_class(denoise_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(denoise_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), app_data->denoise_value);
-	g_signal_connect (denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->denoise_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(denoise_spin),
-	"Controls how much the original image is changed.\nValues near 1.0 heavily modify or replace the image.\nValues near 0.0 preserve the original image with minimal changes.");
-	gtk_box_append (GTK_BOX (box_params_row1_col2), denoise_spin);
+	height_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->h_index);
+	gtk_box_append (GTK_BOX (box_params_row1_col2), height_dd);
 	
-	//Set Parameters 1 Second Row Widgets
+	//Set Parameters Second Row Widgets
 	
 	box_params_row2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_params_row2), TRUE);
@@ -475,61 +462,71 @@ app_activate (GApplication *app, gpointer user_data)
 
 	box_params_row2_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_params_row2), box_params_row2_col2);
-
-	//Set Clip Skip Widgets
 	
-	clip_skip_lab = gtk_label_new ("Clip Skip:");
-	gtk_widget_set_halign(clip_skip_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(clip_skip_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_params_row2_col1), clip_skip_lab);
+	//Set Steps Widgets
 	
-	clip_skip_spin = gtk_spin_button_new_with_range (0, 12.0, 1.0);
-	gtk_widget_add_css_class(clip_skip_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(clip_skip_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(clip_skip_spin), app_data->clip_skip_value);
-	g_signal_connect (clip_skip_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->clip_skip_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(clip_skip_spin),
-	"Skips the last N layers of the text encoder output, reducing the influence of later CLIP layers.\nIf set to 0, the optimal value is automatically selected based on the checkpoint model.");
-	gtk_box_append (GTK_BOX (box_params_row2_col1), clip_skip_spin);
-
-	//Set Repeat Upscale Widgets
-
-	upscale_str_lab = gtk_label_new ("Upscale Runs:");
-	gtk_widget_set_halign(upscale_str_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(upscale_str_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_params_row2_col2), upscale_str_lab);
+	steps_lab = gtk_label_new ("Steps:");
+	gtk_widget_add_css_class(steps_lab, "param_label");
+	gtk_widget_set_halign(steps_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_params_row2_col1), steps_lab);
 	
-	upscale_spin = gtk_spin_button_new_with_range (1.0, 8.0, 1.0);
-	gtk_widget_add_css_class(upscale_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(upscale_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_spin), app_data->up_repeat_value);
-	g_signal_connect (upscale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->up_repeat_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(upscale_spin),
-	"Number of times to run the upscaler sequentially.\nEach run applies the upscale process to the previous result,\nfurther increasing the image dimensions.");
-	gtk_box_append (GTK_BOX (box_params_row2_col2), upscale_spin);
+	steps_spin = gtk_spin_button_new_with_range (1.0, 150.0, 1.0);
+	gtk_widget_add_css_class(steps_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(steps_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), app_data->steps_value);
+	g_signal_connect (steps_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->steps_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(steps_spin),
+	"Number of refinement steps. More steps = higher detail but slower.\n20–40 is usually best.");
+	gtk_box_append (GTK_BOX (box_params_row2_col1), steps_spin);
+	
+	//Set Batch count Widgets
+	
+	batch_count_lab = gtk_label_new ("Batch count:");
+	gtk_widget_add_css_class(batch_count_lab, "param_label");
+	gtk_widget_set_halign(batch_count_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_params_row2_col2), batch_count_lab);
+
+	batch_count_spin = gtk_spin_button_new_with_range (1.0, 50.0, 1.0);
+	gtk_widget_add_css_class(batch_count_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(batch_count_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(batch_count_spin), app_data->batch_count_value);
+	g_signal_connect (batch_count_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->batch_count_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(batch_count_spin),
+	"How many images to generate one after another.\nDoesn’t use extra VRAM.");
+	gtk_box_append (GTK_BOX (box_params_row2_col2), batch_count_spin);
 	
 	//Set Parameters Third Row Widgets
 	
-	box_params_row3 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	box_params_row3 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_params_row3), TRUE);
+	gtk_widget_set_hexpand (box_params_row3, TRUE);
 	gtk_box_append (GTK_BOX (box_params), box_params_row3);
+
+	box_params_row3_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_params_row3), box_params_row3_col1);
+
+	box_params_row3_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_params_row3), box_params_row3_col2);
 	
-	//Set Seed Widgets
+	//Set Sampler Widgets
 	
-	seed_lab = gtk_label_new ("Seed:");
-	gtk_widget_set_halign(seed_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(seed_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_params_row3), seed_lab);
+	sampler_lab = gtk_label_new ("Sampler:");
+	gtk_widget_add_css_class(sampler_lab, "param_label");
+	gtk_widget_set_halign(sampler_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_params_row3_col1), sampler_lab);
 	
-	seed_entry = gtk_entry_new();
-	gtk_widget_add_css_class(seed_entry, "custom_seed_entry");
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "media-playlist-shuffle-symbolic");
-	gtk_entry_set_icon_activatable(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, TRUE);
-	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "Sets to -1 = random seed");
-	g_signal_connect(seed_entry, "icon-release", G_CALLBACK(random_seed_btn_toggle), NULL);
-	char seed_str[LONGLONG_STR_SIZE];
-	snprintf(seed_str, sizeof(seed_str), "%lld", app_data->seed_value);
-	gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
-	gtk_box_append (GTK_BOX (box_params_row3), seed_entry);
+	sampler_dd = gen_const_dd(LIST_SAMPLES, &app_data->sampler_index);
+	gtk_box_append (GTK_BOX (box_params_row3_col1), sampler_dd);
+	
+	//Set Scheduler Widgets
+	
+	scheduler_lab = gtk_label_new ("Scheduler:");
+	gtk_widget_add_css_class(scheduler_lab, "param_label");
+	gtk_widget_set_halign(scheduler_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_params_row3_col2), scheduler_lab);
+	
+	scheduler_dd = gen_const_dd(LIST_SCHEDULES, &app_data->scheduler_index);
+	gtk_box_append (GTK_BOX (box_params_row3_col2), scheduler_dd);
 	
 	//Set Parameters Fourth Row Widgets
 	
@@ -544,58 +541,60 @@ app_activate (GApplication *app, gpointer user_data)
 	box_params_row4_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_params_row4), box_params_row4_col2);
 	
-	//Set Sampler Widgets
+	//Set CFG Widgets
 	
-	sampler_lab = gtk_label_new ("Sampler:");
-	gtk_widget_add_css_class(sampler_lab, "param_label");
-	gtk_widget_set_halign(sampler_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_params_row4_col1), sampler_lab);
+	cfg_lab = gtk_label_new ("CFG Scale:");
+	gtk_widget_set_halign(cfg_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(cfg_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row4_col1), cfg_lab);
 	
-	sampler_dd = gen_const_dd(LIST_SAMPLES, &app_data->sampler_index);
-	gtk_box_append (GTK_BOX (box_params_row4_col1), sampler_dd);
+	cfg_spin = gtk_spin_button_new_with_range (1, 30.0, 0.5);
+	gtk_widget_add_css_class(cfg_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(cfg_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), app_data->cfg_value);
+	g_signal_connect (cfg_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->cfg_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(cfg_spin),
+	"Controls how strongly the prompt influences the generated image.\nHigher values make the output more closely follow the prompt.\nTypical range: 6-12.");
+	gtk_box_append (GTK_BOX (box_params_row4_col1), cfg_spin);
 	
-	//Set Scheduler Widgets
+	//Set Denoise Widgets
 	
-	scheduler_lab = gtk_label_new ("Scheduler:");
-	gtk_widget_add_css_class(scheduler_lab, "param_label");
-	gtk_widget_set_halign(scheduler_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_params_row4_col2), scheduler_lab);
+	denoise_lab = gtk_label_new ("Denoise Str:");
+	gtk_widget_set_halign(denoise_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(denoise_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row4_col2), denoise_lab);
 	
-	scheduler_dd = gen_const_dd(LIST_SCHEDULES, &app_data->scheduler_index);
-	gtk_box_append (GTK_BOX (box_params_row4_col2), scheduler_dd);
+	denoise_spin = gtk_spin_button_new_with_range (0, 1.0, 0.05);
+	gtk_widget_add_css_class(denoise_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(denoise_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), app_data->denoise_value);
+	g_signal_connect (denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->denoise_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(denoise_spin),
+	"Controls how much the original image is changed.\nValues near 1.0 heavily modify or replace the image.\nValues near 0.0 preserve the original image with minimal changes.");
+	gtk_box_append (GTK_BOX (box_params_row4_col2), denoise_spin);
 	
 	//Set Parameters Fifth Row Widgets
 	
-	box_params_row5 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (box_params_row5), TRUE);
-	gtk_widget_set_hexpand (box_params_row5, TRUE);
+	box_params_row5 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_params), box_params_row5);
-
-	box_params_row5_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
-	gtk_box_append (GTK_BOX (box_params_row5), box_params_row5_col1);
-
-	box_params_row5_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
-	gtk_box_append (GTK_BOX (box_params_row5), box_params_row5_col2);
 	
-	//Set Width Widgets
+	//Set Seed Widgets
 	
-	width_lab = gtk_label_new ("Width:");
-	gtk_widget_add_css_class(width_lab, "param_label");
-	gtk_widget_set_halign(width_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_params_row5_col1), width_lab);
+	seed_lab = gtk_label_new ("Seed:");
+	gtk_widget_set_halign(seed_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(seed_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row5), seed_lab);
 	
-	width_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->w_index);
-	gtk_box_append (GTK_BOX (box_params_row5_col1), width_dd);
-	
-	//Set Height Widgets
-	
-	height_lab = gtk_label_new ("Height:");
-	gtk_widget_add_css_class(height_lab, "param_label");
-	gtk_widget_set_halign(height_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_params_row5_col2), height_lab);
-	
-	height_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->h_index);
-	gtk_box_append (GTK_BOX (box_params_row5_col2), height_dd);
+	seed_entry = gtk_entry_new();
+	gtk_widget_add_css_class(seed_entry, "custom_seed_entry");
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "media-playlist-shuffle-symbolic");
+	gtk_entry_set_icon_activatable(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, TRUE);
+	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(seed_entry), GTK_ENTRY_ICON_SECONDARY, "Sets to -1 = random seed");
+	g_signal_connect(seed_entry, "icon-release", G_CALLBACK(random_seed_btn_toggle), NULL);
+	char seed_str[LONGLONG_STR_SIZE];
+	snprintf(seed_str, sizeof(seed_str), "%lld", app_data->seed_value);
+	gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
+	gtk_box_append (GTK_BOX (box_params_row5), seed_entry);
 	
 	//Set Parameters Sixth Row Widgets
 	
@@ -610,37 +609,37 @@ app_activate (GApplication *app, gpointer user_data)
 	box_params_row6_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_params_row6), box_params_row6_col2);
 	
-	//Set Steps Widgets
+	//Set Clip Skip Widgets
 	
-	steps_lab = gtk_label_new ("Steps:");
-	gtk_widget_add_css_class(steps_lab, "param_label");
-	gtk_widget_set_halign(steps_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_params_row6_col1), steps_lab);
+	clip_skip_lab = gtk_label_new ("Clip Skip:");
+	gtk_widget_set_halign(clip_skip_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(clip_skip_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row6_col1), clip_skip_lab);
 	
-	steps_spin = gtk_spin_button_new_with_range (1.0, 150.0, 1.0);
-	gtk_widget_add_css_class(steps_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(steps_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), app_data->steps_value);
-	g_signal_connect (steps_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->steps_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(steps_spin),
-	"Number of refinement steps. More steps = higher detail but slower.\n20–40 is usually best.");
-	gtk_box_append (GTK_BOX (box_params_row6_col1), steps_spin);
-	
-	//Set Batch count Widgets
-	
-	batch_count_lab = gtk_label_new ("Batch count:");
-	gtk_widget_add_css_class(batch_count_lab, "param_label");
-	gtk_widget_set_halign(batch_count_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_params_row6_col2), batch_count_lab);
+	clip_skip_spin = gtk_spin_button_new_with_range (0, 12.0, 1.0);
+	gtk_widget_add_css_class(clip_skip_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(clip_skip_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(clip_skip_spin), app_data->clip_skip_value);
+	g_signal_connect (clip_skip_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->clip_skip_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(clip_skip_spin),
+	"Skips the last N layers of the text encoder output, reducing the influence of later CLIP layers.\nIf set to 0, the optimal value is automatically selected based on the checkpoint model.");
+	gtk_box_append (GTK_BOX (box_params_row6_col1), clip_skip_spin);
 
-	batch_count_spin = gtk_spin_button_new_with_range (1.0, 50.0, 1.0);
-	gtk_widget_add_css_class(batch_count_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(batch_count_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(batch_count_spin), app_data->batch_count_value);
-	g_signal_connect (batch_count_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->batch_count_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(batch_count_spin),
-	"How many images to generate one after another.\nDoesn’t use extra VRAM.");
-	gtk_box_append (GTK_BOX (box_params_row6_col2), batch_count_spin);
+	//Set Repeat Upscale Widgets
+
+	upscale_str_lab = gtk_label_new ("Upscale Runs:");
+	gtk_widget_set_halign(upscale_str_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(upscale_str_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_str_lab);
+	
+	upscale_spin = gtk_spin_button_new_with_range (1.0, 8.0, 1.0);
+	gtk_widget_add_css_class(upscale_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(upscale_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_spin), app_data->up_repeat_value);
+	g_signal_connect (upscale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->up_repeat_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(upscale_spin),
+	"Number of times to run the upscaler sequentially.\nEach run applies the upscale process to the previous result,\nfurther increasing the image dimensions.");
+	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_spin);
 	
 	//Set Extra Options Widgets
 	
@@ -767,33 +766,48 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (boxr_img), preview_img);
 	
 	//Set Box Right Button bar bottom
-	boxr_bottom_bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (boxr_bottom_bar), TRUE);
+	boxr_bottom_bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, ZERO_SPACING);
+	gtk_widget_add_css_class(boxr_bottom_bar, "left_box");
+	gtk_box_set_homogeneous (GTK_BOX (boxr_bottom_bar), FALSE);
 	gtk_box_append (GTK_BOX (box_right), boxr_bottom_bar);
+	
+	//Set Box Right Button Bar Left Spacer
+	boxr_bottom_left_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_set_hexpand(boxr_bottom_left_spacer, TRUE);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_left_spacer);
 	
 	//Previous Img Button
 	prev_img_button = gtk_button_new_from_icon_name ("go-previous-symbolic");
 	gtk_widget_add_css_class(prev_img_button, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_img_button), "Previous Image.");
+	gtk_widget_set_size_request(GTK_WIDGET(prev_img_button), 120, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), prev_img_button);
+	
+	//Next Img Button
+	next_img_button = gtk_button_new_from_icon_name ("go-next-symbolic");
+	gtk_widget_add_css_class(next_img_button, "custom_btn");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(next_img_button), "Next Image.");
+	gtk_widget_set_size_request(GTK_WIDGET(next_img_button), 120, -1);
+	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_img_button);
 	
 	//Load info from current Img
 	load_from_current_btn = gtk_button_new_from_icon_name ("insert-image-symbolic");
 	gtk_widget_add_css_class(load_from_current_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_current_btn), "Load prompt and generation parameters from the displayed image.");
+	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 120, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), load_from_current_btn);
 	
 	//Hide Img Button
 	hide_img_btn = gtk_button_new_from_icon_name ("view-reveal-symbolic");
 	gtk_widget_add_css_class(hide_img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hide_img_btn), "Toggle displayed image visibility.");
+	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 120, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), hide_img_btn);
 	
-	//Next Img Button
-	next_img_button = gtk_button_new_from_icon_name ("go-next-symbolic");
-	gtk_widget_add_css_class(next_img_button, "custom_btn");
-	gtk_widget_set_tooltip_text(GTK_WIDGET(next_img_button), "Next Image.");
-	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_img_button);
+	//Set Box Right Button Bar Right Spacer
+	boxr_bottom_right_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_set_hexpand(boxr_bottom_right_spacer, TRUE);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_right_spacer);
 	
 	seed_entry_d = g_new0 (SeedEntryData, 1);
 	seed_entry_d->seed = &app_data->seed_value;
