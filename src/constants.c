@@ -36,8 +36,8 @@ const char* LIST_SCHEDULES[] = {"ays", "discrete", "exponential", "gits", "karra
 const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]); 
 
 
-const char* POSITIVE_PROMPT = "A colossal ancient tree towering over a vast landscape, its massive branches stretching into the sky, glowing blue particles gracefully drifting down from its leaves, bathed in ethereal light. The scene is filled with vibrant colors, lush greens, radiant blues, and golden hues from a dramatic sunset. An epic cinematic background with distant mountains, swirling clouds, and mystical atmosphere, ultra-detailed, 8K resolution, fantasy concept art, volumetric lighting, masterpiece, epic scale";
-const char* NEGATIVE_PROMPT = "blurry, grainy, low resolution, cartoon, low detail, distorted, text, watermark";
+const char* POSITIVE_PROMPT = "masterpiece, ultra-detailed snow globe glowing softly on a wooden table, magical internal light illuminating a miniature winter village inside, tiny houses with warm windows, snow-covered pine trees, swirling snow particles, crystal glass sphere with smooth reflections, subtle frost and condensation, ornate metal base, cinematic lighting, dark cozy room background, deep shadows with soft rim light, volumetric glow, dreamy atmosphere, shallow depth of field, macro perspective, highly detailed, fantasy realism, dramatic contrast, beautiful composition";
+const char* NEGATIVE_PROMPT = "worst quality, low quality, blurry, flat lighting, harsh shadows, oversaturated, plastic look, bad reflections, warped glass, extra objects, cluttered composition, cartoon, anime, photorealistic face, text, watermark, logo";
 const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const char* EMPTY_IMG_PATH = "./resources/empty.png";

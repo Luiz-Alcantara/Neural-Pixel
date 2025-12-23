@@ -374,12 +374,18 @@ void load_from_img_preview(GtkWidget *btn, gpointer user_data)
 {
 	LoadPNGData *data = user_data;
 	
-	gchar *img_path = g_strdup(g_ptr_array_index(data->image_files, *data->current_image_index));
-	
-	if (img_path != NULL) {
-		set_png_metadata(img_path, user_data);
+	if (data->image_files->len > 0) {
+		gchar *img_path = g_strdup(g_ptr_array_index(data->image_files, *data->current_image_index));
+		
+		if (img_path != NULL) {
+			set_png_metadata(img_path, user_data);
+		} else {
+			fprintf(stderr, "Failed to get image path.\n");
+		}
 	} else {
-		fprintf(stderr, "Failed to get image path.\n");
+		g_printerr("No images in the 'output' directory, using default image.\n");
+		gchar *img_path = g_strdup(DEFAULT_IMG_PATH);
+		set_png_metadata(img_path, user_data);
 	}
 }
 
