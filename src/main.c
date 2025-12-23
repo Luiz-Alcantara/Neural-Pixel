@@ -23,6 +23,7 @@ app_activate (GApplication *app, gpointer user_data)
 	PreviewImageData *preview_d;
 	preview_d = g_new0 (PreviewImageData, 1);
 	
+	preview_d->img_index_string = app_data->img_index_string;
 	preview_d->image_files = app_data->image_files;
 	preview_d->current_image_index = &app_data->current_image_index;
 
@@ -105,7 +106,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_spacer, *boxr_bottom_right_spacer;
 	GtkWidget *preview_img;
-	GtkWidget *prev_img_button, *load_from_current_btn, *hide_img_btn, *next_img_button;
+	GtkWidget *prev_img_button, *img_index_label, *next_img_button, *load_from_current_btn, *hide_img_btn;
 
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
@@ -790,6 +791,11 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_size_request(GTK_WIDGET(next_img_button), 120, -1);
 	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_img_button);
 	
+	//Img index label
+	img_index_label = gtk_label_new (app_data->img_index_string->str);
+	gtk_widget_set_size_request(GTK_WIDGET(img_index_label), 120, -1);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), img_index_label);
+	
 	//Load info from current Img
 	load_from_current_btn = gtk_button_new_from_icon_name ("insert-image-symbolic");
 	gtk_widget_add_css_class(load_from_current_btn, "custom_btn");
@@ -867,6 +873,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 
 	preview_d->image_widget = preview_img;
+	preview_d->img_index_label = img_index_label;
 	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
 	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
 	g_signal_connect (prev_img_button, "clicked", G_CALLBACK (navigate_img_prev), preview_d);
@@ -906,6 +913,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->clip_l_string = app_data->clip_l_string;
 	gen_d->clip_g_string = app_data->clip_g_string;
 	gen_d->text_enc_string = app_data->text_enc_string;
+	gen_d->img_index_string = app_data->img_index_string;
 	gen_d->image_files = app_data->image_files;
 	gen_d->sdpid = &app_data->sdpid;
 	gen_d->sampler_index = &app_data->sampler_index;
@@ -935,6 +943,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->pos_p = pos_tb;
 	gen_d->neg_p = neg_tb;
 	gen_d->image_widget = preview_img;
+	gen_d->img_index_label = img_index_label;
 	gen_d->show_img_btn = hide_img_btn;
 	gen_d->halt_btn = sd_halt_btn;
 	gen_d->win = win;
@@ -1011,6 +1020,12 @@ main (int argc, char **argv)
 	
 	data->img2img_file_path = g_string_new("None");
 	if (data->img2img_file_path == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->img_index_string = g_string_new("0 / 0");
+	if (data->img_index_string == NULL) {
 		g_error("Failed to allocate GString.");
 		return 1;
 	}

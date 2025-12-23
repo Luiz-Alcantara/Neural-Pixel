@@ -12,6 +12,7 @@ typedef struct {
 	GString *clip_l_string;
 	GString *clip_g_string;
 	GString *text_enc_string;
+	GString *img_index_string;
 	GPtrArray *image_files;
 	int sdpid;
 	int sampler_index;
@@ -65,8 +66,10 @@ typedef struct {
 	gchar *result_img_path;
 	gchar **cmd_chunks;
 	GString *cmd_string;
+	GString *img_index_string;
 	GtkWidget *button;
 	GtkWidget *image_widget;
+	GtkWidget *img_index_label;
 	GtkWidget *show_img_btn;
 	GtkWidget *halt_btn;
 } EndGenerationData;
@@ -79,6 +82,7 @@ typedef struct {
 	GString *clip_l_string;
 	GString *clip_g_string;
 	GString *text_enc_string;
+	GString *img_index_string;
 	GPtrArray *image_files;
 	int *sdpid;
 	int *sampler_index;
@@ -108,6 +112,7 @@ typedef struct {
 	GtkTextBuffer *pos_p;
 	GtkTextBuffer *neg_p;
 	GtkWidget *image_widget;
+	GtkWidget *img_index_label;
 	GtkWidget *show_img_btn;
 	GtkWidget *halt_btn;
 	GtkWidget *win;
@@ -146,8 +151,9 @@ typedef struct {
 typedef struct {
 	GPtrArray *image_files;
 	gint *current_image_index;
-	GtkWidget* image_widget;
-	GtkWidget* status_label;
+	GtkWidget *image_widget;
+	GString *img_index_string;
+	GtkWidget *img_index_label;
 } PreviewImageData;
 
 typedef struct {

@@ -285,7 +285,7 @@ void get_png_files(GPtrArray *image_files)
 	g_print("Found %u PNG files.\n", image_files->len);
 }
 
-void set_current_image_index(char *img_str, GPtrArray *image_files, gint *current_image_index)
+void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray *image_files, gint *current_image_index)
 {
 	int *index = (int *)current_image_index;
 	gsize img_count = image_files->len;
@@ -306,8 +306,12 @@ void set_current_image_index(char *img_str, GPtrArray *image_files, gint *curren
 			g_printerr("Could not load last generated image, using default value(s).\n");
 			*index = img_count - 1;
 		}
+		g_string_erase(img_index_string, 0, -1);
+		g_string_append_printf(img_index_string, "%d / %d", *index + 1, img_count);
 	} else {
 		g_printerr("No images in 'outputs' directory.\n");
 		*index = 0;
+		g_string_erase(img_index_string, 0, -1);
+		g_string_append(img_index_string, "0 / 0");
 	}
 }

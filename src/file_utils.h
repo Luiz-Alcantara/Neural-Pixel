@@ -26,6 +26,6 @@ GtkStringList* get_files(const char* path, GError **error);
 
 void get_png_files(GPtrArray *image_files);
 
-void set_current_image_index(char *img_str, GPtrArray *image_files, gint *current_image_index);
+void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray *image_files, gint *current_image_index);
 
 #endif // FILE_UTILS_H

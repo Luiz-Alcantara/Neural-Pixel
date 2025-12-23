@@ -144,7 +144,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	
 	if (check_file_exists(data->result_img_path, 0) == 1) {
 		get_png_files(data->image_files);
-		set_current_image_index(data->result_img_path, data->image_files, data->current_image_index);
+		set_current_image_index(data->result_img_path, data->img_index_string, data->image_files, data->current_image_index);
 		
 		if (data->image_files->len > 0) {
 			if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
@@ -156,6 +156,8 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 			g_printerr("No images in 'outputs' directory.\n");
 			gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 		}
+		
+		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
 	} else {
 		g_printerr(
 			"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
@@ -276,8 +278,10 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		check_d->result_img_path = result_img_path;
 		check_d->cmd_chunks = cmd_chunks;
 		check_d->cmd_string = cmd_string;
+		check_d->img_index_string = data->img_index_string;
 		check_d->button = GTK_WIDGET(gen_btn);
 		check_d->image_widget = data->image_widget;
+		check_d->img_index_label = data->img_index_label;
 		check_d->show_img_btn = data->show_img_btn;
 		check_d->halt_btn = data->halt_btn;
 		

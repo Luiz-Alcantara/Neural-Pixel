@@ -155,6 +155,11 @@ void app_start_data_free (gpointer user_data)
 		data->img2img_file_path = NULL;
 	}
 	
+	if (data->img_index_string != NULL) {
+		g_string_free(data->img_index_string, TRUE);
+		data->img_index_string = NULL;
+	}
+	
 	if (data->image_files != NULL) {
 		g_ptr_array_free(data->image_files, TRUE);
 		data->image_files = NULL;
@@ -269,7 +274,9 @@ void navigate_img_prev(GtkButton* btn, gpointer user_data)
 		}
 		
 		const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
-			
+		g_string_erase(data->img_index_string, 0, -1);
+		g_string_append_printf(data->img_index_string, "%d / %d", *data->current_image_index + 1, img_count);
+		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
 		gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
 	} else {
 		g_printerr("Error: There are no images in the 'output' directory.\n");
@@ -292,7 +299,9 @@ void navigate_img_next(GtkButton* btn, gpointer user_data)
 		}
 		
 		const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
-			
+		g_string_erase(data->img_index_string, 0, -1);
+		g_string_append_printf(data->img_index_string, "%d / %d", *data->current_image_index + 1, img_count);
+		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
 		gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
 	} else {
 		g_printerr("Error: There are no images in the 'output' directory.\n");
