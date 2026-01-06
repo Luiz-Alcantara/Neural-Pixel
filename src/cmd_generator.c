@@ -155,11 +155,9 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|-b|%f", DEFAULT_BATCH_COUNT);
 	}
 
-	if (data->img2img_file_path == NULL || strcmp(data->img2img_file_path->str, "None") == 0) {
-		if (*data->w_index < LIST_RESOLUTIONS_STR_COUNT - 1 && *data->h_index < LIST_RESOLUTIONS_STR_COUNT - 1) {
-			g_string_append_printf(l1, "|-W|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
-			g_string_append_printf(l1, "|-H|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
-		}
+	if (*data->w_index < LIST_RESOLUTIONS_STR_COUNT - 1 && *data->h_index < LIST_RESOLUTIONS_STR_COUNT - 1) {
+		g_string_append_printf(l1, "|-W|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
+		g_string_append_printf(l1, "|-H|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
 	}
 
 	if (*data->vt_bool == 1) {

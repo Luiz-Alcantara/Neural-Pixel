@@ -206,8 +206,17 @@ typedef struct {
 } ResetCbData;
 
 typedef struct {
-	int img_n;
-	int img_t;
+	int is_img2img_encoding;
+	int img2img_enc_completed;
+	int is_generating_latent;
+	int n_current_image;
+	int n_total_images;
+	int gen_latent_completed;
+	int is_decoding_latents;
+	int n_current_latent;
+	int dec_latents_completed;
+	int is_upscaling;
+	int n_current_upscale;
 	int verbose_bool;
 	GtkWidget *button;
 	int *sdpid;

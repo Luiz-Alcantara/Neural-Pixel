@@ -83,19 +83,80 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		g_printerr("Error reading line: %s\n", error->message);
 		g_error_free(error);
 	} else if (out_string) {
-		if (data->verbose_bool) {
+		// Avoid "unused lora tensor" span
+		if (data->verbose_bool && strstr(out_string, "[WARN ] lora.hpp:") == NULL) {
 			printf("%s\n", out_string);
 		}
-
-		if (strstr(out_string, "sampling completed") != NULL && data->img_n == data->img_t) {
-			gtk_button_set_label(GTK_BUTTON(data->button), "Decoding latent(s)...");
+		
+		int ggml_n;
+		int n_tiles;
+		
+		if (strstr(out_string, "target") != NULL) {
+			int x;
+			int n_img2img_tiles;
+			
+			if (sscanf(out_string,
+			"[INFO ] stable-diffusion.cpp:%i - target t_enc is %i steps",
+			&x, &n_img2img_tiles) == 2) {
+				gtk_button_set_label(GTK_BUTTON(data->button), "Encoding...");
+				data->is_img2img_encoding = 1;
+				g_data_input_stream_set_newline_type(G_DATA_INPUT_STREAM(data->out_pipe_stream), G_DATA_STREAM_NEWLINE_TYPE_CR);
+			}
+		} else if (strstr(out_string, "encode_first_stage completed, taking") != NULL && data->is_img2img_encoding) {
+			data->is_img2img_encoding = 0;
+			data->img2img_enc_completed = 1;
+			gtk_button_set_label(GTK_BUTTON(data->button), "Generating...");
 		} else if (strstr(out_string, "generating image:") != NULL) {
+			int x;
+			int n_current_image;
+			int n_total_images;
 			long long int img_seed;
-			const char *last_colon = strrchr(out_string, ':');
-			if (last_colon && sscanf(last_colon + 1, " %i/%i - seed %lld", &data->img_n, &data->img_t, &img_seed) == 3) {
+			
+			if (sscanf(out_string,
+			"[INFO ] stable-diffusion.cpp:%i - generating image: %i/%i - seed %lld",
+			&x, &n_current_image, &n_total_images, &img_seed) == 4) {
+				gtk_button_set_label(GTK_BUTTON(data->button), "Generating...");
+				
+				data->is_generating_latent = 1;
+				data->n_current_image = n_current_image;
+				data->n_total_images = n_total_images;
+				
 				g_data_input_stream_set_newline_type(G_DATA_INPUT_STREAM(data->out_pipe_stream), G_DATA_STREAM_NEWLINE_TYPE_CR);
 			} else {
 				fprintf(stderr, "Error: Could not parse batch size from line: %s\n", out_string);
+			}
+		} else if (strstr(out_string, "latent images completed, taking") != NULL && data->n_current_image == data->n_total_images) {
+			data->is_generating_latent = 0;
+			data->gen_latent_completed = 1;
+			gtk_button_set_label(GTK_BUTTON(data->button), "Decoding latent(s)...");
+		} else if (strstr(out_string, "decoding") != NULL && data->gen_latent_completed) {
+			data->is_decoding_latents = 1;
+		} else if (strstr(out_string, "processing") != NULL && data->is_decoding_latents) {
+			int x;
+			int n_dec_latent_tiles;
+			
+			if (sscanf(out_string,
+			"[INFO ] ggml_extend.hpp:%i - processing %i tiles",
+			&x, &n_dec_latent_tiles) == 2) {
+				gtk_button_set_label(GTK_BUTTON(data->button), "Decoding...");
+				data->n_current_latent++;
+				g_data_input_stream_set_newline_type(G_DATA_INPUT_STREAM(data->out_pipe_stream), G_DATA_STREAM_NEWLINE_TYPE_CR);
+			}
+		} else if (strstr(out_string, "generate_image completed in") != NULL && data->is_decoding_latents) {
+			data->is_decoding_latents = 0;
+			data->dec_latents_completed = 1;
+		} else if (strstr(out_string, "- upscaling from") != NULL && data->dec_latents_completed) {
+			data->is_upscaling = 1;
+		} else if (strstr(out_string, "processing") != NULL && data->is_upscaling) {
+			int x;
+			int n_upscale_tiles;
+			
+			if (sscanf(out_string,
+			"[INFO ] ggml_extend.hpp:%i  - processing %i tiles",
+			&x, &n_upscale_tiles) == 2 ) {
+				gtk_button_set_label(GTK_BUTTON(data->button), "Upscaling...");
+				data->n_current_upscale++;
+				g_data_input_stream_set_newline_type(G_DATA_INPUT_STREAM(data->out_pipe_stream), G_DATA_STREAM_NEWLINE_TYPE_CR);
 			}
 		} else {
 			const char *last_pipe = strrchr(out_string, '|');
@@ -104,15 +165,36 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				float time_or_speed;
 				char unit_part1[10], unit_part2[10];
 
-				if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]", &step, &steps, &time_or_speed, unit_part1, unit_part2) == 5 && steps < 61) {
+				if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]", &step, &steps, &time_or_speed, unit_part1, unit_part2) == 5) {
 					int percentage = (int)(((float)step / steps) * 100 + 0.5);
 					char progress_label[64];
 					
-					int written = snprintf(progress_label,
-					sizeof(progress_label), "Sampling... %d%% (%d/%d) at %.2f%s/%s",
-					percentage, data->img_n, data->img_t, time_or_speed, unit_part1, unit_part2);
+					int written = 0;
 					
-					gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
+					if (data->is_img2img_encoding) {
+						written = snprintf(progress_label,
+							sizeof(progress_label), "Encoding... %d%% (1/1) at %.2f%s/%s",
+							percentage, time_or_speed, unit_part1, unit_part2);
+					} else if (data->is_generating_latent) {
+						written = snprintf(progress_label,
+							sizeof(progress_label), "Generating... %d%% (%d/%d) at %.2f%s/%s",
+							percentage, data->n_current_image, data->n_total_images, time_or_speed, unit_part1, unit_part2);
+					} else if (data->is_decoding_latents) {
+						written = snprintf(progress_label,
+							sizeof(progress_label), "Decoding... %d%% (%d/%d) at %.2f%s/%s",
+							percentage, data->n_current_latent, data->n_total_images, time_or_speed, unit_part1, unit_part2);
+					} else if (data->is_upscaling) {
+						written = snprintf(progress_label,
+							sizeof(progress_label), "Upscaling... %d%% (%d/%d) at %.2f%s/%s",
+							percentage, data->n_current_upscale, data->n_total_images, time_or_speed, unit_part1, unit_part2);
+					}
+					
+					if (written > 0) {
+						gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
+					} else {
+						gtk_button_set_label(GTK_BUTTON(data->button), "Loading...");
+						fprintf(stderr, "Error: Could not fetch progress from line: %s\n", out_string);
+					}
 
 					if (step == steps - 1) {
 						g_data_input_stream_set_newline_type(
@@ -286,8 +368,17 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		check_d->halt_btn = data->halt_btn;
 		
 		SDProcessOutputData *output_d = g_new0 (SDProcessOutputData, 1);
-		output_d->img_n = 1;
-		output_d->img_t = 1;
+		output_d->is_img2img_encoding = 0;
+		output_d->img2img_enc_completed = 0;
+		output_d->is_generating_latent = 0;
+		output_d->n_current_image = 0;
+		output_d->n_total_images = 0;
+		output_d->gen_latent_completed = 0;
+		output_d->is_decoding_latents = 0;
+		output_d->n_current_latent = 0;
+		output_d->dec_latents_completed = 0;
+		output_d->is_upscaling = 0;
+		output_d->n_current_upscale = 0;
 		output_d->verbose_bool = *data->verbose_bool;
 		output_d->button = GTK_WIDGET(gen_btn);
 		output_d->sdpid = data->sdpid;
