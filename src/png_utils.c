@@ -486,7 +486,7 @@ void set_current_preview_to_img2img(GtkWidget *btn, gpointer user_data)
 		g_string_assign(data->img2img_file_path, path);
 		gtk_picture_set_filename(GTK_PICTURE(data->image_wgt), path);
 	} else {
-		g_printerr("Error loading image: The file '%s' is missing, corrupted, or invalid.\n", path);
+		g_printerr("Error loading current preview image into img2img.\n");
 	}
 }
 
