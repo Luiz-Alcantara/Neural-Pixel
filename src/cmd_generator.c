@@ -100,10 +100,6 @@ GString *gen_sd_string(GenerationData *data)
 	}
 	
 	if (data->text_enc_string != NULL && strcmp(data->text_enc_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->text_enc_string->str);
-	}
-	
-	if (data->text_enc_string != NULL && strcmp(data->text_enc_string->str, "None") != 0) {
 		if (*data->llm_bool == 1) {
 			g_string_append_printf(l1, "|--llm|./models/text_encoders/%s", data->text_enc_string->str);
 		} else {
@@ -138,9 +134,9 @@ GString *gen_sd_string(GenerationData *data)
 	}
 	
 	if (seed_str != NULL) {
-		g_string_append_printf(l1,"|-s|%s", seed_str);
+		g_string_append_printf(l1,"|--seed|%s", seed_str);
 	} else {
-		g_string_append(l1,"|-s|-1");
+		g_string_append(l1,"|--seed|-1");
 	}
 	
 	if (steps_str) {
@@ -150,14 +146,14 @@ GString *gen_sd_string(GenerationData *data)
 	}
 	
 	if (batch_count_str) {
-		g_string_append_printf(l1, "|-b|%s", batch_count_str);
+		g_string_append_printf(l1, "|--batch-count|%s", batch_count_str);
 	} else {
-		g_string_append_printf(l1, "|-b|%f", DEFAULT_BATCH_COUNT);
+		g_string_append_printf(l1, "|--batch-count|%f", DEFAULT_BATCH_COUNT);
 	}
 
 	if (*data->w_index < LIST_RESOLUTIONS_STR_COUNT - 1 && *data->h_index < LIST_RESOLUTIONS_STR_COUNT - 1) {
-		g_string_append_printf(l1, "|-W|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
-		g_string_append_printf(l1, "|-H|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
+		g_string_append_printf(l1, "|--width|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
+		g_string_append_printf(l1, "|--height|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
 	}
 
 	if (*data->vt_bool == 1) {
@@ -177,19 +173,19 @@ GString *gen_sd_string(GenerationData *data)
 	}
 
 	if (p_text != NULL) {
-		g_string_append_printf(l1, "|-p|%s", p_text);
+		g_string_append_printf(l1, "|--prompt|%s", p_text);
 	}
 
 	if (n_text != NULL) {
-		g_string_append_printf(l1, "|-n|%s", n_text);
+		g_string_append_printf(l1, "|--negative-prompt|%s", n_text);
 	}
 	
 	char *timestamp = get_time_str();
 	
 	#ifdef G_OS_WIN32
-		g_string_append_printf(l1, "|-o|.\\outputs\\IMG_%s.png", timestamp);
+		g_string_append_printf(l1, "|--output|.\\outputs\\IMG_%s.png", timestamp);
 	#else
-		g_string_append_printf(l1, "|-o|./outputs/IMG_%s.png", timestamp);
+		g_string_append_printf(l1, "|--output|./outputs/IMG_%s.png", timestamp);
 	#endif
 
 	if (*data->update_cache_bool == 1) {
