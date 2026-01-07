@@ -370,6 +370,13 @@ void on_reset_default_btn_destroy (GtkWidget* wgt, gpointer user_data)
 	g_free(data);
 }
 
+void on_set_img2img_from_preview_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	LoadImg2ImgFromPreviewData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
 void quit_btn_callback (GtkWidget *wgt, GtkWidget *win)
 {
 	gtk_window_close(GTK_WINDOW(win));

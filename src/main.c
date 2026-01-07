@@ -106,13 +106,14 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_spacer, *boxr_bottom_right_spacer;
 	GtkWidget *preview_img;
-	GtkWidget *prev_img_button, *img_index_label, *next_img_button, *load_from_current_btn, *hide_img_btn;
+	GtkWidget *prev_img_button, *img_index_label, *next_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn;
 
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
 	GenerationData *gen_d;
 	LoadPNGData *load_png_info_d;
 	LoadImg2ImgData *load_img2img_file_d;
+	LoadImg2ImgFromPreviewData *load_img2img_from_preview_d;
 	SeedEntryData *seed_entry_d;
 	//End defining GTK Widgets;
 
@@ -796,18 +797,26 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_size_request(GTK_WIDGET(img_index_label), 120, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), img_index_label);
 	
-	//Load info from current Img
+	//Load info from current preview image
 	load_from_current_btn = gtk_button_new_from_icon_name ("insert-image-symbolic");
 	gtk_widget_add_css_class(load_from_current_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_current_btn), "Load prompt and generation parameters from the displayed image.");
-	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 120, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 80, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), load_from_current_btn);
+	
+	//Set img2img file from current preview image
+	set_img2img_from_preview_btn = gtk_button_new_from_icon_name ("x-office-drawing-symbolic");
+	gtk_widget_add_css_class(set_img2img_from_preview_btn, "custom_btn");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(set_img2img_from_preview_btn),
+	"Sets the current preview image as the template for image-to-image processing.");
+	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 80, -1);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), set_img2img_from_preview_btn);
 	
 	//Hide Img Button
 	hide_img_btn = gtk_button_new_from_icon_name ("view-reveal-symbolic");
 	gtk_widget_add_css_class(hide_img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hide_img_btn), "Toggle displayed image visibility.");
-	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 120, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 80, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), hide_img_btn);
 	
 	//Set Box Right Button Bar Right Spacer
@@ -904,6 +913,14 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (load_img2img_btn, "clicked", G_CALLBACK (load_img2img_btn_cb), load_img2img_file_d);
 	g_signal_connect (clear_img2img_btn, "clicked", G_CALLBACK (clear_img2img_btn_cb), load_img2img_file_d);
 	g_signal_connect (clear_img2img_btn, "destroy", G_CALLBACK (on_clear_img2img_btn_destroy), load_img2img_file_d);
+	
+	load_img2img_from_preview_d = g_new0 (LoadImg2ImgFromPreviewData, 1);
+	load_img2img_from_preview_d->current_image_index = &app_data->current_image_index;
+	load_img2img_from_preview_d->image_files = app_data->image_files;
+	load_img2img_from_preview_d->img2img_file_path = app_data->img2img_file_path;
+	load_img2img_from_preview_d->image_wgt = preview_img2img;
+	g_signal_connect (set_img2img_from_preview_btn, "clicked", G_CALLBACK (set_current_preview_to_img2img), load_img2img_from_preview_d);
+	g_signal_connect (set_img2img_from_preview_btn, "destroy", G_CALLBACK (on_set_img2img_from_preview_btn_destroy), load_img2img_from_preview_d);
 
 	gen_d = g_new0 (GenerationData, 1);
 	gen_d->checkpoint_string = app_data->checkpoint_string;

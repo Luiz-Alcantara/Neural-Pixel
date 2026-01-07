@@ -88,9 +88,6 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 			printf("%s\n", out_string);
 		}
 		
-		int ggml_n;
-		int n_tiles;
-		
 		if (strstr(out_string, "target") != NULL) {
 			int x;
 			int n_img2img_tiles;

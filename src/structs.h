@@ -127,6 +127,13 @@ typedef struct {
 } LoadImg2ImgData;
 
 typedef struct {
+	gint *current_image_index;
+	GPtrArray *image_files;
+	GString *img2img_file_path;
+	GtkWidget *image_wgt;
+} LoadImg2ImgFromPreviewData;
+
+typedef struct {
 	GPtrArray *image_files;
 	gint *current_image_index;
 	GtkWidget *win;

@@ -476,3 +476,17 @@ void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data)
 
 	#endif
 }
+
+void set_current_preview_to_img2img(GtkWidget *btn, gpointer user_data)
+{
+	LoadImg2ImgFromPreviewData *data = user_data;
+
+	char *path = g_ptr_array_index(data->image_files, *data->current_image_index);
+	if (path != NULL && data->image_files->len > 0 && check_file_exists(path, 0) == 1) {
+		g_string_assign(data->img2img_file_path, path);
+		gtk_picture_set_filename(GTK_PICTURE(data->image_wgt), path);
+	} else {
+		g_printerr("Error loading image: The file '%s' is missing, corrupted, or invalid.\n", path);
+	}
+}
+
