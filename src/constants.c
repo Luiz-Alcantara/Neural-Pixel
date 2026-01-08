@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.4.3";
+const char* APP_NAME_VERSION = "Neural Pixel v0.4.4";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
