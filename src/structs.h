@@ -227,7 +227,9 @@ typedef struct {
 	int verbose_bool;
 	GtkWidget *button;
 	int *sdpid;
-	GDataInputStream *out_pipe_stream;
+	GInputStream *out_pipe_stream;
+	char read_buffer[4096];
+	GString *stdout_string;
 } SDProcessOutputData;
 
 typedef struct {
