@@ -60,7 +60,11 @@ GString *gen_sd_string(GenerationData *data)
 	#endif
 	
 	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path->str, "None") != 0) {
-		g_string_append_printf(l1, "|-M|img_gen|-i|%s", data->img2img_file_path->str);
+		if (*data->kontext_bool == 1) {
+			g_string_append_printf(l1, "|--mode|img_gen|--ref-image|%s", data->img2img_file_path->str);
+		} else {
+			g_string_append_printf(l1, "|--mode|img_gen|--init-img|%s", data->img2img_file_path->str);
+		}
 	}
 
 	if (data->checkpoint_string != NULL) {
@@ -176,7 +180,7 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|--prompt|%s", p_text);
 	}
 
-	if (n_text != NULL) {
+	if (n_text != NULL && strcmp(n_text, "") != 0 && strcmp(n_text, " ") != 0) {
 		g_string_append_printf(l1, "|--negative-prompt|%s", n_text);
 	}
 	

@@ -19,6 +19,7 @@ typedef struct {
 	int scheduler_index;
 	int w_index;
 	int h_index;
+	int kontext_bool;
 	int sd_based_bool;
 	int llm_bool;
 	int cpu_bool;
@@ -89,6 +90,7 @@ typedef struct {
 	int *scheduler_index;
 	int *w_index;
 	int *h_index;
+	int *kontext_bool;
 	int *sd_based_bool;
 	int *llm_bool;
 	int *cpu_bool;
@@ -198,6 +200,7 @@ typedef struct {
 	GtkWidget *height_dd;
 	GtkWidget *steps_spin;
 	GtkWidget *batch_count_spin;
+	GtkWidget *kontext_check;
 	GtkWidget *sd_based_check;
 	GtkWidget *llm_check;
 	GtkWidget *cpu_check;

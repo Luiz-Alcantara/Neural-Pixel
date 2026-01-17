@@ -59,6 +59,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "img_height_index=%d\n", DEFAULT_SIZE);
 		fprintf(cf, "n_steps=%.1f\n", DEFAULT_N_STEPS);
 		fprintf(cf, "batch_count=%.1f\n", DEFAULT_BATCH_COUNT);
+		fprintf(cf, "kontext_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "cpu_mode_bool=%d\n", DISABLED_OPT);
@@ -220,6 +221,7 @@ void load_cache_fallback(gpointer user_data)
 	data->h_index = DEFAULT_SIZE;
 	data->steps_value = DEFAULT_N_STEPS;
 	data->batch_count_value = DEFAULT_BATCH_COUNT;
+	data->kontext_bool = DISABLED_OPT;
 	data->sd_based_bool = ENABLED_OPT;
 	data->llm_bool = DISABLED_OPT;
 	data->cpu_bool = DISABLED_OPT;
@@ -349,6 +351,13 @@ void load_cache(gpointer user_data)
 			data->batch_count_value = strtod(batch_count_str, &endptr2);
 		} else {
 			data->batch_count_value = DEFAULT_BATCH_COUNT;
+		}
+
+		char *kontext_bool_str = ini_file_get_value(cache_filename, "kontext_bool");
+		if (kontext_bool_str) {
+			sscanf(kontext_bool_str, "%d", &data->kontext_bool);
+		} else {
+			data->kontext_bool = DISABLED_OPT;
 		}
 
 		char *sd_based_bool_str = ini_file_get_value(cache_filename, "sd_based_bool");
@@ -513,6 +522,7 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(cf, "img_height_index=%d\n", *data->h_index);
 	fprintf(cf, "n_steps=%.1f\n", *data->steps_value);
 	fprintf(cf, "batch_count=%.1f\n", *data->batch_count_value);
+	fprintf(cf, "kontext_bool=%d\n", *data->kontext_bool);
 	fprintf(cf, "sd_based_bool=%d\n", *data->sd_based_bool);
 	fprintf(cf, "llm_bool=%d\n", *data->llm_bool);
 	fprintf(cf, "cpu_mode_bool=%d\n", *data->cpu_bool);

@@ -465,6 +465,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *batch_count_spin = data->batch_count_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(batch_count_spin), DEFAULT_BATCH_COUNT);
 	
+	GtkWidget *kontext_check = data->kontext_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(kontext_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
 	GtkWidget *sd_based_check = data->sd_based_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), ENABLED_OPT == 1 ? TRUE : FALSE);
 	

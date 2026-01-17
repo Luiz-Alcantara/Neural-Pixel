@@ -45,7 +45,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	GtkWidget *img2img_expander;
 	GtkWidget *box_img2img, *box_img2img_buttons, *box_preview_img2img;
-	GtkWidget *load_img2img_btn, *clear_img2img_btn;
+	GtkWidget *load_img2img_btn, *kontext_check, *clear_img2img_btn;
 	GtkWidget *preview_img2img;
 
 	GtkWidget *box_prompts ,*box_pos_prompt, *box_neg_prompt;
@@ -186,7 +186,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (properties_scrollable), box_properties);
 	
 	//Set IMG2IMG Widgets
-	img2img_expander = gtk_expander_new ("IMG2IMG");
+	img2img_expander = gtk_expander_new ("IMG2IMG / Flux-Kontext");
 	gtk_widget_add_css_class(img2img_expander, "param_label");
 	gtk_box_append (GTK_BOX (box_properties), img2img_expander);
 	
@@ -196,20 +196,28 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_expander_set_child(GTK_EXPANDER(img2img_expander), box_img2img);
 	
 	box_img2img_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (box_img2img_buttons), TRUE);
+	gtk_box_set_homogeneous (GTK_BOX (box_img2img_buttons), FALSE);
 	gtk_box_append (GTK_BOX (box_img2img), box_img2img_buttons);
 	
 	load_img2img_btn = gtk_button_new_with_label ("Load img2img");
+	gtk_widget_set_hexpand (load_img2img_btn, TRUE);
 	gtk_widget_add_css_class(load_img2img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_img2img_btn),
 	"Select the image that will be used as a template for image-to-image processing.");
 	gtk_box_append (GTK_BOX (box_img2img_buttons), load_img2img_btn);
 	
-	clear_img2img_btn = gtk_button_new_with_label ("Disable Img2Img");
+	clear_img2img_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
 	gtk_widget_add_css_class(clear_img2img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(clear_img2img_btn),
 	"Clear the source image to stop using it as a template.");
 	gtk_box_append (GTK_BOX (box_img2img_buttons), clear_img2img_btn);
+	
+	kontext_check = gtk_check_button_new_with_label("Kontext");
+	gtk_widget_add_css_class(kontext_check, "custom_check");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(kontext_check), app_data->kontext_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(kontext_check), "Enables Flux-Kontext for superior structural adherence to your reference image.\nEnsure you are using a compatible Kontext checkpoint.");
+	g_signal_connect(kontext_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->kontext_bool);
+	gtk_box_append (GTK_BOX (box_img2img_buttons), kontext_check);
 	
 	box_preview_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_set_size_request(box_preview_img2img, 412, 400);
@@ -866,6 +874,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->height_dd = height_dd;
 	reset_d->steps_spin = steps_spin;
 	reset_d->batch_count_spin = batch_count_spin;
+	reset_d->kontext_check = kontext_check;
 	reset_d->sd_based_check = sd_based_check;
 	reset_d->llm_check = llm_check;
 	reset_d->cpu_check = cpu_check;
@@ -938,6 +947,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->w_index = &app_data->w_index;
 	gen_d->h_index = &app_data->h_index;
 	gen_d->steps_value = &app_data->steps_value;
+	gen_d->kontext_bool = &app_data->kontext_bool;
 	gen_d->batch_count_value = &app_data->batch_count_value;
 	gen_d->sd_based_bool = &app_data->sd_based_bool;
 	gen_d->llm_bool = &app_data->llm_bool;
