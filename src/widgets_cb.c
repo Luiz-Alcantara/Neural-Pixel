@@ -264,6 +264,10 @@ void navigate_img_prev(GtkButton* btn, gpointer user_data)
 	
 	gsize img_count = data->image_files->len;
 	
+	if (g_strcmp0 (gtk_button_get_icon_name(GTK_BUTTON(data->hide_img_btn)), "view-conceal-symbolic") == 0) {
+		gtk_button_set_icon_name (GTK_BUTTON(data->hide_img_btn), "view-reveal-symbolic");
+	}
+	
 	if (img_count > 0) {
 		(*(data->current_image_index))--;
 		
@@ -288,6 +292,10 @@ void navigate_img_next(GtkButton* btn, gpointer user_data)
 	PreviewImageData *data = user_data;
 	
 	gsize img_count = data->image_files->len;
+	
+	if (g_strcmp0 (gtk_button_get_icon_name(GTK_BUTTON(data->hide_img_btn)), "view-conceal-symbolic") == 0) {
+		gtk_button_set_icon_name (GTK_BUTTON(data->hide_img_btn), "view-reveal-symbolic");
+	}
 	
 	if (img_count > 0) {
 		(*(data->current_image_index))++;
@@ -587,9 +595,7 @@ void hide_img_btn_cb (GtkButton *btn, gpointer user_data)
 {
 	PreviewImageData *data = user_data;
 	GtkPicture *img = GTK_PICTURE(data->image_widget);
-	const char *i;
-	i = gtk_button_get_icon_name (btn);
-	if (g_strcmp0 (i, "view-reveal-symbolic") == 0) {
+	if (g_strcmp0 (gtk_button_get_icon_name(btn), "view-reveal-symbolic") == 0) {
 		gtk_button_set_icon_name (btn, "view-conceal-symbolic");
 		gtk_picture_set_filename(img, EMPTY_IMG_PATH);
 	} else {

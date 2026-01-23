@@ -158,10 +158,11 @@ typedef struct {
 } NumStrData;
 
 typedef struct {
-	GPtrArray *image_files;
 	gint *current_image_index;
-	GtkWidget *image_widget;
+	GPtrArray *image_files;
 	GString *img_index_string;
+	GtkWidget *hide_img_btn;
+	GtkWidget *image_widget;
 	GtkWidget *img_index_label;
 } PreviewImageData;
 

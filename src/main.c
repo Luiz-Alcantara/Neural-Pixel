@@ -199,11 +199,11 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_set_homogeneous (GTK_BOX (box_img2img_buttons), FALSE);
 	gtk_box_append (GTK_BOX (box_img2img), box_img2img_buttons);
 	
-	load_img2img_btn = gtk_button_new_with_label ("Load img2img");
+	load_img2img_btn = gtk_button_new_with_label ("Load Image File");
 	gtk_widget_set_hexpand (load_img2img_btn, TRUE);
 	gtk_widget_add_css_class(load_img2img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_img2img_btn),
-	"Select the image that will be used as a template for image-to-image processing.");
+	"Select the image that will be used as a template for img2img/Kontext processing.");
 	gtk_box_append (GTK_BOX (box_img2img_buttons), load_img2img_btn);
 	
 	clear_img2img_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
@@ -890,6 +890,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_default_btn_cb), reset_d);
 	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 
+	preview_d->hide_img_btn = hide_img_btn;
 	preview_d->image_widget = preview_img;
 	preview_d->img_index_label = img_index_label;
 	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
