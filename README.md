@@ -12,12 +12,12 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 
 ## Features
 - Supported models:
-    - SD 1.4, SD 1.5, SD 1.5 LCM, SD 1.5 Turbo, SD 1.5 Hyper, SD 2.0 and SD 2.1
+    - SD 1.4, SD 1.5 (LCM, Turbo & Hyper), SD 2.X
         - Some SD 1.X and SDXL Distilled models work too, see [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md).
-    - SDXL 1.0, SDXL Lightning, SDXL Hyper, Pony and Illustrious
+    - SDXL 1.0 ( Lightning, Hyper, Pony & Illustrious)
         - If you get a black image when using SDXL based models, try using the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
     - SD 3.0 and SD 3.5
-    - Flux-dev and Flux-schnell
+    - Flux-dev, Flux-schnell and Flux-Kontext
         - Flux models needs to be converted to `GGUF` to work. You can either download a pre-converted model ([FLUX.1-dev](https://huggingface.co/leejet/FLUX.1-dev-gguf/tree/main) or [FLUX.1-schnell](https://huggingface.co/leejet/FLUX.1-schnell-gguf/tree/main))
         - Or convert your own:
         ```
@@ -38,6 +38,10 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
     - Safetensors
     - GGUF
 
+- Supported features:
+    - Generate images from text prompts (txt2img)
+    - Transform existing images using prompts (img2img / Flux Kontext)
+
 - Supported platforms:
     - Linux
     - Windows
@@ -51,36 +55,26 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 - No video support at the moment.
 - You can change the application's theme color in the `resources/styles.css` file.
 
-## Linux Requirements
+## Linux Requirements (usually preinstalled on most systems)
 
 - Linux Distro with kernel >= 5.14 (Tested on RHEL 9, Fedora 42, and Arch Linux).
 
-- GTK >= 4.12, Vulkan(If using GPU) and libpng installed.
-- Install deps on Arch (Change vulkan packages according to your GPU, this is for AMD GPUs):
-```
-sudo pacman -S gtk4 libpng zlib vulkan-icd-loader vulkan-radeon vulkan-tools
-```
+- Required:
+    - GTK >= 4.12
+    - libpng
+    - zlib
 
-- Install deps on Debian/Ubuntu/Mint (Change vulkan packages according to your GPU, this is for AMD GPUs):
-```
-sudo apt install libgtk-4-1 libpng16-16 zlib1g vulkan-tools mesa-vulkan-drivers
-```
-
-- Install deps on Fedora/RHEL (Change vulkan packages according to your GPU, this is for AMD GPUs):
-```
-sudo dnf install gtk4 libpng zlib vulkan-tools mesa-vulkan-drivers
-```
-
-- Install deps on OpenSUSE (Change vulkan packages according to your GPU, this is for AMD GPUs):
-```
-sudo zypper install libgtk-4-1 libpng16-16 libz1 vulkan-tools libvulkan_radeon libvulkan1
-```
+- Optional (Vulkan backend):
+    - Vulkan (driver, loader and tools)
 
 - A GPU or iGPU with at least 3GB of VRAM for Vulkan.
 
 ## Running on Linux
 
-Download the Linux bundle in the releases tab, extract it and run the "run_neural_pixel" file.
+Download the Linux bundle:
+[![Linux](https://img.shields.io/badge/Linux-v0.4.6-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.4.6/NeuralPixel-Linux_v0.4.6.zip)
+
+Then extract it and run the "run_neural_pixel" file.
 If you want to see errors and details, start the application from a terminal and enable the "Terminal Verbose" option in "Extra Opts."
 
 ## Windows Requirements
@@ -90,7 +84,10 @@ If you want to see errors and details, start the application from a terminal and
 
 ## Running on Windows
 
-Download the Windows bundle in the releases tab, extract it and run the "neural_pixel.bat" file.
+Download the Windows bundle:
+[![Windows](https://img.shields.io/badge/Windows-v0.4.6-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.4.6/NeuralPixel-Windows_v0.4.6.zip)
+
+Then extract it and run the "neural_pixel.bat" file.
 You can directly run the "neural pixel" binary, but the variable that defines the dark theme will not be applied, so the app may look weird.
 
 ## Recommended checkpoints
