@@ -10,45 +10,51 @@
 With Neural Pixel, you can use Stable Diffusion on practically any GPU that supports Vulkan and has at least 3GB of VRAM. This is a simple way to generate your images without having to deal with CUDA/ROCm installations or hundreds of Python dependencies.
 
 
-## Features
-- Supported models:
-    - SD 1.4, SD 1.5 (LCM, Turbo & Hyper), SD 2.X
-        - Some SD 1.X and SDXL Distilled models work too, see [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md).
-    - SDXL 1.0 ( Lightning, Hyper, Pony & Illustrious)
-        - If you get a black image when using SDXL based models, try using the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
-    - SD 3.0 and SD 3.5
-    - Flux-dev, Flux-schnell and Flux-Kontext
-        - Flux models needs to be converted to `GGUF` to work. You can either download a pre-converted model ([FLUX.1-dev](https://huggingface.co/leejet/FLUX.1-dev-gguf/tree/main) or [FLUX.1-schnell](https://huggingface.co/leejet/FLUX.1-schnell-gguf/tree/main))
-        - Or convert your own:
-        ```
-		./sd -M convert -m path_to_your_model.safetensors -o your_model_converted.q8_0.gguf -v --type q8_0
-		```
-        - You'll also need: [Flux VAE](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/ae.safetensors), [clip_l](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/clip_l.safetensors), and [t5xxl](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/t5xxl_fp16.safetensors).
-    - Chroma and Chroma1-Radiance
-    - Qwen Image
-- Supported add-ons:
-    - LoRA and LCM-LoRA
-    - Embeddings
-    - Control Net for SD 1.5
-    - TAESD (Faster latent decoding/Worse quality)
-    - ESRGAN Upscaler (Only [RealESRGAN_x4plus_anime_6B.pth](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth) works for now.)
+## Supported Models
+| Supported base models | Supported variations | Notes |
+|--------|--------|-------|
+| SD 1.4 | Not tested | None |
+| SD 1.5 | LCM, Turbo & Hyper | Some SD 1.5 Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
+| SD 2.X | Not tested | None |
+|  SDXL  | Lightning, Hyper, Pony & Illustrious | Some SDXL Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
+| SD 3.X | Not tested | None |
+| Flux.1 | Dev, Schnell and Kontext | Flux models needs to be converted to `GGUF` to work, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/flux.md). You'll also need: [Flux VAE](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/ae.safetensors), [clip_l](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/clip_l.safetensors), and [t5xxl](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/t5xxl_fp16.safetensors). |
+| Chroma1 | Radiance | None |
+|  Qwen   | Not tested | None |
 
-- Supported weight formats:
-    - Pytorch checkpoint (.ckpt or .pth)
-    - Safetensors
-    - GGUF
+## Supported Add-ons
+| Supported add-ons | Notes |
+|--------|-------|
+| LoRA and LCM-LoRA | None |
+| Embeddings | None |
+| Control Net | SD 1.5 Only |
+| TAESD | Faster latent decoding/Worse quality |
+| ESRGAN Upscaler | Only [RealESRGAN_x4plus_anime_6B.pth](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth) works for now. |
 
-- Supported features:
-    - Generate images from text prompts (txt2img)
-    - Transform existing images using prompts (img2img / Flux Kontext)
+## Supported Features
+| Supported features | Notes |
+|--------|-------|
+| txt2img | Generate images from text prompts |
+| img2img / Flux Kontext | Transform existing images using prompts |
 
-- Supported platforms:
-    - Linux
-    - Windows
+## Supported Weight Formats
+| Supported weight formats |
+|--------|
+| Pytorch checkpoint (.ckpt or .pth) |
+| Safetensors |
+| GGUF |
 
-- Supported backends:
-    - The files available on the releases page support only CPU and Vulkan.
-    - But you can compile sd.cpp for your own backend by following [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/build.md), then simply replace the 'sd' binary in the Neural-Pixel folder with your newly compiled binary, and the app will work as expected.
+## Supported Platforms
+| Supported platforms |
+|--------|
+| Linux |
+| Windows |
+
+## Supported Backends
+| Supported backends | Notes |
+|--------|-------|
+| CPU and Vulkan | Included with the release packages |
+| CUDA, ROCm... | To compile sd.cpp for other backends, follow the instructions [here](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/build.md), then simply replace the "sd" binary in the Neural-Pixel folder with your newly compiled one (rename if needed). |
 
 ## Notes
 
