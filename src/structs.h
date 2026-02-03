@@ -14,6 +14,7 @@ typedef struct {
 	GString *text_enc_string;
 	GString *img_index_string;
 	GPtrArray *image_files;
+	GPtrArray *sd_cmd_array;
 	int sdpid;
 	int sampler_index;
 	int scheduler_index;
@@ -65,8 +66,7 @@ typedef struct {
 	GPtrArray *image_files;
 	gint *current_image_index;
 	gchar *result_img_path;
-	gchar **cmd_chunks;
-	GString *cmd_string;
+	GPtrArray *sd_cmd_array;
 	GString *img_index_string;
 	GtkWidget *button;
 	GtkWidget *image_widget;
@@ -85,6 +85,7 @@ typedef struct {
 	GString *text_enc_string;
 	GString *img_index_string;
 	GPtrArray *image_files;
+	GPtrArray *sd_cmd_array;
 	int *sdpid;
 	int *sampler_index;
 	int *scheduler_index;

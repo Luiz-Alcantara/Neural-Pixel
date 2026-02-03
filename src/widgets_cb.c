@@ -164,6 +164,11 @@ void app_start_data_free (gpointer user_data)
 		g_ptr_array_free(data->image_files, TRUE);
 		data->image_files = NULL;
 	}
+	
+	if (data->sd_cmd_array != NULL) {
+		g_ptr_array_free(data->sd_cmd_array, TRUE);
+		data->sd_cmd_array = NULL;
+	}
 }
 
 void array_strings_free (const char **list)

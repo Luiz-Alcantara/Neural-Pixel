@@ -942,6 +942,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->text_enc_string = app_data->text_enc_string;
 	gen_d->img_index_string = app_data->img_index_string;
 	gen_d->image_files = app_data->image_files;
+	gen_d->sd_cmd_array = app_data->sd_cmd_array;
 	gen_d->sdpid = &app_data->sdpid;
 	gen_d->sampler_index = &app_data->sampler_index;
 	gen_d->scheduler_index = &app_data->scheduler_index;
@@ -1060,6 +1061,12 @@ main (int argc, char **argv)
 	
 	data->image_files = g_ptr_array_new_full(1, g_free);
 	if (data->image_files == NULL) {
+		g_error("Failed to allocate GPtrArray.");
+		return 1;
+	}
+	
+	data->sd_cmd_array = g_ptr_array_new_full(1, g_free);
+	if (data->sd_cmd_array == NULL) {
 		g_error("Failed to allocate GPtrArray.");
 		return 1;
 	}

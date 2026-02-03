@@ -270,8 +270,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	gtk_button_set_label(GTK_BUTTON(data->button), "Generate");
 	gtk_widget_set_sensitive(GTK_WIDGET(data->button), TRUE);
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
-	g_strfreev(data->cmd_chunks);
-	g_string_free(data->cmd_string, TRUE);
+	g_ptr_array_set_size(data->sd_cmd_array, 0);
 	g_free(data);
 	g_object_unref(source_object);
 }
@@ -322,21 +321,18 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), TRUE);
 	}
 
-	GString *cmd_string = gen_sd_string(data);
+	gen_sd_string(data);
 
-	//TODO: make gen_sd_string return a gchar** array
-	gchar **cmd_chunks = g_strsplit(cmd_string->str, "|", -1);
 	gchar *result_img_path = NULL;
 	
-	gint chunk_count = g_strv_length(cmd_chunks);
-	if (chunk_count > 0) {
-		result_img_path = cmd_chunks[chunk_count - 1];
+	if (data->sd_cmd_array->len > 0) {
+		result_img_path = g_ptr_array_index(data->sd_cmd_array, data->sd_cmd_array->len - 2);
 	}
 
 	GSubprocessFlags sd_flags = G_SUBPROCESS_FLAGS_STDOUT_PIPE | G_SUBPROCESS_FLAGS_STDERR_PIPE;
 	GError *error = NULL;
 
-	GSubprocess* sd_process = g_subprocess_newv((const gchar * const *)cmd_chunks, sd_flags, &error);
+	GSubprocess* sd_process = g_subprocess_newv((const gchar * const *)data->sd_cmd_array->pdata, sd_flags, &error);
 
 	if (sd_process == NULL) {
 		g_print("Error spawning process: %s\n", error->message);
@@ -346,8 +342,7 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		"Error spawning process",
 		"Error spawning the sd.cpp process;\nlook at the terminal log for details.");
 		
-		g_strfreev(cmd_chunks);
-		g_string_free(cmd_string, TRUE);
+		g_ptr_array_set_size(data->sd_cmd_array, 0);
 		
 		gtk_button_set_label (gen_btn, "Generate");
 		gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
@@ -372,19 +367,18 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		
 		g_data_input_stream_set_newline_type (data_err_stream, G_DATA_STREAM_NEWLINE_TYPE_LF);
 
-		EndGenerationData *check_d = g_new0 (EndGenerationData, 1);
-		check_d->sdpid = data->sdpid;
-		check_d->image_files = data->image_files;
-		check_d->current_image_index = data->current_image_index;
-		check_d->result_img_path = result_img_path;
-		check_d->cmd_chunks = cmd_chunks;
-		check_d->cmd_string = cmd_string;
-		check_d->img_index_string = data->img_index_string;
-		check_d->button = GTK_WIDGET(gen_btn);
-		check_d->image_widget = data->image_widget;
-		check_d->img_index_label = data->img_index_label;
-		check_d->show_img_btn = data->show_img_btn;
-		check_d->halt_btn = data->halt_btn;
+		EndGenerationData *end_gen_d = g_new0 (EndGenerationData, 1);
+		end_gen_d->sdpid = data->sdpid;
+		end_gen_d->image_files = data->image_files;
+		end_gen_d->current_image_index = data->current_image_index;
+		end_gen_d->result_img_path = result_img_path;
+		end_gen_d->img_index_string = data->img_index_string;
+		end_gen_d->sd_cmd_array = data->sd_cmd_array;
+		end_gen_d->button = GTK_WIDGET(gen_btn);
+		end_gen_d->image_widget = data->image_widget;
+		end_gen_d->img_index_label = data->img_index_label;
+		end_gen_d->show_img_btn = data->show_img_btn;
+		end_gen_d->halt_btn = data->halt_btn;
 		
 		SDProcessOutputData *output_d = g_new0 (SDProcessOutputData, 1);
 		output_d->is_img2img_encoding = 0;
@@ -416,7 +410,7 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 
 		start_reading_output(output_d);
 		start_reading_error(error_d);
-		g_subprocess_wait_async(sd_process, cnlb, on_subprocess_end, check_d);
+		g_subprocess_wait_async(sd_process, cnlb, on_subprocess_end, end_gen_d);
 		g_object_unref(cnlb);
 	}
 }

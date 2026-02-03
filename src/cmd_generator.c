@@ -10,7 +10,7 @@
 #include "str_utils.h"
 #include "widgets_cb.h"
 
-GString *gen_sd_string(GenerationData *data)
+void gen_sd_string(GenerationData *data)
 {
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;
@@ -38,159 +38,173 @@ GString *gen_sd_string(GenerationData *data)
 	char *clip_skip_str = convert_double_to_string(*data->clip_skip_value, "%.0f");
 	char *up_repeat_str = convert_double_to_string(*data->up_repeat_value, "%.0f");
 
-	GString *l1 = g_string_new(NULL);
+	g_ptr_array_set_size(data->sd_cmd_array, 0);
 	
 	#ifdef G_OS_WIN32
 		gchar *current_dir = g_get_current_dir();
-		
-		g_string_append(l1, current_dir);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(current_dir));
 		g_free(current_dir);
 		
 		if (*data->cpu_bool == 1) {
-			g_string_append(l1, "\\sd-cpu");
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("\\sd-cpu"));
 		} else {
-			g_string_append(l1, "\\sd");
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("\\sd"));
 		}
 	#else
 		if (*data->cpu_bool == 1) {
-			g_string_append(l1, "./sd-cpu");
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("./sd-cpu"));
 		} else {
-			g_string_append(l1, "./sd");
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("./sd"));
 		}
 	#endif
-	
+		
 	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path->str, "None") != 0) {
-		if (*data->kontext_bool == 1) {
-			g_string_append_printf(l1, "|--mode|img_gen|--ref-image|%s", data->img2img_file_path->str);
-		} else {
-			g_string_append_printf(l1, "|--mode|img_gen|--init-img|%s", data->img2img_file_path->str);
-		}
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(*data->kontext_bool == 1 ? "--ref-image" : "--init-img"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path->str));
 	}
 
 	if (data->checkpoint_string != NULL) {
 		if (*data->sd_based_bool == 1) {
-			g_string_append_printf(l1, "|--model|./models/checkpoints/%s", data->checkpoint_string->str);
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--model"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/checkpoints/%s", data->checkpoint_string->str));
 		} else {
-			g_string_append_printf(l1, "|--diffusion-model|./models/checkpoints/%s", data->checkpoint_string->str);
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--diffusion-model"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/checkpoints/%s", data->checkpoint_string->str));
 		}
 	}
 	
-	g_string_append(l1, "|--lora-model-dir|./models/loras|--embd-dir|./models/embeddings");
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--lora-model-dir"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("./models/loras"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--embd-dir"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("./models/embeddings"));
 
 	if (data->vae_string != NULL && strcmp(data->vae_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--vae|./models/vae/%s", data->vae_string->str);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/vae/%s", data->vae_string->str));
 		if (*data->k_vae_bool == 1) {
-			g_string_append(l1, "|--vae-on-cpu");
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-on-cpu"));
 		}
 	}
 
 	if (data->cnet_string != NULL && strcmp(data->cnet_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--control-net|./models/controlnet/%s", data->cnet_string->str);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/controlnet/%s", data->cnet_string->str));
 		if (*data->k_cnet_bool == 1) {
-			g_string_append(l1, "|--control-net-cpu");
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net-cpu"));
 		}
 	}
 
 	if (data->upscaler_string != NULL && strcmp(data->upscaler_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--upscale-model|./models/upscale_models/%s|--upscale-repeats|%s", data->upscaler_string->str, up_repeat_str);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--upscale-model"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/upscale_models/%s", data->upscaler_string->str));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--upscale-repeats"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(up_repeat_str));
 	}
 	
 	if (data->clip_l_string != NULL && strcmp(data->clip_l_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--clip_l|./models/clips/%s", data->clip_l_string->str);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip_l"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/clips/%s", data->clip_l_string->str));
 	}
 	
 	if (data->clip_g_string != NULL && strcmp(data->clip_g_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|--clip_g|./models/clips/%s", data->clip_g_string->str);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip_g"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/clips/%s", data->clip_g_string->str));
 	}
 	
 	if (data->text_enc_string != NULL && strcmp(data->text_enc_string->str, "None") != 0) {
 		if (*data->llm_bool == 1) {
-			g_string_append_printf(l1, "|--llm|./models/text_encoders/%s", data->text_enc_string->str);
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--llm"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/text_encoders/%s", data->text_enc_string->str));
 		} else {
-			g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->text_enc_string->str);
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--t5xxl"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/text_encoders/%s", data->text_enc_string->str));
 		}
 	}
 	
 	if (*data->k_clip_bool == 1) {
 		if (data->clip_l_string != NULL || data->clip_g_string != NULL || data->text_enc_string != NULL) {
 			if (strcmp(data->clip_l_string->str, "None") != 0 || strcmp(data->clip_g_string->str, "None") != 0 || strcmp(data->text_enc_string->str, "None") != 0) {
-				g_string_append(l1, "|--clip-on-cpu");
+				g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip-on-cpu"));
 			}
 		}
 	}
 
-	g_string_append_printf(l1, "|--strength|%s", denoise_str);
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup(denoise_str));
 
 	if (*data->taesd_bool == 1) {
-		g_string_append(l1, "|--taesd|.models/vae/taesd_decoder.safetensors");
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--taesd"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(".models/vae/taesd_decoder.safetensors"));
 	}
 
-	g_string_append_printf(l1, "|--cfg-scale|%s", cfg_str);
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--cfg-scale"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup(cfg_str));
 	
-	g_string_append_printf(l1, "|--clip-skip|%s", clip_skip_str);
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip-skip"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup(clip_skip_str));
 
 	if (*data->sampler_index < LIST_SAMPLES_COUNT - 1) {
-		g_string_append_printf(l1, "|--sampling-method|%s", LIST_SAMPLES[(*data->sampler_index)]);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--sampling-method"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_SAMPLES[(*data->sampler_index)]));
 	}
 	
 	if (*data->scheduler_index < LIST_SCHEDULES_COUNT - 1) {
-		g_string_append_printf(l1, "|--scheduler|%s", LIST_SCHEDULES[(*data->scheduler_index)]);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--scheduler"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_SCHEDULES[(*data->scheduler_index)]));
 	}
 	
-	if (seed_str != NULL) {
-		g_string_append_printf(l1,"|--seed|%s", seed_str);
-	} else {
-		g_string_append(l1,"|--seed|-1");
-	}
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--seed"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup(seed_str != NULL ? seed_str : "-1"));
 	
-	if (steps_str) {
-		g_string_append_printf(l1, "|--steps|%s", steps_str);
-	} else {
-		g_string_append_printf(l1, "|--steps|%f", DEFAULT_N_STEPS);
-	}
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--steps"));
+	g_ptr_array_add(data->sd_cmd_array, steps_str != NULL ? g_strdup(steps_str) : g_strdup_printf("%f", DEFAULT_N_STEPS));
 	
-	if (batch_count_str) {
-		g_string_append_printf(l1, "|--batch-count|%s", batch_count_str);
-	} else {
-		g_string_append_printf(l1, "|--batch-count|%f", DEFAULT_BATCH_COUNT);
-	}
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--batch-count"));
+	g_ptr_array_add(data->sd_cmd_array, batch_count_str != NULL ? g_strdup(batch_count_str) : g_strdup_printf("%f", DEFAULT_BATCH_COUNT));
 
 	if (*data->w_index < LIST_RESOLUTIONS_STR_COUNT - 1 && *data->h_index < LIST_RESOLUTIONS_STR_COUNT - 1) {
-		g_string_append_printf(l1, "|--width|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
-		g_string_append_printf(l1, "|--height|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--width"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_RESOLUTIONS_STR[(*data->w_index)]));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--height"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_RESOLUTIONS_STR[(*data->h_index)]));
 	}
 
 	if (*data->vt_bool == 1) {
-		g_string_append(l1, "|--vae-tiling");
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-tiling"));
 	}
 	
 	if (*data->ram_offload_bool == 1) {
-		g_string_append(l1, "|--offload-to-cpu");
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--offload-to-cpu"));
 	}
 
 	if (*data->fa_bool == 1) {
-		if (*data->sd_based_bool == 1) {
-			g_string_append(l1, "|--diffusion-fa");
-		} else {
-			g_string_append(l1, "|--diffusion-fa|--chroma-disable-dit-mask");
-		}
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--diffusion-fa"));
+		if (*data->sd_based_bool != 1) g_ptr_array_add(data->sd_cmd_array, g_strdup("--chroma-disable-dit-mask"));
 	}
 
 	if (p_text != NULL) {
-		g_string_append_printf(l1, "|--prompt|%s", p_text);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--prompt"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(p_text));
 	}
 
 	if (n_text != NULL && strcmp(n_text, "") != 0 && strcmp(n_text, " ") != 0) {
-		g_string_append_printf(l1, "|--negative-prompt|%s", n_text);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--negative-prompt"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(n_text));
 	}
+	
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--output"));
 	
 	char *timestamp = get_time_str();
 	
 	#ifdef G_OS_WIN32
-		g_string_append_printf(l1, "|--output|.\\outputs\\IMG_%s.png", timestamp);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf(".\\outputs\\IMG_%s.png", timestamp));
 	#else
-		g_string_append_printf(l1, "|--output|./outputs/IMG_%s.png", timestamp);
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./outputs/IMG_%s.png", timestamp));
 	#endif
+	
+	g_ptr_array_add(data->sd_cmd_array, NULL);
 
 	if (*data->update_cache_bool == 1) {
 		update_cache(data, data->checkpoint_string->str, data->vae_string->str, data->cnet_string->str, data->upscaler_string->str, data->clip_l_string->str, data->clip_g_string->str, data->text_enc_string->str, p_text, n_text, timestamp);
@@ -209,18 +223,9 @@ GString *gen_sd_string(GenerationData *data)
 	free(clip_skip_str);
 	free(up_repeat_str);
 	
-	if (*data->verbose_bool == 1) {
-		GString *l1_copy = g_string_new_len(l1->str, l1->len);
-
-		for (gsize i = 0; i < l1_copy->len; i++) {
-			if (l1_copy->str[i] == '|') {
-				l1_copy->str[i] = ' ';
-			}
-		}
-		
-		printf("%s\n", l1_copy->str);
-		g_string_free(l1_copy, TRUE);
+	if (*data->verbose_bool == 1 && data->sd_cmd_array != NULL) {
+		char *final_cmd = g_strjoinv(" ", (char **)data->sd_cmd_array->pdata);
+		g_print("Executing: %s\n", final_cmd);
+		g_free(final_cmd);
 	}
-	
-	return l1;
 }
