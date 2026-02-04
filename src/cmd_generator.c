@@ -39,25 +39,15 @@ void gen_sd_string(GenerationData *data)
 	char *up_repeat_str = convert_double_to_string(*data->up_repeat_value, "%.0f");
 
 	g_ptr_array_set_size(data->sd_cmd_array, 0);
-	
+
 	#ifdef G_OS_WIN32
 		gchar *current_dir = g_get_current_dir();
-		g_ptr_array_add(data->sd_cmd_array, g_strdup(current_dir));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf(*data->cpu_bool == 1 ? "%s\\sd-cpu": "%s\\sd", current_dir));
 		g_free(current_dir);
-		
-		if (*data->cpu_bool == 1) {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup("\\sd-cpu"));
-		} else {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup("\\sd"));
-		}
 	#else
-		if (*data->cpu_bool == 1) {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup("./sd-cpu"));
-		} else {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup("./sd"));
-		}
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(*data->cpu_bool == 1 ? "./sd-cpu" : "./sd"));
 	#endif
-		
+
 	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path->str, "None") != 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
