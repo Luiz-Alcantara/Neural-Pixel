@@ -78,20 +78,24 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 
 		while (TRUE) {
 			char *clear_escape = strstr(data->stdout_string->str, "\033[K");
+			char *return_escape = strchr(data->stdout_string->str, '\r');
 			char *newline_escape = strchr(data->stdout_string->str, '\n');
+			
+			char *progress_escape = clear_escape ? clear_escape : return_escape;
+			size_t progress_escape_len = clear_escape ? 3 : 1;
 
-			if (clear_escape) {
-				size_t end_index = (clear_escape - data->stdout_string->str) + 3;
-
-				char *raw_string = g_strndup(data->stdout_string->str, end_index);
-
-				char *clean_string = strrchr(raw_string, '\r');
-				if (clean_string) {
+			if (progress_escape) {
+				size_t end_index = (progress_escape - data->stdout_string->str) + progress_escape_len;
+				char *raw_string = progress_escape_len == 3 ? g_strndup(data->stdout_string->str, end_index) : g_strdup(progress_escape + 1);
+				
+				char *final_string = progress_escape_len == 3 ? strrchr(raw_string, '\r') : raw_string;
+				
+				if (final_string) {
 					if (data->verbose_bool) {
-						printf("%s\n", clean_string);
+						printf("%s\n", final_string);
 					}
 					
-					const char *last_pipe = strrchr(clean_string, '|');
+					const char *last_pipe = strrchr(final_string, '|');
 					if (last_pipe) {
 						int step, steps;
 						float time_or_speed;
@@ -125,16 +129,17 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 								gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
 							} else {
 								gtk_button_set_label(GTK_BUTTON(data->button), "Loading...");
-								g_printerr("Error: Could not fetch progress from line: %s\n", clean_string);
+								g_printerr("Error: Could not fetch progress from line: %s\n", final_string);
 							}
 						}
 					}
 				}
 
 				g_free(raw_string);
+				//Check what is kept in the string after this:
 				g_string_erase(data->stdout_string, 0, end_index);
 				continue;
-			} 
+			}
 
 			if (newline_escape) {
 				size_t end_index = (newline_escape - data->stdout_string->str);
