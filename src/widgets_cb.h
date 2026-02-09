@@ -15,6 +15,8 @@ void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data);
 
+static gboolean disable_scroll_cb (GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data);
+
 void dropdown_items_update(const char *path, GtkWidget *dd, GApplication *app);
 
 void free_cache_data(MyCacheData *s);
@@ -58,6 +60,8 @@ gboolean seed_entry_int_filter(GtkEditable *editable, gpointer user_data);
 void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1);
 
 void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
+
+void stop_spinbutton_scroll(GtkWidget *btn);
 
 void set_spin_value_to_var(GtkWidget *w, double *v);
 

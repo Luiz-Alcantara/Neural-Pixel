@@ -487,6 +487,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (steps_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->steps_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(steps_spin),
 	"Number of refinement steps. More steps = higher detail but slower.\n20–40 is usually best.");
+	stop_spinbutton_scroll(steps_spin);
 	gtk_box_append (GTK_BOX (box_params_row2_col1), steps_spin);
 	
 	//Set Batch count Widgets
@@ -503,6 +504,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (batch_count_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->batch_count_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(batch_count_spin),
 	"How many images to generate one after another.\nDoesn’t use extra VRAM.");
+	stop_spinbutton_scroll(batch_count_spin);
 	gtk_box_append (GTK_BOX (box_params_row2_col2), batch_count_spin);
 	
 	//Set Parameters Third Row Widgets
@@ -565,6 +567,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (cfg_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->cfg_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(cfg_spin),
 	"Controls how strongly the prompt influences the generated image.\nHigher values make the output more closely follow the prompt.\nTypical range: 6-12.");
+	stop_spinbutton_scroll(cfg_spin);
 	gtk_box_append (GTK_BOX (box_params_row4_col1), cfg_spin);
 	
 	//Set Denoise Widgets
@@ -581,6 +584,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->denoise_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(denoise_spin),
 	"Controls how much the original image is changed.\nValues near 1.0 heavily modify or replace the image.\nValues near 0.0 preserve the original image with minimal changes.");
+	stop_spinbutton_scroll(denoise_spin);
 	gtk_box_append (GTK_BOX (box_params_row4_col2), denoise_spin);
 	
 	//Set Parameters Fifth Row Widgets
@@ -633,6 +637,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (clip_skip_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->clip_skip_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(clip_skip_spin),
 	"Skips the last N layers of the text encoder output, reducing the influence of later CLIP layers.\nIf set to 0, the optimal value is automatically selected based on the checkpoint model.");
+	stop_spinbutton_scroll(clip_skip_spin);
 	gtk_box_append (GTK_BOX (box_params_row6_col1), clip_skip_spin);
 
 	//Set Repeat Upscale Widgets
@@ -649,6 +654,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (upscale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->up_repeat_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(upscale_spin),
 	"Number of times to run the upscaler sequentially.\nEach run applies the upscale process to the previous result,\nfurther increasing the image dimensions.");
+	stop_spinbutton_scroll(upscale_spin);
 	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_spin);
 	
 	//Set Extra Options Widgets

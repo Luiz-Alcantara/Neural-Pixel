@@ -196,6 +196,11 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 	gtk_window_destroy (win);
 }
 
+static gboolean disable_scroll_cb (GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data)
+{
+	return TRUE;
+}
+
 void dropdown_items_update (const char *path, GtkWidget *dd, GApplication *app)
 {
 	GError *err = NULL;
@@ -579,6 +584,17 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 			}
 		}
 	}
+}
+
+void stop_spinbutton_scroll(GtkWidget *btn)
+{
+	GtkEventController *sc;
+	sc = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	
+	gtk_event_controller_set_propagation_phase (sc, GTK_PHASE_CAPTURE);
+
+	g_signal_connect (sc, "scroll", G_CALLBACK (disable_scroll_cb), NULL);
+	gtk_widget_add_controller (btn, sc);
 }
 
 void set_spin_value_to_var (GtkWidget *w, double *v)
