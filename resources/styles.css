@@ -119,6 +119,11 @@
 	background-color: @primary-color-light;
 }
 
+.custom_dd > popover.menu > contents > box > box > entry {
+	background-image: none;
+	background-color: @primary-color-light;
+}
+
 .custom_dd > popover.menu > contents > box > scrolledwindow > listview {
 	background-image: none;
 	background-color: @primary-color-light;

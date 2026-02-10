@@ -80,8 +80,14 @@ GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, 
 		g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), GINT_TO_POINTER(str_size));
 
 		g_object_ref_sink(my_list);
+		
 		GtkWidget* dd = gtk_drop_down_new(G_LIST_MODEL(my_list), NULL);
+		
+		GtkExpression *dd_expression = gtk_property_expression_new (GTK_TYPE_STRING_OBJECT, NULL, "string");
+		gtk_drop_down_set_expression (GTK_DROP_DOWN(dd), dd_expression);
+		gtk_drop_down_set_enable_search(GTK_DROP_DOWN(dd), TRUE);
 		gtk_widget_add_css_class(dd, "custom_dd");
+		gtk_expression_unref (dd_expression);
 		g_object_unref(my_list);
 		
 		gtk_drop_down_set_factory(GTK_DROP_DOWN(dd), fact);
