@@ -779,6 +779,7 @@ app_activate (GApplication *app, gpointer user_data)
 		preview_img = gtk_picture_new_for_filename
 		(DEFAULT_IMG_PATH);
 	}
+	gtk_picture_set_content_fit(GTK_PICTURE(preview_img), GTK_CONTENT_FIT_CONTAIN);
 	gtk_box_append (GTK_BOX (boxr_img), preview_img);
 	
 	//Set Box Right Button bar bottom
