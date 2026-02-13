@@ -796,6 +796,7 @@ app_activate (GApplication *app, gpointer user_data)
 	//Previous Img Button
 	prev_img_button = gtk_button_new_from_icon_name ("go-previous-symbolic");
 	gtk_widget_add_css_class(prev_img_button, "custom_btn");
+	gtk_widget_set_focusable(prev_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_img_button), "Previous Image.");
 	gtk_widget_set_size_request(GTK_WIDGET(prev_img_button), 120, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), prev_img_button);
@@ -803,6 +804,7 @@ app_activate (GApplication *app, gpointer user_data)
 	//Next Img Button
 	next_img_button = gtk_button_new_from_icon_name ("go-next-symbolic");
 	gtk_widget_add_css_class(next_img_button, "custom_btn");
+	gtk_widget_set_focusable(next_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_img_button), "Next Image.");
 	gtk_widget_set_size_request(GTK_WIDGET(next_img_button), 120, -1);
 	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_img_button);
@@ -815,6 +817,7 @@ app_activate (GApplication *app, gpointer user_data)
 	//Load info from current preview image
 	load_from_current_btn = gtk_button_new_from_icon_name ("insert-image-symbolic");
 	gtk_widget_add_css_class(load_from_current_btn, "custom_btn");
+	gtk_widget_set_focusable(load_from_current_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_current_btn), "Load prompt and generation parameters from the displayed image.");
 	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 80, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), load_from_current_btn);
@@ -822,6 +825,7 @@ app_activate (GApplication *app, gpointer user_data)
 	//Set img2img file from current preview image
 	set_img2img_from_preview_btn = gtk_button_new_from_icon_name ("x-office-drawing-symbolic");
 	gtk_widget_add_css_class(set_img2img_from_preview_btn, "custom_btn");
+	gtk_widget_set_focusable(set_img2img_from_preview_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(set_img2img_from_preview_btn),
 	"Sets the current preview image as the template for image-to-image processing.");
 	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 80, -1);
@@ -830,6 +834,7 @@ app_activate (GApplication *app, gpointer user_data)
 	//Hide Img Button
 	hide_img_btn = gtk_button_new_from_icon_name ("view-reveal-symbolic");
 	gtk_widget_add_css_class(hide_img_btn, "custom_btn");
+	gtk_widget_set_focusable(hide_img_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hide_img_btn), "Toggle displayed image visibility.");
 	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 80, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), hide_img_btn);
