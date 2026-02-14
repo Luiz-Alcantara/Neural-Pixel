@@ -86,6 +86,9 @@ GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, 
 		GtkExpression *dd_expression = gtk_property_expression_new (GTK_TYPE_STRING_OBJECT, NULL, "string");
 		gtk_drop_down_set_expression (GTK_DROP_DOWN(dd), dd_expression);
 		gtk_drop_down_set_enable_search(GTK_DROP_DOWN(dd), TRUE);
+		#if GTK_CHECK_VERSION(4, 12, 0)
+			gtk_drop_down_set_search_match_mode(GTK_DROP_DOWN(dd), GTK_STRING_FILTER_MATCH_MODE_SUBSTRING);
+		#endif
 		gtk_widget_add_css_class(dd, "custom_dd");
 		gtk_expression_unref (dd_expression);
 		g_object_unref(my_list);

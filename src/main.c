@@ -298,6 +298,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	generate_btn = gtk_button_new_with_label ("Generate");
 	gtk_widget_add_css_class(generate_btn, "gen_btn");
+	gtk_widget_set_focusable(generate_btn, FALSE);
 	
 	checkpoint_dd = gen_path_dd(CHECKPOINTS_PATH, DD_STRING_LEN, NULL, 0, app_data->checkpoint_string, generate_btn, app, 1);
 	gtk_widget_set_hexpand (checkpoint_dd, TRUE);
@@ -756,6 +757,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	sd_halt_btn = gtk_button_new_from_icon_name ("process-stop-symbolic");
 	gtk_widget_add_css_class(sd_halt_btn, "custom_btn");
+	gtk_widget_set_focusable(sd_halt_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_halt_btn), "Stops the sd.cpp process.");
 	g_signal_connect (sd_halt_btn, "clicked", G_CALLBACK (kill_stable_diffusion_process), &app_data->sdpid);
 	gtk_widget_set_sensitive(GTK_WIDGET(sd_halt_btn), FALSE);
