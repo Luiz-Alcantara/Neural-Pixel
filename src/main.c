@@ -300,7 +300,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(generate_btn, "gen_btn");
 	gtk_widget_set_focusable(generate_btn, FALSE);
 	
-	checkpoint_dd = gen_path_dd(CHECKPOINTS_PATH, DD_STRING_LEN, NULL, 0, app_data->checkpoint_string, generate_btn, app, 1);
+	checkpoint_dd = gen_path_dd(CHECKPOINTS_PATH, NULL, 0, app_data->checkpoint_string, generate_btn, app, 1);
 	gtk_widget_set_hexpand (checkpoint_dd, TRUE);
 	gtk_box_append (GTK_BOX (box_checkpoint_buttons), checkpoint_dd);
 	
@@ -329,7 +329,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(vae_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), vae_lab);
 
-	vae_dd = gen_path_dd(VAES_PATH, DD_STRING_LEN, NULL, 0, app_data->vae_string, NULL, app, 0);
+	vae_dd = gen_path_dd(VAES_PATH, NULL, 0, app_data->vae_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_addons), vae_dd);
 
 	//Set CNet Widgets
@@ -339,7 +339,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(cnet_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), cnet_lab);
 	
-	cnet_dd = gen_path_dd(CONTROLNET_PATH, DD_STRING_LEN, NULL, 0, app_data->cnet_string, NULL, app, 0);
+	cnet_dd = gen_path_dd(CONTROLNET_PATH, NULL, 0, app_data->cnet_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_addons), cnet_dd);
 	
 	//Set Upscaler Widgets
@@ -349,7 +349,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(upscaler_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), upscaler_lab);
 
-	upscaler_dd = gen_path_dd(UPSCALES_PATH, DD_STRING_LEN, NULL, 0, app_data->upscaler_string, NULL, app, 0);
+	upscaler_dd = gen_path_dd(UPSCALES_PATH, NULL, 0, app_data->upscaler_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_addons), upscaler_dd);
 
 	//Set Clip_l Widgets
@@ -359,7 +359,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(clip_l_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), clip_l_lab);
 	
-	clip_l_dd = gen_path_dd(CLIPS_PATH, DD_STRING_LEN, NULL, 0, app_data->clip_l_string, NULL, app, 0);
+	clip_l_dd = gen_path_dd(CLIPS_PATH, NULL, 0, app_data->clip_l_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_addons), clip_l_dd);
 	
 	//Set Clip_g Widgets
@@ -369,7 +369,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(clip_g_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons), clip_g_lab);
 	
-	clip_g_dd = gen_path_dd(CLIPS_PATH, DD_STRING_LEN, NULL, 0, app_data->clip_g_string, NULL, app, 0);
+	clip_g_dd = gen_path_dd(CLIPS_PATH, NULL, 0, app_data->clip_g_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_addons), clip_g_dd);
 	
 	//Set Text Encoder Widgets
@@ -385,7 +385,7 @@ app_activate (GApplication *app, gpointer user_data)
 	box_text_encoder_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_text_encoder), box_text_encoder_buttons);
 	
-	text_enc_dd = gen_path_dd(TEXT_ENCODERS_PATH, DD_STRING_LEN, NULL, 0, app_data->text_enc_string, NULL, app, 0);
+	text_enc_dd = gen_path_dd(TEXT_ENCODERS_PATH, NULL, 0, app_data->text_enc_string, NULL, app, 0);
 	gtk_widget_set_hexpand (text_enc_dd, TRUE);
 	gtk_box_append (GTK_BOX (box_text_encoder_buttons), text_enc_dd);
 	
@@ -410,7 +410,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(lora_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_model_adapters), lora_lab);
 	
-	lora_dd = gen_path_dd(LORAS_PATH, DD_STRING_LEN, pos_tb, 1, NULL, NULL, app, 0);
+	lora_dd = gen_path_dd(LORAS_PATH, pos_tb, 1, NULL, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_model_adapters), lora_dd);
 
 	//Set Embeddings Widgets
@@ -420,7 +420,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(embedding_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_model_adapters), embedding_lab);
 
-	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, DD_STRING_LEN, neg_tb, 0, NULL, NULL, app, 0);
+	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, neg_tb, 0, NULL, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_model_adapters), embedding_dd);
 
 	//Set Parameters Widgets

@@ -13,36 +13,13 @@ static void factory_setup_cb (GtkListItemFactory *factory, GtkListItem *list_ite
 
 static void factory_bind_cb (GtkListItemFactory *factory, GtkListItem *list_item, gpointer user_data)
 {
-	int str_size = GPOINTER_TO_INT(user_data);
-	
-	GtkLabel *label;
-	GtkStringObject *string_object;
-	const gchar *string;
+	GtkStringObject *strobj = GTK_STRING_OBJECT(gtk_list_item_get_item(list_item));
+	const char *text = gtk_string_object_get_string(strobj);
+	GtkWidget *label = gtk_list_item_get_child(list_item);
 
-	string_object = GTK_STRING_OBJECT(gtk_list_item_get_item(list_item));
-	string = gtk_string_object_get_string(string_object);
-	label = GTK_LABEL(gtk_list_item_get_child(list_item));
-	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-	gtk_widget_set_hexpand (GTK_WIDGET(label), FALSE);
-	size_t str_length = (size_t)str_size;
-
-	size_t truncated_length = str_length;
-
-	if (strlen(string) < str_length) {
-		truncated_length = strlen(string);
-		char *shortened_string = g_malloc(truncated_length + 1);
-		strncpy(shortened_string, string, truncated_length);
-		shortened_string[truncated_length] = '\0';
-		gtk_label_set_text(label, shortened_string);
-		g_free(shortened_string);
-	} else {
-		char *shortened_string = g_malloc(truncated_length + 4);
-		strncpy(shortened_string, string, truncated_length);
-		strcpy(shortened_string + truncated_length, "...");
-		shortened_string[truncated_length + 3] = '\0';
-		gtk_label_set_text(label, shortened_string);
-		g_free(shortened_string);
-	}
+	gtk_label_set_label(GTK_LABEL(label), text);
+	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+	gtk_widget_set_halign(label, GTK_ALIGN_START);
 }
 
 GtkWidget* gen_const_dd(const char** items, int *def_item)
@@ -55,7 +32,7 @@ GtkWidget* gen_const_dd(const char** items, int *def_item)
 	return dd;
 }
 
-GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, int tb_type, GString *dd_item_str, GtkWidget *gen_btn, GApplication *app, int is_req)
+GtkWidget* gen_path_dd(const char* path, GtkTextBuffer *tb, int tb_type, GString *dd_item_str, GtkWidget *gen_btn, GApplication *app, int is_req)
 {
 	int start_pos = 0;
 	
@@ -77,7 +54,7 @@ GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, 
 		}
 		
 		g_signal_connect (fact, "setup", G_CALLBACK (factory_setup_cb), NULL);
-		g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), GINT_TO_POINTER(str_size));
+		g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), NULL);
 
 		g_object_ref_sink(my_list);
 		
