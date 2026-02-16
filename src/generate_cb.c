@@ -136,7 +136,6 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				}
 
 				g_free(raw_string);
-				//Check what is kept in the string after this:
 				g_string_erase(data->stdout_string, 0, end_index);
 				continue;
 			}
@@ -260,7 +259,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	
 	if (check_file_exists(data->result_img_path, 0) == 1) {
 		get_png_files(data->image_files);
-		set_current_image_index(data->result_img_path, data->img_index_string, data->image_files, data->current_image_index);
+		set_current_image_index(data->result_img_path + 2, data->img_index_string, data->image_files, data->current_image_index);
 		
 		if (data->image_files->len > 0) {
 			if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {

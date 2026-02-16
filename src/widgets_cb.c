@@ -555,6 +555,78 @@ void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, 
 	}
 }
 
+static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, gpointer user_data)
+{
+	SendTrashData *data = user_data;
+	GFile *file = G_FILE(source_object);
+	GError *error = NULL;
+
+	if (!g_file_trash_finish(file, res, &error)) {
+		g_printerr("Error trashing file: %s\n", error->message);
+		g_error_free(error);
+	} else {
+		get_png_files(data->image_files);
+		set_current_image_index(data->new_img_path, data->img_index_string, data->image_files, data->current_image_index);
+
+		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
+
+		if (data->image_files->len > 0) {
+			gtk_picture_set_filename(GTK_PICTURE(data->image_widget), data->new_img_path);
+		} else {
+			g_printerr("No images in 'outputs' directory.\n");
+			gtk_picture_set_filename(GTK_PICTURE(data->image_widget), DEFAULT_IMG_PATH);
+		}
+		printf("File moved to trash successfully.\n");
+	}
+	gtk_widget_set_sensitive(data->to_trash_btn, TRUE);
+	g_free(data->new_img_path);
+	g_free(data);
+}
+
+void send_to_trash(GtkWidget* btn, gpointer user_data)
+{
+	PreviewImageData *data = user_data;
+	gsize img_count = data->image_files->len;
+	
+	if (img_count > 0) {
+		gchar *file_to_trash_path = g_ptr_array_index(data->image_files, *data->current_image_index);
+
+		if (check_file_exists(file_to_trash_path, 0) == 1) {
+			gtk_widget_set_sensitive(GTK_WIDGET(btn), FALSE);
+
+			char *new_img_path = NULL;
+
+			if (img_count > 1) {
+				gint new_index = *data->current_image_index + 1 == img_count ?
+					*data->current_image_index - 1 :
+					*data->current_image_index + 1;
+
+				gchar *new_img_path_ptr = g_ptr_array_index(data->image_files, new_index);
+				new_img_path = g_strdup(new_img_path_ptr);
+			}
+
+			GFile *file_to_trash = g_file_new_for_path(file_to_trash_path);
+
+			SendTrashData *trash_d = g_new0 (SendTrashData, 1);
+			trash_d->new_img_path = new_img_path;
+			trash_d->current_image_index = data->current_image_index;
+			trash_d->image_files = data->image_files;
+			trash_d->img_index_string = data->img_index_string;
+			trash_d->hide_img_btn = data->hide_img_btn;
+			trash_d->image_widget = data->image_widget;
+			trash_d->img_index_label = data->img_index_label;
+			trash_d->to_trash_btn = btn;
+
+			g_file_trash_async(file_to_trash, G_PRIORITY_DEFAULT, NULL, (GAsyncReadyCallback)on_send_to_trash_finish, trash_d);
+			g_object_unref(file_to_trash);
+		} else {
+			g_printerr("Error: File not found.\n");
+		}
+	} else {
+		g_printerr("Error: There are no images in the 'output' directory.\n");
+	}
+}
+
 void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1)
 {
 	GtkDropDown *dd = GTK_DROP_DOWN(wgt);

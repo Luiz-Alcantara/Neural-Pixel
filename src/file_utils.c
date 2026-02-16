@@ -287,7 +287,6 @@ void get_png_files(GPtrArray *image_files)
 
 void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray *image_files, gint *current_image_index)
 {
-	int *index = (int *)current_image_index;
 	gsize img_count = image_files->len;
 	
 	if (img_count > 0) {
@@ -295,22 +294,22 @@ void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray
 
 		gboolean found = g_ptr_array_find_with_equal_func(
 		image_files,
-		img_str + 2,
+		img_str,
 		string_equal,
 		&new_index
 		);
 
 		if (found == TRUE && new_index < img_count) {
-			*index = new_index;
+			*current_image_index = new_index;
 		} else {
 			g_printerr("Could not load last generated image, using default value(s).\n");
-			*index = img_count - 1;
+			*current_image_index = img_count - 1;
 		}
 		g_string_erase(img_index_string, 0, -1);
-		g_string_append_printf(img_index_string, "%d / %d", *index + 1, img_count);
+		g_string_append_printf(img_index_string, "%d / %d", *current_image_index + 1, img_count);
 	} else {
 		g_printerr("No images in 'outputs' directory.\n");
-		*index = 0;
+		*current_image_index = 0;
 		g_string_erase(img_index_string, 0, -1);
 		g_string_append(img_index_string, "0 / 0");
 	}

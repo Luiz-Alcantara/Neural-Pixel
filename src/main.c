@@ -106,7 +106,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_spacer, *boxr_bottom_right_spacer;
 	GtkWidget *preview_img;
-	GtkWidget *prev_img_button, *img_index_label, *next_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn;
+	GtkWidget *prev_img_button, *img_index_label, *next_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn, *to_trash_btn;
 
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
@@ -821,7 +821,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(load_from_current_btn, "custom_btn");
 	gtk_widget_set_focusable(load_from_current_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_current_btn), "Load prompt and generation parameters from the displayed image.");
-	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 80, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 60, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), load_from_current_btn);
 	
 	//Set img2img file from current preview image
@@ -830,7 +830,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(set_img2img_from_preview_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(set_img2img_from_preview_btn),
 	"Sets the current preview image as the template for image-to-image processing.");
-	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 80, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 60, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), set_img2img_from_preview_btn);
 	
 	//Hide Img Button
@@ -838,8 +838,16 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(hide_img_btn, "custom_btn");
 	gtk_widget_set_focusable(hide_img_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hide_img_btn), "Toggle displayed image visibility.");
-	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 80, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 60, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), hide_img_btn);
+
+	//Send Img to system trash Button
+	to_trash_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
+	gtk_widget_add_css_class(to_trash_btn, "custom_btn");
+	gtk_widget_set_focusable(to_trash_btn, FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(to_trash_btn), "Move to Trash (can be restored).");
+	gtk_widget_set_size_request(GTK_WIDGET(to_trash_btn), 60, -1);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), to_trash_btn);
 	
 	//Set Box Right Button Bar Right Spacer
 	boxr_bottom_right_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
@@ -907,10 +915,11 @@ app_activate (GApplication *app, gpointer user_data)
 	preview_d->hide_img_btn = hide_img_btn;
 	preview_d->image_widget = preview_img;
 	preview_d->img_index_label = img_index_label;
-	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
-	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
 	g_signal_connect (prev_img_button, "clicked", G_CALLBACK (navigate_img_prev), preview_d);
 	g_signal_connect (next_img_button, "clicked", G_CALLBACK (navigate_img_next), preview_d);
+	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
+	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
+	g_signal_connect (to_trash_btn, "clicked", G_CALLBACK (send_to_trash), preview_d);
 
 	load_png_info_d = g_new0 (LoadPNGData, 1);
 	load_png_info_d->image_files = app_data->image_files;
