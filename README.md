@@ -79,7 +79,7 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 ## Running on Linux
 
 Download the Linux bundle:
-[![Linux](https://img.shields.io/badge/Linux-v0.4.6-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.4.6/NeuralPixel-Linux_v0.4.6.zip)
+[![Linux](https://img.shields.io/badge/Linux-v0.5.0-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.5.0/NeuralPixel-Linux_v0.5.0.zip)
 
 Then extract it and run the "run_neural_pixel" file.
 If you want to see errors and details, start the application from a terminal and enable the "Terminal Verbose" option in "Extra Opts."
@@ -92,7 +92,7 @@ If you want to see errors and details, start the application from a terminal and
 ## Running on Windows
 
 Download the Windows bundle:
-[![Windows](https://img.shields.io/badge/Windows-v0.4.6-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.4.6/NeuralPixel-Windows_v0.4.6.zip)
+[![Windows](https://img.shields.io/badge/Windows-v0.5.0-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.5.0/NeuralPixel-Windows_v0.5.0.zip)
 
 Then extract it and run the "neural_pixel.bat" file.
 You can directly run the "neural pixel" binary, but the variable that defines the dark theme will not be applied, so the app may look weird.
