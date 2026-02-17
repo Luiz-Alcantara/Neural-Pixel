@@ -185,6 +185,12 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(box_properties, "left_box");
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (properties_scrollable), box_properties);
 	
+	// Scrolled Window Viewport
+	GtkWidget *prop_scroll_vp = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(properties_scrollable));
+	if (GTK_IS_VIEWPORT(prop_scroll_vp)) {
+		gtk_viewport_set_scroll_to_focus(GTK_VIEWPORT(prop_scroll_vp), FALSE);
+	}
+	
 	//Set IMG2IMG Widgets
 	img2img_expander = gtk_expander_new ("IMG2IMG / Flux-Kontext");
 	gtk_widget_add_css_class(img2img_expander, "param_label");
