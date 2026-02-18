@@ -25,9 +25,15 @@ void free_preview_data(gpointer data);
 
 void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
 
+static void navigate_images(PreviewImageData *data, int offset);
+
+void navigate_10_img_prev(GtkButton* btn, gpointer user_data);
+
 void navigate_img_prev(GtkButton* btn, gpointer user_data);
 
 void navigate_img_next(GtkButton* btn, gpointer user_data);
+
+void navigate_10_img_next(GtkButton* btn, gpointer user_data);
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data);
 

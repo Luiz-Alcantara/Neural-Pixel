@@ -269,62 +269,54 @@ void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
 	}
 }
 
-void navigate_img_prev(GtkButton* btn, gpointer user_data)
+static void navigate_images(PreviewImageData *data, int offset)
 {
-	PreviewImageData *data = user_data;
-	
 	gsize img_count = data->image_files->len;
-	
+
+	if (img_count <= 0) {
+		g_printerr("Error: No images found.\n");
+		return;
+	}
+
 	if (g_strcmp0 (gtk_button_get_icon_name(GTK_BUTTON(data->hide_img_btn)), "view-conceal-symbolic") == 0) {
 		gtk_button_set_icon_name (GTK_BUTTON(data->hide_img_btn), "view-reveal-symbolic");
 	}
-	
-	if (img_count > 0) {
-		(*(data->current_image_index))--;
-		
-		if (*data->current_image_index < 0) {
-			*data->current_image_index = img_count - 1;
-		} else if (*data->current_image_index >= img_count) {
-			*data->current_image_index = 0;
-		}
-		
-		const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
-		g_string_erase(data->img_index_string, 0, -1);
-		g_string_append_printf(data->img_index_string, "%d / %d", *data->current_image_index + 1, img_count);
-		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
-		gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
-	} else {
-		g_printerr("Error: There are no images in the 'output' directory.\n");
+
+	int new_index = (*data->current_image_index + offset) % (int)img_count;
+
+	if (new_index < 0) {
+		new_index += img_count;
 	}
+
+	*data->current_image_index = new_index;
+
+	const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
+
+	g_string_erase(data->img_index_string, 0, -1);
+	g_string_append_printf(data->img_index_string, "%d / %d", *data->current_image_index + 1, (int)img_count);
+
+	gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
+	gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
+}
+
+void navigate_10_img_prev(GtkButton* btn, gpointer user_data)
+{
+	navigate_images((PreviewImageData*)user_data, -10);
+}
+
+void navigate_img_prev(GtkButton* btn, gpointer user_data)
+{
+	navigate_images((PreviewImageData*)user_data, -1);
 }
 
 void navigate_img_next(GtkButton* btn, gpointer user_data)
 {
-	PreviewImageData *data = user_data;
-	
-	gsize img_count = data->image_files->len;
-	
-	if (g_strcmp0 (gtk_button_get_icon_name(GTK_BUTTON(data->hide_img_btn)), "view-conceal-symbolic") == 0) {
-		gtk_button_set_icon_name (GTK_BUTTON(data->hide_img_btn), "view-reveal-symbolic");
-	}
-	
-	if (img_count > 0) {
-		(*(data->current_image_index))++;
-		
-		if (*data->current_image_index < 0) {
-			*data->current_image_index = img_count - 1;
-		} else if (*data->current_image_index >= img_count) {
-			*data->current_image_index = 0;
-		}
-		
-		const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
-		g_string_erase(data->img_index_string, 0, -1);
-		g_string_append_printf(data->img_index_string, "%d / %d", *data->current_image_index + 1, img_count);
-		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
-		gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
-	} else {
-		g_printerr("Error: There are no images in the 'output' directory.\n");
-	}
+	navigate_images((PreviewImageData*)user_data, 1);
+}
+
+void navigate_10_img_next(GtkButton* btn, gpointer user_data)
+{
+	navigate_images((PreviewImageData*)user_data, 10);
 }
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data)

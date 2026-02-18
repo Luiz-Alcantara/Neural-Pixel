@@ -106,7 +106,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_spacer, *boxr_bottom_right_spacer;
 	GtkWidget *preview_img;
-	GtkWidget *prev_img_button, *img_index_label, *next_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn, *to_trash_btn;
+	GtkWidget *prev_10_img_button, *prev_img_button, *img_index_label, *next_img_button, *next_10_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn, *to_trash_btn;
 
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
@@ -194,6 +194,8 @@ app_activate (GApplication *app, gpointer user_data)
 	//Set IMG2IMG Widgets
 	img2img_expander = gtk_expander_new ("IMG2IMG / Flux-Kontext");
 	gtk_widget_add_css_class(img2img_expander, "param_label");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(img2img_expander),
+	"Expand the area to configure img2img/Kontext processing.\nThe arrow on the side will be colored whenever an image is loaded.");
 	gtk_box_append (GTK_BOX (box_properties), img2img_expander);
 	
 	box_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
@@ -801,12 +803,20 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_hexpand(boxr_bottom_left_spacer, TRUE);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_left_spacer);
 	
+	//Previous Img by 10 Button
+	prev_10_img_button = gtk_button_new_from_icon_name ("go-last-symbolic-rtl");
+	gtk_widget_add_css_class(prev_10_img_button, "custom_btn");
+	gtk_widget_set_focusable(prev_10_img_button, FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_10_img_button), "Jump back 10 images");
+	gtk_widget_set_size_request(GTK_WIDGET(prev_10_img_button), 60, -1);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), prev_10_img_button);
+	
 	//Previous Img Button
 	prev_img_button = gtk_button_new_from_icon_name ("go-previous-symbolic");
 	gtk_widget_add_css_class(prev_img_button, "custom_btn");
 	gtk_widget_set_focusable(prev_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_img_button), "Previous Image.");
-	gtk_widget_set_size_request(GTK_WIDGET(prev_img_button), 120, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(prev_img_button), 60, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), prev_img_button);
 	
 	//Next Img Button
@@ -814,8 +824,16 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(next_img_button, "custom_btn");
 	gtk_widget_set_focusable(next_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_img_button), "Next Image.");
-	gtk_widget_set_size_request(GTK_WIDGET(next_img_button), 120, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(next_img_button), 60, -1);
 	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_img_button);
+	
+	//Next Img by 10 Button
+	next_10_img_button = gtk_button_new_from_icon_name ("go-last-symbolic");
+	gtk_widget_add_css_class(next_10_img_button, "custom_btn");
+	gtk_widget_set_focusable(next_10_img_button, FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(next_10_img_button), "Jump forward 10 images.");
+	gtk_widget_set_size_request(GTK_WIDGET(next_10_img_button), 60, -1);
+	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_10_img_button);
 	
 	//Img index label
 	img_index_label = gtk_label_new (app_data->img_index_string->str);
@@ -921,8 +939,10 @@ app_activate (GApplication *app, gpointer user_data)
 	preview_d->hide_img_btn = hide_img_btn;
 	preview_d->image_widget = preview_img;
 	preview_d->img_index_label = img_index_label;
+	g_signal_connect (prev_10_img_button, "clicked", G_CALLBACK (navigate_10_img_prev), preview_d);
 	g_signal_connect (prev_img_button, "clicked", G_CALLBACK (navigate_img_prev), preview_d);
 	g_signal_connect (next_img_button, "clicked", G_CALLBACK (navigate_img_next), preview_d);
+	g_signal_connect (next_10_img_button, "clicked", G_CALLBACK (navigate_10_img_next), preview_d);
 	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
 	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
 	g_signal_connect (to_trash_btn, "clicked", G_CALLBACK (send_to_trash), preview_d);
