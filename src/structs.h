@@ -124,6 +124,7 @@ typedef struct {
 
 typedef struct {
 	GtkWidget *win;
+	GtkWidget *img2img_expander;
 	GtkWidget *image_wgt;
 	GString *img2img_file_path;
 	GCancellable *cancellable;
@@ -134,6 +135,7 @@ typedef struct {
 	GPtrArray *image_files;
 	GString *img2img_file_path;
 	GtkWidget *image_wgt;
+	GtkWidget *img2img_expander;
 } LoadImg2ImgFromPreviewData;
 
 typedef struct {

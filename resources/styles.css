@@ -236,6 +236,10 @@
 	font-weight: bold;
 }
 
+/* IMG2IMG Expander Arrow */
+.img2img_active > box > title > expander {
+	color: @primary-color-accent;
+}
 
 /* Info Labels */
 .info_box {

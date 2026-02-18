@@ -184,10 +184,11 @@ void array_strings_free (const char **list)
 void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data)
 {
 	LoadImg2ImgData *data = user_data;
+	gtk_widget_remove_css_class(data->img2img_expander, "img2img_active");
 	GString *gstr = data->img2img_file_path;
 	g_string_assign(gstr, "None");
-	GtkPicture *prev_img = GTK_PICTURE(data->image_wgt);
-	gtk_picture_set_filename(prev_img, EMPTY_IMG_PATH);
+	GtkPicture *preview_img = GTK_PICTURE(data->image_wgt);
+	gtk_picture_set_filename(preview_img, EMPTY_IMG_PATH);
 }
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)

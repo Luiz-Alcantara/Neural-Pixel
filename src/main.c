@@ -947,6 +947,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	load_img2img_file_d = g_new0 (LoadImg2ImgData, 1);
 	load_img2img_file_d->win = win;
+	load_img2img_file_d->img2img_expander = img2img_expander;
 	load_img2img_file_d->image_wgt = preview_img2img;
 	load_img2img_file_d->img2img_file_path = app_data->img2img_file_path;
 	g_signal_connect (load_img2img_btn, "clicked", G_CALLBACK (load_img2img_btn_cb), load_img2img_file_d);
@@ -958,6 +959,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_img2img_from_preview_d->image_files = app_data->image_files;
 	load_img2img_from_preview_d->img2img_file_path = app_data->img2img_file_path;
 	load_img2img_from_preview_d->image_wgt = preview_img2img;
+	load_img2img_from_preview_d->img2img_expander = img2img_expander;
 	g_signal_connect (set_img2img_from_preview_btn, "clicked", G_CALLBACK (set_current_preview_to_img2img), load_img2img_from_preview_d);
 	g_signal_connect (set_img2img_from_preview_btn, "destroy", G_CALLBACK (on_set_img2img_from_preview_btn_destroy), load_img2img_from_preview_d);
 
