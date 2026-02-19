@@ -73,7 +73,6 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		g_printerr("Error reading line: %s\n", error->message);
 		g_error_free(error);
 	} else if (bytes_read > 0) {
-
 		g_string_append_len(data->stdout_string, data->read_buffer, bytes_read);
 
 		while (TRUE) {
@@ -208,6 +207,17 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				} else if (strstr(line, "generate_image completed in") != NULL && data->is_decoding_latents) {
 					data->is_decoding_latents = 0;
 					data->dec_latents_completed = 1;
+					
+					int x;
+					double gen_seconds;
+					
+					if (sscanf(line,
+					"[INFO ] stable-diffusion.cpp:%i - generate_image completed in %lfs",
+					&x, &gen_seconds) == 2) {
+						*(data->total_time) = (int)gen_seconds;
+					} else {
+						g_printerr("Error: Could not extract time from string: \"%s\"\n", line);
+					}
 				} else if (strstr(line, "- upscaling from") != NULL) {
 					data->is_upscaling = 1;
 					int x;
@@ -221,6 +231,17 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					&x, &ow, &oh, &nw, &nh) == 5 ) {
 						gtk_button_set_label(GTK_BUTTON(data->button), "Upscaling...");
 						data->n_current_upscale++;
+					}
+				} else if (strstr(line, "- input_image_tensor upscaled, taking") != NULL) {
+					int x;
+					double upscale_seconds;
+					
+					if (sscanf(line,
+					"[INFO ] upscaler.cpp:%i   - input_image_tensor upscaled, taking %lfs",
+					&x, &upscale_seconds) == 2) {
+						*(data->total_time) += (int)upscale_seconds;
+					} else {
+						g_printerr("Error: Could not extract time from string: \"%s\"\n", line);
 					}
 				}
 
@@ -259,7 +280,10 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	
 	if (check_file_exists(data->result_img_path, 0) == 1) {
 		get_png_files(data->image_files);
-		set_current_image_index(data->result_img_path + 2, data->img_index_string, data->image_files, data->current_image_index);
+		
+		set_current_image_index(data->result_img_path + 2,
+			data->img_index_string, data->image_files,
+			data->current_image_index, data->total_time);
 		
 		if (data->image_files->len > 0) {
 			if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
@@ -364,6 +388,7 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		
 		return;
 	} else {
+		*data->total_time = 0;
 		const gchar* sd_pid = g_subprocess_get_identifier(sd_process);
 		char *endptr;
 		int npid = strtol(sd_pid, &endptr, 10);
@@ -373,6 +398,8 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		} else {
 			*data->sdpid = 0;
 		}
+		
+		printf("Binary launched in subprocess: %d\n", *data->sdpid);
 
 		GInputStream *stdout_stream = g_subprocess_get_stdout_pipe(sd_process);
 		GInputStream *stderr_stream = g_subprocess_get_stderr_pipe(sd_process);
@@ -380,19 +407,6 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		GDataInputStream *data_err_stream = g_data_input_stream_new(stderr_stream);
 		
 		g_data_input_stream_set_newline_type (data_err_stream, G_DATA_STREAM_NEWLINE_TYPE_LF);
-
-		EndGenerationData *end_gen_d = g_new0 (EndGenerationData, 1);
-		end_gen_d->sdpid = data->sdpid;
-		end_gen_d->image_files = data->image_files;
-		end_gen_d->current_image_index = data->current_image_index;
-		end_gen_d->result_img_path = result_img_path;
-		end_gen_d->img_index_string = data->img_index_string;
-		end_gen_d->sd_cmd_array = data->sd_cmd_array;
-		end_gen_d->button = GTK_WIDGET(gen_btn);
-		end_gen_d->image_widget = data->image_widget;
-		end_gen_d->img_index_label = data->img_index_label;
-		end_gen_d->show_img_btn = data->show_img_btn;
-		end_gen_d->halt_btn = data->halt_btn;
 		
 		SDProcessOutputData *output_d = g_new0 (SDProcessOutputData, 1);
 		output_d->is_img2img_encoding = 0;
@@ -407,6 +421,7 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		output_d->is_upscaling = 0;
 		output_d->n_current_upscale = 0;
 		output_d->verbose_bool = *data->verbose_bool;
+		output_d->total_time = data->total_time;
 		output_d->button = GTK_WIDGET(gen_btn);
 		output_d->sdpid = data->sdpid;
 		output_d->out_pipe_stream = stdout_stream;
@@ -417,8 +432,20 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		error_d->win = data->win;
 		error_d->sdpid = data->sdpid;
 		error_d->err_pipe_stream = data_err_stream;
-
-		printf("Binary launched in subprocess: %d\n", *data->sdpid);
+		
+		EndGenerationData *end_gen_d = g_new0 (EndGenerationData, 1);
+		end_gen_d->total_time = data->total_time;
+		end_gen_d->sdpid = data->sdpid;
+		end_gen_d->image_files = data->image_files;
+		end_gen_d->current_image_index = data->current_image_index;
+		end_gen_d->result_img_path = result_img_path;
+		end_gen_d->img_index_string = data->img_index_string;
+		end_gen_d->sd_cmd_array = data->sd_cmd_array;
+		end_gen_d->button = GTK_WIDGET(gen_btn);
+		end_gen_d->image_widget = data->image_widget;
+		end_gen_d->img_index_label = data->img_index_label;
+		end_gen_d->show_img_btn = data->show_img_btn;
+		end_gen_d->halt_btn = data->halt_btn;
 
 		GCancellable* cnlb = g_cancellable_new ();
 

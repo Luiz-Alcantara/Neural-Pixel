@@ -285,7 +285,7 @@ void get_png_files(GPtrArray *image_files)
 	g_print("Found %u PNG files.\n", image_files->len);
 }
 
-void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray *image_files, gint *current_image_index)
+void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray *image_files, gint *current_image_index, int *total_time)
 {
 	gsize img_count = image_files->len;
 	
@@ -306,7 +306,14 @@ void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray
 			*current_image_index = img_count - 1;
 		}
 		g_string_erase(img_index_string, 0, -1);
-		g_string_append_printf(img_index_string, "%d / %d", *current_image_index + 1, img_count);
+		if (total_time == NULL) {
+			g_string_append_printf(img_index_string, "(%d / %d) File: '%s'", *current_image_index + 1, img_count, img_str + 8);
+		} else {
+			int minutes = *total_time / 60;
+			int seconds = *total_time % 60;
+			g_string_append_printf(img_index_string, "(%d / %d) Last generation took: %dm %ds.",
+			*current_image_index + 1, img_count, minutes, seconds);
+		}
 	} else {
 		g_printerr("No images in 'outputs' directory.\n");
 		*current_image_index = 0;

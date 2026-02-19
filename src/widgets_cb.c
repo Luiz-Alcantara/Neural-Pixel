@@ -293,7 +293,7 @@ static void navigate_images(PreviewImageData *data, int offset)
 	const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
 
 	g_string_erase(data->img_index_string, 0, -1);
-	g_string_append_printf(data->img_index_string, "%d / %d", *data->current_image_index + 1, (int)img_count);
+	g_string_append_printf(data->img_index_string, "(%d / %d) File: '%s'", *data->current_image_index + 1, (int)img_count, current_image_path + 8);
 
 	gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
 	gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
@@ -559,7 +559,7 @@ static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, g
 		g_error_free(error);
 	} else {
 		get_png_files(data->image_files);
-		set_current_image_index(data->new_img_path, data->img_index_string, data->image_files, data->current_image_index);
+		set_current_image_index(data->new_img_path, data->img_index_string, data->image_files, data->current_image_index, NULL);
 
 		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
 

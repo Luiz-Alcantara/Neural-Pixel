@@ -33,6 +33,7 @@ typedef struct {
 	int taesd_bool;
 	int update_cache_bool;
 	int verbose_bool;
+	int total_time;
 	gint current_image_index;
 	long long int seed_value;
 	double cfg_value;
@@ -62,6 +63,7 @@ typedef struct {
 } DropDownTextBufferData;
 
 typedef struct {
+	int *total_time;
 	int *sdpid;
 	GPtrArray *image_files;
 	gint *current_image_index;
@@ -104,6 +106,7 @@ typedef struct {
 	int *taesd_bool;
 	int *update_cache_bool;
 	int *verbose_bool;
+	int *total_time;
 	gint *current_image_index;
 	long long int *seed_value;
 	double *cfg_value;
@@ -232,6 +235,7 @@ typedef struct {
 	int is_upscaling;
 	int n_current_upscale;
 	int verbose_bool;
+	int *total_time;
 	GtkWidget *button;
 	int *sdpid;
 	GInputStream *out_pipe_stream;

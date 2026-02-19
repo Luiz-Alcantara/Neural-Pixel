@@ -104,7 +104,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_generation;
 	GtkWidget *sd_halt_btn;
 
-	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_spacer, *boxr_bottom_right_spacer;
+	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_box, *boxr_bottom_right_box;
 	GtkWidget *preview_img;
 	GtkWidget *prev_10_img_button, *prev_img_button, *img_index_label, *next_img_button, *next_10_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn, *to_trash_btn;
 
@@ -795,13 +795,14 @@ app_activate (GApplication *app, gpointer user_data)
 	//Set Box Right Button bar bottom
 	boxr_bottom_bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, ZERO_SPACING);
 	gtk_widget_add_css_class(boxr_bottom_bar, "left_box");
-	gtk_box_set_homogeneous (GTK_BOX (boxr_bottom_bar), FALSE);
+	gtk_box_set_homogeneous (GTK_BOX (boxr_bottom_bar), TRUE);
 	gtk_box_append (GTK_BOX (box_right), boxr_bottom_bar);
 	
-	//Set Box Right Button Bar Left Spacer
-	boxr_bottom_left_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_widget_set_hexpand(boxr_bottom_left_spacer, TRUE);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_left_spacer);
+	//Set Box Right Button Bar Left Box
+	boxr_bottom_left_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_add_css_class(boxr_bottom_left_box, "left_box");
+	gtk_box_set_homogeneous (GTK_BOX (boxr_bottom_left_box), TRUE);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_left_box);
 	
 	//Previous Img by 10 Button
 	prev_10_img_button = gtk_button_new_from_icon_name ("go-last-symbolic-rtl");
@@ -809,7 +810,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(prev_10_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_10_img_button), "Jump back 10 images");
 	gtk_widget_set_size_request(GTK_WIDGET(prev_10_img_button), 60, -1);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), prev_10_img_button);
+	gtk_box_append (GTK_BOX (boxr_bottom_left_box), prev_10_img_button);
 	
 	//Previous Img Button
 	prev_img_button = gtk_button_new_from_icon_name ("go-previous-symbolic");
@@ -817,7 +818,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(prev_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prev_img_button), "Previous Image.");
 	gtk_widget_set_size_request(GTK_WIDGET(prev_img_button), 60, -1);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), prev_img_button);
+	gtk_box_append (GTK_BOX (boxr_bottom_left_box), prev_img_button);
 	
 	//Next Img Button
 	next_img_button = gtk_button_new_from_icon_name ("go-next-symbolic");
@@ -825,7 +826,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(next_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_img_button), "Next Image.");
 	gtk_widget_set_size_request(GTK_WIDGET(next_img_button), 60, -1);
-	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_img_button);
+	gtk_box_append(GTK_BOX(boxr_bottom_left_box), next_img_button);
 	
 	//Next Img by 10 Button
 	next_10_img_button = gtk_button_new_from_icon_name ("go-last-symbolic");
@@ -833,12 +834,18 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(next_10_img_button, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(next_10_img_button), "Jump forward 10 images.");
 	gtk_widget_set_size_request(GTK_WIDGET(next_10_img_button), 60, -1);
-	gtk_box_append(GTK_BOX(boxr_bottom_bar), next_10_img_button);
+	gtk_box_append(GTK_BOX(boxr_bottom_left_box), next_10_img_button);
 	
 	//Img index label
 	img_index_label = gtk_label_new (app_data->img_index_string->str);
 	gtk_widget_set_size_request(GTK_WIDGET(img_index_label), 120, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), img_index_label);
+	
+	//Set Box Right Button Bar Right Box
+	boxr_bottom_right_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_add_css_class(boxr_bottom_right_box, "left_box");
+	gtk_box_set_homogeneous (GTK_BOX (boxr_bottom_right_box), TRUE);
+	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_right_box);
 	
 	//Load info from current preview image
 	load_from_current_btn = gtk_button_new_from_icon_name ("insert-image-symbolic");
@@ -846,7 +853,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(load_from_current_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_current_btn), "Load prompt and generation parameters from the displayed image.");
 	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 60, -1);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), load_from_current_btn);
+	gtk_box_append (GTK_BOX (boxr_bottom_right_box), load_from_current_btn);
 	
 	//Set img2img file from current preview image
 	set_img2img_from_preview_btn = gtk_button_new_from_icon_name ("x-office-drawing-symbolic");
@@ -855,7 +862,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(set_img2img_from_preview_btn),
 	"Sets the current preview image as the template for image-to-image processing.");
 	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 60, -1);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), set_img2img_from_preview_btn);
+	gtk_box_append (GTK_BOX (boxr_bottom_right_box), set_img2img_from_preview_btn);
 	
 	//Hide Img Button
 	hide_img_btn = gtk_button_new_from_icon_name ("view-reveal-symbolic");
@@ -863,7 +870,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(hide_img_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hide_img_btn), "Toggle displayed image visibility.");
 	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 60, -1);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), hide_img_btn);
+	gtk_box_append (GTK_BOX (boxr_bottom_right_box), hide_img_btn);
 
 	//Send Img to system trash Button
 	to_trash_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
@@ -871,12 +878,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_focusable(to_trash_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(to_trash_btn), "Move to Trash (can be restored).");
 	gtk_widget_set_size_request(GTK_WIDGET(to_trash_btn), 60, -1);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), to_trash_btn);
-	
-	//Set Box Right Button Bar Right Spacer
-	boxr_bottom_right_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_widget_set_hexpand(boxr_bottom_right_spacer, TRUE);
-	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_right_spacer);
+	gtk_box_append (GTK_BOX (boxr_bottom_right_box), to_trash_btn);
 	
 	seed_entry_d = g_new0 (SeedEntryData, 1);
 	seed_entry_d->seed = &app_data->seed_value;
@@ -1014,6 +1016,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->taesd_bool = &app_data->taesd_bool;
 	gen_d->update_cache_bool = &app_data->update_cache_bool;
 	gen_d->verbose_bool = &app_data->verbose_bool;
+	gen_d->total_time = &app_data->total_time;
 	gen_d->current_image_index = &app_data->current_image_index;
 	gen_d->seed_value = &app_data->seed_value;
 	gen_d->cfg_value = &app_data->cfg_value;
