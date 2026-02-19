@@ -51,6 +51,7 @@ GtkWidget* gen_path_dd(const char* path, GtkTextBuffer *tb, int tb_type, GString
 		
 		if (dd_item_str != NULL) {
 			start_pos = check_gtk_list_contains_item(my_list, dd_item_str->str);
+			if (start_pos == 0 && strcmp(dd_item_str->str, "None") != 0) g_string_assign(dd_item_str, "None");
 		}
 		
 		g_signal_connect (fact, "setup", G_CALLBACK (factory_setup_cb), NULL);
