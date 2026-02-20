@@ -87,7 +87,7 @@ int check_file_exists(char *filename, int is_text_file)
 	if (access(filename, F_OK) == 0) {
 		/* If it's a text file, verify it's not empty and initialize if needed */
 		if (is_text_file == 1) {
-			if (is_file_empty(filename) == 1) {
+			if (is_file_empty(filename) == 1 && strcmp(filename, ".cache/np_cache") != 0) {
 				GError *err = NULL;
 				create_cache(filename, &err);
 				if (err != NULL) {
