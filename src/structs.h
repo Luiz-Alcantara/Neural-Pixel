@@ -149,10 +149,12 @@ typedef struct {
 	GtkTextBuffer *neg_tb;
 	GtkWidget *steps_spin;
 	GtkWidget *cfg_spin;
+	GtkWidget *clip_skip_spin;
 	GtkWidget *seed_entry;
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;
 	GtkWidget *checkpoint_dd;
+	GtkWidget *vae_dd;
 	GtkWidget *sampler_dd;
 	GtkWidget *scheduler_dd;
 	GCancellable *cancellable;

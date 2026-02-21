@@ -957,10 +957,12 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->neg_tb = neg_tb;
 	load_png_info_d->steps_spin = steps_spin;
 	load_png_info_d->cfg_spin = cfg_spin;
+	load_png_info_d->clip_skip_spin = clip_skip_spin;
 	load_png_info_d->seed_entry = seed_entry;
 	load_png_info_d->width_dd = width_dd;
 	load_png_info_d->height_dd = height_dd;
 	load_png_info_d->checkpoint_dd = checkpoint_dd;
+	load_png_info_d->vae_dd = vae_dd;
 	load_png_info_d->sampler_dd = sampler_dd;
 	load_png_info_d->scheduler_dd = scheduler_dd;
 	g_signal_connect (load_from_img_btn, "clicked", G_CALLBACK (load_from_img_btn_cb), load_png_info_d);

@@ -70,7 +70,9 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	ptr = strstr(l1->str, "parameters ");
 	if (ptr) {
 		const char *start = ptr + strlen("parameters ");
-		const char *end = strstr(start, "\nNegative prompt:");
+		const char *neg_end = strstr(start, "\nNegative prompt:");
+		const char *steps_end = strstr(start, "\nSteps:");
+		const char *end = neg_end ? neg_end : steps_end;
 		if (start && end && start < end) {
 			size_t len = end - start;
 			if (len >= MAX_METADATA_PROMPT_LENGTH) {
@@ -249,6 +251,48 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 		}
 	} else {
 		fprintf(stderr, "Failed to parse sampler data.\n");
+		n_err++;
+	}
+	
+	//Set VAE
+	ptr = strstr(l1->str, ", VAE: ");
+	if (ptr) {
+		const char *start = ptr + strlen(", VAE: ");
+		const char *end = strstr(start, ",");
+		if (start && end && start < end) {
+			size_t len = end - start;
+			if (len >= MAX_PROPERTY_LENGTH) {
+				len = MAX_PROPERTY_LENGTH - 1;
+			}
+			char vae_str[MAX_PROPERTY_LENGTH];
+			strncpy(vae_str, start, len);
+			vae_str[len] = '\0';
+			
+			GtkWidget *vae_dd = data->vae_dd;
+			GtkStringList *vae_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(vae_dd)));
+			int vae_i = check_gtk_list_contains_item(vae_items, vae_str);
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_dd), vae_i);
+		} else {
+			fprintf(stderr, "Failed to parse VAE data.\n");
+			n_err++;
+		}
+	} else {
+		fprintf(stderr, "Failed to parse VAE data.\n");
+		n_err++;
+	}
+	
+	//Set Clip Skip
+	ptr = strstr(l1->str, ", Clip skip: ");
+	if (ptr) {
+		int clip_skip_value;
+		if (sscanf(ptr + strlen(", Clip skip: "), "%d", &clip_skip_value) == 1) {
+			gtk_spin_button_set_value (GTK_SPIN_BUTTON(data->clip_skip_spin), clip_skip_value);
+		} else {
+			fprintf(stderr, "Failed to parse Clip skip data.\n");
+			n_err++;
+		}
+	} else {
+		fprintf(stderr, "Failed to parse Clip skip data.\n");
 		n_err++;
 	}
 
