@@ -223,7 +223,7 @@
 }
 
 /* Right Box */
-.right_box {
+.right_box, .img_preview_box {
 	background-color: @primary-color-darker;
 }
 

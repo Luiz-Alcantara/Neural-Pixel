@@ -74,6 +74,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
 		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
+		fprintf(cf, "cnet_strength=%.2f\n", DEFAULT_CNET_STRENGTH);
 		fprintf(cf, "denoise_strength=%.2f\n", DEFAULT_DENOISE);
 		fprintf(cf, "clip_skip=%.1f\n", DEFAULT_CLIP_SKIP);
 		fprintf(cf, "repeat_upscale=%.1f\n", DEFAULT_RP_UPSCALE);
@@ -238,6 +239,7 @@ void load_cache_fallback(gpointer user_data)
 	data->seed_value = DEFAULT_SEED;
 	
 	data->cfg_value = DEFAULT_CFG;
+	data->cnet_value = DEFAULT_CNET_STRENGTH;
 	data->denoise_value = DEFAULT_DENOISE;
 	data->clip_skip_value = DEFAULT_CLIP_SKIP;
 	data->up_repeat_value = DEFAULT_RP_UPSCALE;
@@ -339,16 +341,16 @@ void load_cache(gpointer user_data)
 		
 		char *n_steps_str = ini_file_get_value(cache_filename, "n_steps");
 		if (n_steps_str) {
-			char *endptr1;
-			data->steps_value = strtod(n_steps_str, &endptr1);
+			char *endptr;
+			data->steps_value = strtod(n_steps_str, &endptr);
 		} else {
 			data->steps_value = DEFAULT_N_STEPS;
 		}
 		
 		char *batch_count_str = ini_file_get_value(cache_filename, "batch_count");
 		if (batch_count_str) {
-			char *endptr2;
-			data->batch_count_value = strtod(batch_count_str, &endptr2);
+			char *endptr;
+			data->batch_count_value = strtod(batch_count_str, &endptr);
 		} else {
 			data->batch_count_value = DEFAULT_BATCH_COUNT;
 		}
@@ -453,32 +455,40 @@ void load_cache(gpointer user_data)
 		
 		char *cfg_scale_str = ini_file_get_value(cache_filename, "cfg_scale");
 		if (cfg_scale_str) {
-			char *endptr3;
-			data->cfg_value = strtod(cfg_scale_str, &endptr3);
+			char *endptr;
+			data->cfg_value = strtod(cfg_scale_str, &endptr);
 		} else {
 			data->cfg_value = DEFAULT_CFG;
 		}
 		
+		char *cnet_strength_str = ini_file_get_value(cache_filename, "cnet_strength");
+		if (cnet_strength_str) {
+			char *endptr;
+			data->cnet_value = strtod(cnet_strength_str, &endptr);
+		} else {
+			data->cnet_value = DEFAULT_CNET_STRENGTH;
+		}
+		
 		char *denoise_strength_str = ini_file_get_value(cache_filename, "denoise_strength");
 		if (denoise_strength_str) {
-			char *endptr4;
-			data->denoise_value = strtod(denoise_strength_str, &endptr4);
+			char *endptr;
+			data->denoise_value = strtod(denoise_strength_str, &endptr);
 		} else {
 			data->denoise_value = DEFAULT_DENOISE;
 		}
 		
 		char *clip_skip_str = ini_file_get_value(cache_filename, "clip_skip");
 		if (clip_skip_str) {
-			char *endptr5;
-			data->clip_skip_value = strtod(clip_skip_str, &endptr5);
+			char *endptr;
+			data->clip_skip_value = strtod(clip_skip_str, &endptr);
 		} else {
 			data->clip_skip_value = DEFAULT_CLIP_SKIP;
 		}
 		
 		char *repeat_upscale_str = ini_file_get_value(cache_filename, "repeat_upscale");
 		if (repeat_upscale_str) {
-			char *endptr6;
-			data->up_repeat_value = strtod(repeat_upscale_str, &endptr6);
+			char *endptr;
+			data->up_repeat_value = strtod(repeat_upscale_str, &endptr);
 		} else {
 			data->up_repeat_value = DEFAULT_RP_UPSCALE;
 		}
@@ -537,6 +547,7 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 	fprintf(cf, "verbose_bool=%d\n", *data->verbose_bool);
 	fprintf(cf, "seed=%lld\n", *data->seed_value);
 	fprintf(cf, "cfg_scale=%.1f\n", *data->cfg_value);
+	fprintf(cf, "cnet_strength=%.2f\n", *data->cnet_value);
 	fprintf(cf, "denoise_strength=%.2f\n", *data->denoise_value);
 	fprintf(cf, "clip_skip=%.1f\n", *data->clip_skip_value);
 	fprintf(cf, "repeat_upscale=%.1f\n", *data->up_repeat_value);

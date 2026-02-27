@@ -37,6 +37,7 @@ typedef struct {
 	gint current_image_index;
 	long long int seed_value;
 	double cfg_value;
+	double cnet_value;
 	double denoise_value;
 	double clip_skip_value;
 	double up_repeat_value;
@@ -110,6 +111,7 @@ typedef struct {
 	gint *current_image_index;
 	long long int *seed_value;
 	double *cfg_value;
+	double *cnet_value;
 	double *denoise_value;
 	double *clip_skip_value;
 	double *up_repeat_value;
@@ -198,6 +200,7 @@ typedef struct {
 	GtkWidget *clip_g_dd;
 	GtkWidget *text_enc_dd;
 	GtkWidget *cfg_spin;
+	GtkWidget *cnet_strength_spin;
 	GtkWidget *denoise_spin;
 	GtkWidget *seed_entry;
 	GtkWidget *upscale_spin;

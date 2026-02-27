@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.5.2";
+const char* APP_NAME_VERSION = "Neural Pixel v0.5.3";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -56,6 +56,7 @@ const int LABEL_ALIGNMENT = 3;
 const int DD_STRING_LEN = 40;
 const long long int DEFAULT_SEED = -1;
 const double DEFAULT_CFG = 6;
+const double DEFAULT_CNET_STRENGTH = 0.90;
 const double DEFAULT_DENOISE = 0.75;
 const double DEFAULT_CLIP_SKIP = 0;
 const double DEFAULT_RP_UPSCALE = 1;

@@ -80,6 +80,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_params_row4, *box_params_row4_col1, *box_params_row4_col2;
 	GtkWidget *box_params_row5;
 	GtkWidget *box_params_row6, *box_params_row6_col1, *box_params_row6_col2;
+	GtkWidget *box_params_row7;
 	
 	GtkWidget *box_model_adapters;
 	GtkWidget *lora_lab, *lora_dd;
@@ -96,6 +97,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *seed_lab, *seed_entry;
 	GtkWidget *clip_skip_lab, *clip_skip_spin;
 	GtkWidget *upscale_str_lab, *upscale_spin;
+	GtkWidget *cnet_strength_lab, *cnet_strength_spin;
 	
 	GtkWidget *extra_opts_expander, *box_extra_opts, *box_extra_opts_col1, *box_extra_opts_col2;
 	
@@ -192,10 +194,10 @@ app_activate (GApplication *app, gpointer user_data)
 	}
 	
 	//Set IMG2IMG Widgets
-	img2img_expander = gtk_expander_new ("IMG2IMG / Flux-Kontext");
+	img2img_expander = gtk_expander_new ("Input Image");
 	gtk_widget_add_css_class(img2img_expander, "param_label");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(img2img_expander),
-	"Expand the area to configure img2img/Kontext processing.\nThe arrow on the side will be colored whenever an image is loaded.");
+	"Expand the area to configure img2img, Flux Kontext, or ControlNet processing.\nThe arrow on the side will be colored whenever an image is loaded.");
 	gtk_box_append (GTK_BOX (box_properties), img2img_expander);
 	
 	box_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
@@ -207,11 +209,11 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_set_homogeneous (GTK_BOX (box_img2img_buttons), FALSE);
 	gtk_box_append (GTK_BOX (box_img2img), box_img2img_buttons);
 	
-	load_img2img_btn = gtk_button_new_with_label ("Load Image File");
+	load_img2img_btn = gtk_button_new_with_label ("Choose Image");
 	gtk_widget_set_hexpand (load_img2img_btn, TRUE);
 	gtk_widget_add_css_class(load_img2img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_img2img_btn),
-	"Select the image that will be used as a template for img2img/Kontext processing.");
+	"Select the source image that will be used for img2img, Flux Kontext, or ControlNet processing.");
 	gtk_box_append (GTK_BOX (box_img2img_buttons), load_img2img_btn);
 	
 	clear_img2img_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
@@ -228,6 +230,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_img2img_buttons), kontext_check);
 	
 	box_preview_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_widget_add_css_class(box_preview_img2img, "img_preview_box");
 	gtk_widget_set_size_request(box_preview_img2img, 412, 400);
 	gtk_widget_set_hexpand (box_preview_img2img, FALSE);
 	gtk_widget_set_vexpand (box_preview_img2img, FALSE);
@@ -592,7 +595,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), app_data->denoise_value);
 	g_signal_connect (denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->denoise_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(denoise_spin),
-	"Controls how much the original image is changed.\nValues near 1.0 heavily modify or replace the image.\nValues near 0.0 preserve the original image with minimal changes.");
+	"Controls how much the original image is changed.\nValues near 1.0 heavily modify or replace the image.\nValues near 0 preserve the original image with minimal changes.");
 	stop_spinbutton_scroll(denoise_spin);
 	gtk_box_append (GTK_BOX (box_params_row4_col2), denoise_spin);
 	
@@ -665,6 +668,28 @@ app_activate (GApplication *app, gpointer user_data)
 	"Number of times to run the upscaler sequentially.\nEach run applies the upscale process to the previous result,\nfurther increasing the image dimensions.");
 	stop_spinbutton_scroll(upscale_spin);
 	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_spin);
+	
+	//Set Parameters Seventh Row Widgets
+	
+	box_params_row7 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_params), box_params_row7);
+	
+	//Set Control Net Strength Widgets
+
+	cnet_strength_lab = gtk_label_new ("ControlNet Str");
+	gtk_widget_set_halign(cnet_strength_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(cnet_strength_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row7), cnet_strength_lab);
+	
+	cnet_strength_spin = gtk_spin_button_new_with_range (0, 1.0, 0.05);
+	gtk_widget_add_css_class(cnet_strength_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(cnet_strength_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cnet_strength_spin), app_data->cnet_value);
+	g_signal_connect (cnet_strength_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->cnet_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(cnet_strength_spin),
+	"Adjusts how strongly the ControlNet influences the image.\nValues near '1' force the output to match the control map strictly.\nValues near '0' allow the prompt more creative freedom.");
+	stop_spinbutton_scroll(cnet_strength_spin);
+	gtk_box_append (GTK_BOX (box_params_row7), cnet_strength_spin);
 	
 	//Set Extra Options Widgets
 	
@@ -860,7 +885,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(set_img2img_from_preview_btn, "custom_btn");
 	gtk_widget_set_focusable(set_img2img_from_preview_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(set_img2img_from_preview_btn),
-	"Sets the current preview image as the template for image-to-image processing.");
+	"Sets the current preview image as the template for img2img/ControlNet processing.");
 	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 60, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), set_img2img_from_preview_btn);
 	
@@ -911,6 +936,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->clip_g_dd = clip_g_dd;
 	reset_d->text_enc_dd = text_enc_dd;
 	reset_d->cfg_spin = cfg_spin;
+	reset_d->cnet_strength_spin = cnet_strength_spin;
 	reset_d->denoise_spin = denoise_spin;
 	reset_d->seed_entry = seed_entry;
 	reset_d->upscale_spin = upscale_spin;
@@ -1022,6 +1048,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->current_image_index = &app_data->current_image_index;
 	gen_d->seed_value = &app_data->seed_value;
 	gen_d->cfg_value = &app_data->cfg_value;
+	gen_d->cnet_value = &app_data->cnet_value;
 	gen_d->denoise_value = &app_data->denoise_value;
 	gen_d->clip_skip_value = &app_data->clip_skip_value;
 	gen_d->up_repeat_value = &app_data->up_repeat_value;

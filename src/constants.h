@@ -54,6 +54,7 @@ extern const int LABEL_ALIGNMENT;
 extern const int DD_STRING_LEN;
 extern const long long int DEFAULT_SEED;
 extern const double DEFAULT_CFG;
+extern const double DEFAULT_CNET_STRENGTH;
 extern const double DEFAULT_DENOISE;
 extern const double DEFAULT_CLIP_SKIP;
 extern const double DEFAULT_RP_UPSCALE;

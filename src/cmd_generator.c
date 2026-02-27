@@ -34,6 +34,7 @@ void gen_sd_string(GenerationData *data)
 	char *steps_str = convert_double_to_string(*data->steps_value, "%.0f");
 	char *batch_count_str = convert_double_to_string(*data->batch_count_value, "%.0f");
 	char *cfg_str = convert_double_to_string(*data->cfg_value, "%.1f");
+	char *cnet_strength_str = convert_double_to_string(*data->cnet_value, "%.2f");
 	char *denoise_str = convert_double_to_string(*data->denoise_value, "%.2f");
 	char *clip_skip_str = convert_double_to_string(*data->clip_skip_value, "%.0f");
 	char *up_repeat_str = convert_double_to_string(*data->up_repeat_value, "%.0f");
@@ -47,13 +48,9 @@ void gen_sd_string(GenerationData *data)
 	#else
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(*data->cpu_bool == 1 ? "./sd-cpu" : "./sd"));
 	#endif
-
-	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path->str, "None") != 0) {
-		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup(*data->kontext_bool == 1 ? "--ref-image" : "--init-img"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path->str));
-	}
+	
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
 
 	if (data->checkpoint_string != NULL) {
 		if (*data->sd_based_bool == 1) {
@@ -77,12 +74,21 @@ void gen_sd_string(GenerationData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-on-cpu"));
 		}
 	}
-
-	if (data->cnet_string != NULL && strcmp(data->cnet_string->str, "None") != 0) {
-		g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/controlnet/%s", data->cnet_string->str));
-		if (*data->k_cnet_bool == 1) {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net-cpu"));
+	
+	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path->str, "None") != 0) {
+		if (data->cnet_string != NULL && strcmp(data->cnet_string->str, "None") != 0) {
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/controlnet/%s", data->cnet_string->str));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-image"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path->str));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-strength"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup(cnet_strength_str));
+			if (*data->k_cnet_bool == 1) {
+				g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net-cpu"));
+			}
+		} else {
+			g_ptr_array_add(data->sd_cmd_array, g_strdup(*data->kontext_bool == 1 ? "--ref-image" : "--init-img"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path->str));
 		}
 	}
 
@@ -209,6 +215,7 @@ void gen_sd_string(GenerationData *data)
 	free(steps_str);
 	free(batch_count_str);
 	free(cfg_str);
+	free(cnet_strength_str);
 	free(denoise_str);
 	free(clip_skip_str);
 	free(up_repeat_str);
