@@ -15,6 +15,6 @@ void load_cache_fallback(gpointer user_data);
 
 void load_cache(gpointer user_data);
 
-void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscaler, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_text_enc, char *pp, char *np, char *img_num);
+void update_cache(GenerationSnapshotData *data);
 
 #endif // HANDLE_CACHE_H

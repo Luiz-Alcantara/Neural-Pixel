@@ -155,14 +155,14 @@ void app_start_data_free (gpointer user_data)
 		data->img2img_file_path = NULL;
 	}
 	
-	if (data->img_index_string != NULL) {
-		g_string_free(data->img_index_string, TRUE);
-		data->img_index_string = NULL;
+	if (data->preview_label_string != NULL) {
+		g_string_free(data->preview_label_string, TRUE);
+		data->preview_label_string = NULL;
 	}
 	
-	if (data->image_files != NULL) {
-		g_ptr_array_free(data->image_files, TRUE);
-		data->image_files = NULL;
+	if (data->preview_image_files != NULL) {
+		g_ptr_array_free(data->preview_image_files, TRUE);
+		data->preview_image_files = NULL;
 	}
 	
 	if (data->sd_cmd_array != NULL) {
@@ -562,7 +562,7 @@ static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, g
 		g_error_free(error);
 	} else {
 		get_png_files(data->image_files);
-		set_current_image_index(data->new_img_path, data->img_index_string, data->image_files, data->current_image_index, NULL);
+		set_current_image_index(data->new_img_path, data->img_index_string, data->image_files, data->current_image_index, -1);
 
 		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
 

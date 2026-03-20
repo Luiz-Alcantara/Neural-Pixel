@@ -11,6 +11,8 @@ static void start_reading_error(gpointer user_data);
 
 static void start_reading_output(gpointer user_data);
 
-void generate_cb(GtkButton *gen_btn, gpointer user_data);
+static void start_generation(gpointer user_data);
+
+void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data);
 
 #endif // GENERATE_CB_H

@@ -41,6 +41,10 @@ extern const char* EMPTY_IMG_PATH;
 extern const int DEFAULT_MODELS;
 extern const int DEFAULT_SAMPLER;
 extern const int DEFAULT_SCHEDULER;
+extern const int DEFAULT_CLIP_SKIP;
+extern const int DEFAULT_RP_UPSCALE;
+extern const int DEFAULT_N_STEPS;
+extern const int DEFAULT_BATCH_COUNT;
 extern const int DEFAULT_SIZE;
 extern const int ENABLED_OPT;
 extern const int DISABLED_OPT;
@@ -56,9 +60,5 @@ extern const long long int DEFAULT_SEED;
 extern const double DEFAULT_CFG;
 extern const double DEFAULT_CNET_STRENGTH;
 extern const double DEFAULT_DENOISE;
-extern const double DEFAULT_CLIP_SKIP;
-extern const double DEFAULT_RP_UPSCALE;
-extern const double DEFAULT_N_STEPS;
-extern const double DEFAULT_BATCH_COUNT;
 
 #endif  // CONSTANTS_H

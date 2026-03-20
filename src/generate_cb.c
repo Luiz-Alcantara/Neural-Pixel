@@ -273,42 +273,52 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 
 static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointer user_data)
 {
-	EndGenerationData *data = user_data;
+	GenerationSnapshotData *data = user_data;
 	*data->sdpid = 0;
-	const char *icon_n = gtk_button_get_icon_name (GTK_BUTTON(data->show_img_btn));
-	GtkPicture *prev_img = GTK_PICTURE(data->image_widget);
+	const char *icon_n = gtk_button_get_icon_name (GTK_BUTTON(data->preview_image_toggle_visibility_btn));
 	
-	if (check_file_exists(data->result_img_path, 0) == 1) {
-		get_png_files(data->image_files);
+	if (check_file_exists(data->output_path, 0) == 1) {
+		get_png_files(data->preview_image_files);
 		
-		set_current_image_index(data->result_img_path + 2,
-			data->img_index_string, data->image_files,
-			data->current_image_index, data->total_time);
+		set_current_image_index(data->output_path + 2,
+			data->preview_label_string, data->preview_image_files,
+			data->preview_image_index, data->total_time);
 		
-		if (data->image_files->len > 0) {
+		if (data->preview_image_files->len > 0) {
 			if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
-				gtk_picture_set_filename(prev_img, data->result_img_path);
+				gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), data->output_path);
 			} else {
-				gtk_picture_set_filename(prev_img, EMPTY_IMG_PATH);
+				gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), EMPTY_IMG_PATH);
 			}
 		} else {
 			g_printerr("No images in 'outputs' directory.\n");
-			gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
+			gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
 		}
 		
-		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
+		gtk_label_set_label(GTK_LABEL(data->preview_label), data->preview_label_string->str);
 	} else {
 		g_printerr(
 			"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
-			data->result_img_path
+			data->output_path
 		);
-		gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
+		gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
 	}
 	
-	gtk_button_set_label(GTK_BUTTON(data->button), "Generate");
-	gtk_widget_set_sensitive(GTK_WIDGET(data->button), TRUE);
+	gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Generate");
+	gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), TRUE);
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
 	g_ptr_array_set_size(data->sd_cmd_array, 0);
+	g_free(data->output_path);
+	g_free(data->img2img_file_path);
+	g_free(data->positive_prompt);
+	g_free(data->negative_prompt);
+	g_free(data->checkpoint_filename);
+	g_free(data->vae_filename);
+	g_free(data->cnet_filename);
+	g_free(data->upscaler_filename);
+	g_free(data->clip_l_filename);
+	g_free(data->clip_g_filename);
+	g_free(data->text_enc_filename);
 	g_free(data);
 	g_object_unref(source_object);
 }
@@ -341,9 +351,9 @@ static void start_reading_output(gpointer user_data)
 	);
 }
 
-void generate_cb(GtkButton *gen_btn, gpointer user_data)
+static void start_generation(gpointer user_data)
 {
-	GenerationData *data = user_data;
+	GenerationSnapshotData *data = user_data;
 	if (data == NULL) {
 		g_printerr("Error: Data used to generate the images is corrupted.\n");
 		
@@ -353,19 +363,13 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		
 		return;
 	}
-	if (g_strcmp0 (gtk_button_get_label (gen_btn), "Generate") == 0) {
-		gtk_button_set_label (gen_btn, "Loading Files...");
-		gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
+	if (g_strcmp0 (gtk_button_get_label (GTK_BUTTON(data->gen_btn)), "Generate") == 0) {
+		gtk_button_set_label (GTK_BUTTON(data->gen_btn), "Loading Files...");
+		gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), TRUE);
 	}
 
 	gen_sd_string(data);
-
-	gchar *result_img_path = NULL;
-	
-	if (data->sd_cmd_array->len > 0) {
-		result_img_path = g_ptr_array_index(data->sd_cmd_array, data->sd_cmd_array->len - 2);
-	}
 
 	GSubprocessFlags sd_flags = G_SUBPROCESS_FLAGS_STDOUT_PIPE | G_SUBPROCESS_FLAGS_STDERR_PIPE;
 	GError *error = NULL;
@@ -382,13 +386,13 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		
 		g_ptr_array_set_size(data->sd_cmd_array, 0);
 		
-		gtk_button_set_label (gen_btn, "Generate");
-		gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
-		gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
+		gtk_button_set_label (GTK_BUTTON(data->gen_btn), "Generate");
+		gtk_widget_set_sensitive(data->gen_btn, TRUE);
+		gtk_widget_set_sensitive(data->halt_btn, FALSE);
 		
 		return;
 	} else {
-		*data->total_time = 0;
+		data->total_time = 0;
 		const gchar* sd_pid = g_subprocess_get_identifier(sd_process);
 		char *endptr;
 		int npid = strtol(sd_pid, &endptr, 10);
@@ -420,38 +424,118 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		output_d->dec_latents_completed = 0;
 		output_d->is_upscaling = 0;
 		output_d->n_current_upscale = 0;
-		output_d->verbose_bool = *data->verbose_bool;
-		output_d->total_time = data->total_time;
-		output_d->button = GTK_WIDGET(gen_btn);
+		output_d->verbose_bool = data->verbose_enabled;
+		output_d->total_time = &data->total_time;
+		output_d->button = data->gen_btn;
 		output_d->sdpid = data->sdpid;
 		output_d->out_pipe_stream = stdout_stream;
 		output_d->stdout_string = g_string_new("");
 		
 		SDProcessErrorData *error_d = g_new0 (SDProcessErrorData, 1);
-		error_d->verbose_bool = *data->verbose_bool;
+		error_d->verbose_bool = data->verbose_enabled;
 		error_d->win = data->win;
 		error_d->sdpid = data->sdpid;
 		error_d->err_pipe_stream = data_err_stream;
-		
-		EndGenerationData *end_gen_d = g_new0 (EndGenerationData, 1);
-		end_gen_d->total_time = data->total_time;
-		end_gen_d->sdpid = data->sdpid;
-		end_gen_d->image_files = data->image_files;
-		end_gen_d->current_image_index = data->current_image_index;
-		end_gen_d->result_img_path = result_img_path;
-		end_gen_d->img_index_string = data->img_index_string;
-		end_gen_d->sd_cmd_array = data->sd_cmd_array;
-		end_gen_d->button = GTK_WIDGET(gen_btn);
-		end_gen_d->image_widget = data->image_widget;
-		end_gen_d->img_index_label = data->img_index_label;
-		end_gen_d->show_img_btn = data->show_img_btn;
-		end_gen_d->halt_btn = data->halt_btn;
 
 		GCancellable* cnlb = g_cancellable_new ();
 
 		start_reading_output(output_d);
 		start_reading_error(error_d);
-		g_subprocess_wait_async(sd_process, cnlb, on_subprocess_end, end_gen_d);
+		g_subprocess_wait_async(sd_process, cnlb, on_subprocess_end, user_data);
 		g_object_unref(cnlb);
 	}
+}
+
+void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
+{
+	GenerationData *data = user_data;
+	AppStartData *app_data = data->app_data;
+	
+	GenerationSnapshotData *snapshot_data = g_new0 (GenerationSnapshotData, 1);
+	
+	snapshot_data->img2img_file_path = g_strdup(app_data->img2img_file_path->str);
+	snapshot_data->kontext_enabled = app_data->kontext_bool;
+	
+	GtkTextBuffer *pos_tb = data->pos_p;
+	GtkTextIter psi;
+	GtkTextIter pei;
+	gtk_text_buffer_get_bounds (pos_tb, &psi, &pei);
+	snapshot_data->positive_prompt = gtk_text_buffer_get_text(pos_tb, &psi, &pei, FALSE);
+
+	GtkTextBuffer *neg_tb = data->neg_p;
+	GtkTextIter nsi;
+	GtkTextIter nei;
+	gtk_text_buffer_get_bounds (neg_tb, &nsi, &nei);
+	snapshot_data->negative_prompt = gtk_text_buffer_get_text(neg_tb, &nsi, &nei, FALSE);
+	
+	snapshot_data->checkpoint_filename = g_strdup(app_data->checkpoint_string->str);
+	
+	snapshot_data->sd_based_enabled = app_data->sd_based_bool;
+	
+	snapshot_data->vae_filename = g_strdup(app_data->vae_string->str);
+	snapshot_data->cnet_filename = g_strdup(app_data->cnet_string->str);
+	snapshot_data->upscaler_filename = g_strdup(app_data->upscaler_string->str);
+	snapshot_data->clip_l_filename = g_strdup(app_data->clip_l_string->str);
+	snapshot_data->clip_g_filename  = g_strdup(app_data->clip_g_string->str);
+	snapshot_data->text_enc_filename  = g_strdup(app_data->text_enc_string->str);
+	
+	snapshot_data->llm_mode_enabled = app_data->llm_bool;
+	
+	snapshot_data->width_index = app_data->w_index;
+	snapshot_data->height_index = app_data->h_index;
+	snapshot_data->step_count_value = (int)app_data->steps_value;
+	snapshot_data->batch_count_value = (int)app_data->batch_count_value;
+	snapshot_data->sampler_index = app_data->sampler_index;
+	snapshot_data->scheduler_index = app_data->scheduler_index;
+	snapshot_data->cfg_scale_value = app_data->cfg_value;
+	snapshot_data->denoise_strength_value = app_data->denoise_value;
+	snapshot_data->seed_value = app_data->seed_value;
+	snapshot_data->clip_skip_value = (int)app_data->clip_skip_value;
+	snapshot_data->upscale_passes_value = (int)app_data->up_repeat_value;
+	snapshot_data->cnet_strength_value = app_data->cnet_value;
+	snapshot_data->cpu_mode_enabled = app_data->cpu_bool;
+	snapshot_data->vae_tiling_enabled = app_data->vt_bool;
+	snapshot_data->ram_offload_enabled = app_data->ram_offload_bool;
+	snapshot_data->keep_clip_cpu_enabled = app_data->k_clip_bool;
+	snapshot_data->keep_cnet_cpu_enabled = app_data->k_cnet_bool;
+	snapshot_data->keep_vae_cpu_enabled = app_data->k_vae_bool;
+	snapshot_data->flash_att_enabled = app_data->fa_bool;
+	snapshot_data->taesd_enabled = app_data->taesd_bool;
+	snapshot_data->update_cache_enabled = app_data->update_cache_bool;
+	snapshot_data->verbose_enabled = app_data->verbose_bool;
+	snapshot_data->total_time = 0;
+	snapshot_data->sdpid = &app_data->sdpid;
+	
+	char *out_timestamp = get_time_str();
+	
+	if (out_timestamp) {
+		#ifdef G_OS_WIN32
+			snapshot_data->output_path = g_strdup_printf(".\\outputs\\IMG_%s.png", out_timestamp);
+		#else
+			snapshot_data->output_path = g_strdup_printf("./outputs/IMG_%s.png", out_timestamp);
+		#endif
+		
+		free(out_timestamp);
+	} else {
+		g_printerr("Failed to acquire timestamp. Using default value, which may overwrite the generated image. Try restarting the app or deleting the '.cache' folder. If the issue persists, please report it.\n");
+		#ifdef G_OS_WIN32
+			snapshot_data->output_path = g_strdup(".\\outputs\\IMG_00001.png");
+		#else
+			snapshot_data->output_path = g_strdup("./outputs/IMG_00001.png");
+		#endif
+	}
+	
+	snapshot_data->preview_image_index = &app_data->preview_image_index;
+	snapshot_data->preview_label_string = app_data->preview_label_string;
+	snapshot_data->preview_image_files = app_data->preview_image_files;
+	snapshot_data->sd_cmd_array = app_data->sd_cmd_array;
+	
+	snapshot_data->preview_image_toggle_visibility_btn = data->preview_image_toggle_visibility_btn;
+	snapshot_data->preview_image_widget = data->preview_image_widget;
+	snapshot_data->preview_label = data->preview_label;
+	snapshot_data->gen_btn = gen_btn;
+	snapshot_data->halt_btn = data->halt_btn;
+	snapshot_data->win = data->win;
+	
+	start_generation(snapshot_data);
 }

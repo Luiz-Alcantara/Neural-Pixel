@@ -3,8 +3,6 @@
 
 typedef struct {
 	GtkApplication *app;
-	GtkWidget *window;
-	GtkWidget *button;
 	GString *checkpoint_string;
 	GString *vae_string;
 	GString *cnet_string;
@@ -12,8 +10,9 @@ typedef struct {
 	GString *clip_l_string;
 	GString *clip_g_string;
 	GString *text_enc_string;
-	GString *img_index_string;
-	GPtrArray *image_files;
+	GString *preview_label_string;
+	GString *img2img_file_path;
+	GPtrArray *preview_image_files;
 	GPtrArray *sd_cmd_array;
 	int sdpid;
 	int sampler_index;
@@ -34,7 +33,7 @@ typedef struct {
 	int update_cache_bool;
 	int verbose_bool;
 	int total_time;
-	gint current_image_index;
+	gint preview_image_index;
 	long long int seed_value;
 	double cfg_value;
 	double cnet_value;
@@ -43,7 +42,6 @@ typedef struct {
 	double up_repeat_value;
 	double steps_value;
 	double batch_count_value;
-	GString *img2img_file_path;
 } AppStartData;
 
 typedef struct {
@@ -64,68 +62,72 @@ typedef struct {
 } DropDownTextBufferData;
 
 typedef struct {
-	int *total_time;
-	int *sdpid;
-	GPtrArray *image_files;
-	gint *current_image_index;
 	gchar *result_img_path;
-	GPtrArray *sd_cmd_array;
-	GString *img_index_string;
-	GtkWidget *button;
-	GtkWidget *image_widget;
-	GtkWidget *img_index_label;
-	GtkWidget *show_img_btn;
-	GtkWidget *halt_btn;
+	gpointer *gen_snapshot_ptr;
 } EndGenerationData;
 
 typedef struct {
-	GString *checkpoint_string;
-	GString *vae_string;
-	GString *cnet_string;
-	GString *upscaler_string;
-	GString *clip_l_string;
-	GString *clip_g_string;
-	GString *text_enc_string;
-	GString *img_index_string;
-	GPtrArray *image_files;
-	GPtrArray *sd_cmd_array;
-	int *sdpid;
-	int *sampler_index;
-	int *scheduler_index;
-	int *w_index;
-	int *h_index;
-	int *kontext_bool;
-	int *sd_based_bool;
-	int *llm_bool;
-	int *cpu_bool;
-	int *vt_bool;
-	int *ram_offload_bool;
-	int *k_clip_bool;
-	int *k_cnet_bool;
-	int *k_vae_bool;
-	int *fa_bool;
-	int *taesd_bool;
-	int *update_cache_bool;
-	int *verbose_bool;
-	int *total_time;
-	gint *current_image_index;
-	long long int *seed_value;
-	double *cfg_value;
-	double *cnet_value;
-	double *denoise_value;
-	double *clip_skip_value;
-	double *up_repeat_value;
-	double *steps_value;
-	double *batch_count_value;
+	AppStartData *app_data;
 	GtkTextBuffer *pos_p;
 	GtkTextBuffer *neg_p;
-	GtkWidget *image_widget;
-	GtkWidget *img_index_label;
-	GtkWidget *show_img_btn;
+	GtkWidget *preview_image_widget;
+	GtkWidget *preview_label;
+	GtkWidget *preview_image_toggle_visibility_btn;
 	GtkWidget *halt_btn;
 	GtkWidget *win;
-	GString *img2img_file_path;
 } GenerationData;
+
+typedef struct {
+	char *output_path;
+	char *img2img_file_path;
+	int kontext_enabled;
+	char *positive_prompt;
+	char *negative_prompt;
+	char *checkpoint_filename;
+	int sd_based_enabled;
+	char *vae_filename;
+	char *cnet_filename;
+	char *upscaler_filename;
+	char *clip_l_filename;
+	char *clip_g_filename;
+	char *text_enc_filename;
+	int llm_mode_enabled;
+	int width_index;
+	int height_index;
+	int step_count_value;
+	int batch_count_value;
+	int sampler_index;
+	int scheduler_index;
+	double cfg_scale_value;
+	double denoise_strength_value;
+	long long int seed_value;
+	int clip_skip_value;
+	int upscale_passes_value;
+	double cnet_strength_value;
+	int cpu_mode_enabled;
+	int vae_tiling_enabled;
+	int ram_offload_enabled;
+	int keep_clip_cpu_enabled;
+	int keep_cnet_cpu_enabled;
+	int keep_vae_cpu_enabled;
+	int flash_att_enabled;
+	int taesd_enabled;
+	int update_cache_enabled;
+	int verbose_enabled;
+	int total_time;
+	int *sdpid;
+	gint *preview_image_index;
+	GString *preview_label_string;
+	GPtrArray *preview_image_files;
+	GPtrArray *sd_cmd_array;
+	GtkWidget *preview_image_toggle_visibility_btn;
+	GtkWidget *preview_input_widget;
+	GtkWidget *preview_image_widget;
+	GtkWidget *preview_label;
+	GtkWidget *gen_btn;
+	GtkWidget *halt_btn;
+	GtkWidget *win;
+} GenerationSnapshotData;
 
 typedef struct {
 	GtkWidget *win;

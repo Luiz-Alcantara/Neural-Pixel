@@ -23,9 +23,9 @@ app_activate (GApplication *app, gpointer user_data)
 	PreviewImageData *preview_d;
 	preview_d = g_new0 (PreviewImageData, 1);
 	
-	preview_d->img_index_string = app_data->img_index_string;
-	preview_d->image_files = app_data->image_files;
-	preview_d->current_image_index = &app_data->current_image_index;
+	preview_d->img_index_string = app_data->preview_label_string;
+	preview_d->image_files = app_data->preview_image_files;
+	preview_d->current_image_index = &app_data->preview_image_index;
 
 	//Defining GTK Widgets
 	GtkWidget *win;
@@ -806,9 +806,9 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_vexpand (boxr_img, TRUE);
 	gtk_box_append (GTK_BOX (box_right), boxr_img);
 
-	if (app_data->image_files->len > 0) {
+	if (app_data->preview_image_files->len > 0) {
 		preview_img = gtk_picture_new_for_filename
-		(g_ptr_array_index(app_data->image_files, app_data->current_image_index));
+		(g_ptr_array_index(app_data->preview_image_files, app_data->preview_image_index));
 	} else {
 		g_printerr("No images in 'outputs' directory.\n");
 		preview_img = gtk_picture_new_for_filename
@@ -862,7 +862,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append(GTK_BOX(boxr_bottom_left_box), next_10_img_button);
 	
 	//Img index label
-	img_index_label = gtk_label_new (app_data->img_index_string->str);
+	img_index_label = gtk_label_new (app_data->preview_label_string->str);
 	gtk_widget_set_size_request(GTK_WIDGET(img_index_label), 120, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), img_index_label);
 	
@@ -976,8 +976,8 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (to_trash_btn, "clicked", G_CALLBACK (send_to_trash), preview_d);
 
 	load_png_info_d = g_new0 (LoadPNGData, 1);
-	load_png_info_d->image_files = app_data->image_files;
-	load_png_info_d->current_image_index = &app_data->current_image_index;
+	load_png_info_d->image_files = app_data->preview_image_files;
+	load_png_info_d->current_image_index = &app_data->preview_image_index;
 	load_png_info_d->win = win;
 	load_png_info_d->pos_tb = pos_tb;
 	load_png_info_d->neg_tb = neg_tb;
@@ -1005,8 +1005,8 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (clear_img2img_btn, "destroy", G_CALLBACK (on_clear_img2img_btn_destroy), load_img2img_file_d);
 	
 	load_img2img_from_preview_d = g_new0 (LoadImg2ImgFromPreviewData, 1);
-	load_img2img_from_preview_d->current_image_index = &app_data->current_image_index;
-	load_img2img_from_preview_d->image_files = app_data->image_files;
+	load_img2img_from_preview_d->current_image_index = &app_data->preview_image_index;
+	load_img2img_from_preview_d->image_files = app_data->preview_image_files;
 	load_img2img_from_preview_d->img2img_file_path = app_data->img2img_file_path;
 	load_img2img_from_preview_d->image_wgt = preview_img2img;
 	load_img2img_from_preview_d->img2img_expander = img2img_expander;
@@ -1014,53 +1014,15 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (set_img2img_from_preview_btn, "destroy", G_CALLBACK (on_set_img2img_from_preview_btn_destroy), load_img2img_from_preview_d);
 
 	gen_d = g_new0 (GenerationData, 1);
-	gen_d->checkpoint_string = app_data->checkpoint_string;
-	gen_d->vae_string = app_data->vae_string;
-	gen_d->cnet_string = app_data->cnet_string;
-	gen_d->upscaler_string = app_data->upscaler_string;
-	gen_d->clip_l_string = app_data->clip_l_string;
-	gen_d->clip_g_string = app_data->clip_g_string;
-	gen_d->text_enc_string = app_data->text_enc_string;
-	gen_d->img_index_string = app_data->img_index_string;
-	gen_d->image_files = app_data->image_files;
-	gen_d->sd_cmd_array = app_data->sd_cmd_array;
-	gen_d->sdpid = &app_data->sdpid;
-	gen_d->sampler_index = &app_data->sampler_index;
-	gen_d->scheduler_index = &app_data->scheduler_index;
-	gen_d->w_index = &app_data->w_index;
-	gen_d->h_index = &app_data->h_index;
-	gen_d->steps_value = &app_data->steps_value;
-	gen_d->kontext_bool = &app_data->kontext_bool;
-	gen_d->batch_count_value = &app_data->batch_count_value;
-	gen_d->sd_based_bool = &app_data->sd_based_bool;
-	gen_d->llm_bool = &app_data->llm_bool;
-	gen_d->cpu_bool = &app_data->cpu_bool;
-	gen_d->vt_bool = &app_data->vt_bool;
-	gen_d->ram_offload_bool = &app_data->ram_offload_bool;
-	gen_d->k_clip_bool = &app_data->k_clip_bool;
-	gen_d->k_cnet_bool = &app_data->k_cnet_bool;
-	gen_d->k_vae_bool = &app_data->k_vae_bool;
-	gen_d->fa_bool = &app_data->fa_bool;
-	gen_d->taesd_bool = &app_data->taesd_bool;
-	gen_d->update_cache_bool = &app_data->update_cache_bool;
-	gen_d->verbose_bool = &app_data->verbose_bool;
-	gen_d->total_time = &app_data->total_time;
-	gen_d->current_image_index = &app_data->current_image_index;
-	gen_d->seed_value = &app_data->seed_value;
-	gen_d->cfg_value = &app_data->cfg_value;
-	gen_d->cnet_value = &app_data->cnet_value;
-	gen_d->denoise_value = &app_data->denoise_value;
-	gen_d->clip_skip_value = &app_data->clip_skip_value;
-	gen_d->up_repeat_value = &app_data->up_repeat_value;
+	gen_d->app_data = app_data;
 	gen_d->pos_p = pos_tb;
 	gen_d->neg_p = neg_tb;
-	gen_d->image_widget = preview_img;
-	gen_d->img_index_label = img_index_label;
-	gen_d->show_img_btn = hide_img_btn;
+	gen_d->preview_image_widget = preview_img;
+	gen_d->preview_label = img_index_label;
+	gen_d->preview_image_toggle_visibility_btn = hide_img_btn;
 	gen_d->halt_btn = sd_halt_btn;
 	gen_d->win = win;
-	gen_d->img2img_file_path = app_data->img2img_file_path;
-	g_signal_connect (generate_btn, "clicked", G_CALLBACK (generate_cb), gen_d);
+	g_signal_connect (generate_btn, "clicked", G_CALLBACK (prepare_gen_data), gen_d);
 	g_signal_connect (generate_btn, "destroy", G_CALLBACK (on_generate_btn_destroy), gen_d);
 
 	g_signal_connect (info_btn, "clicked", G_CALLBACK (show_info_message), win);
@@ -1136,14 +1098,14 @@ main (int argc, char **argv)
 		return 1;
 	}
 	
-	data->img_index_string = g_string_new("0 / 0");
-	if (data->img_index_string == NULL) {
+	data->preview_label_string = g_string_new("0 / 0");
+	if (data->preview_label_string == NULL) {
 		g_error("Failed to allocate GString.");
 		return 1;
 	}
 	
-	data->image_files = g_ptr_array_new_full(1, g_free);
-	if (data->image_files == NULL) {
+	data->preview_image_files = g_ptr_array_new_full(1, g_free);
+	if (data->preview_image_files == NULL) {
 		g_error("Failed to allocate GPtrArray.");
 		return 1;
 	}
@@ -1154,7 +1116,7 @@ main (int argc, char **argv)
 		return 1;
 	}
 	
-	data->current_image_index = 0;
+	data->preview_image_index = 0;
 	data->sdpid = 0;
 	
 	int s;

@@ -253,11 +253,11 @@ void load_cache(gpointer user_data)
 	if (check_file_exists(cache_filename, 1) == 1) {
 		AppStartData *data = user_data;
 		
-		get_png_files(data->image_files);
+		get_png_files(data->preview_image_files);
 		
 		char *img_str = ini_file_get_value(cache_filename, "last_image_path");
 		if (img_str && check_file_exists(img_str, 1) == 1) {
-			set_current_image_index(img_str + 2, data->img_index_string, data->image_files, &data->current_image_index, NULL);
+			set_current_image_index(img_str + 2, data->preview_label_string, data->preview_image_files, &data->preview_image_index, -1);
 		} else {
 			g_printerr("Error loading image: The file '%s' is missing, corrupted, or invalid.\n", img_str);
 		}
@@ -498,7 +498,7 @@ void load_cache(gpointer user_data)
 	}
 }
 
-void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscaler, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_text_enc, char *pp, char *np, char *img_num)
+void update_cache(GenerationSnapshotData *data)
 {
 	FILE *pcf = fopen(".cache/pp_cache", "wb");
 	FILE *ncf = fopen(".cache/np_cache", "wb");
@@ -508,49 +508,45 @@ void update_cache(GenerationData *data, gchar *sel_checkpoint, gchar *sel_vae, g
 		return;
 	}
 
-	fprintf(pcf, "%s", pp);
+	fprintf(pcf, "%s", data->positive_prompt);
 	fclose(pcf);
 
-	fprintf(ncf, "%s", np);
+	fprintf(ncf, "%s", data->negative_prompt);
 	fclose(ncf);
 
-	#ifdef _WIN32
-		fprintf(cf, "last_image_path=.\\outputs\\IMG_%s.png\n", img_num);
-	#else
-		fprintf(cf, "last_image_path=./outputs/IMG_%s.png\n", img_num);
-	#endif
-	fprintf(cf, "checkpoint=%s\n", sel_checkpoint);
-	fprintf(cf, "vae=%s\n", sel_vae);
-	fprintf(cf, "cnet=%s\n", sel_cnet);
-	fprintf(cf, "upscaler=%s\n", sel_upscaler);
-	fprintf(cf, "clip_l=%s\n", sel_clip_l);
-	fprintf(cf, "clip_g=%s\n", sel_clip_g);
-	fprintf(cf, "text_enc=%s\n", sel_text_enc);
-	fprintf(cf, "sampler_index=%d\n", *data->sampler_index);
-	fprintf(cf, "scheduler_index=%d\n", *data->scheduler_index);
-	fprintf(cf, "img_width_index=%d\n", *data->w_index);
-	fprintf(cf, "img_height_index=%d\n", *data->h_index);
-	fprintf(cf, "n_steps=%.1f\n", *data->steps_value);
-	fprintf(cf, "batch_count=%.1f\n", *data->batch_count_value);
-	fprintf(cf, "kontext_bool=%d\n", *data->kontext_bool);
-	fprintf(cf, "sd_based_bool=%d\n", *data->sd_based_bool);
-	fprintf(cf, "llm_bool=%d\n", *data->llm_bool);
-	fprintf(cf, "cpu_mode_bool=%d\n", *data->cpu_bool);
-	fprintf(cf, "vae_tiling_bool=%d\n", *data->vt_bool);
-	fprintf(cf, "ram_offload_bool=%d\n", *data->ram_offload_bool);
-	fprintf(cf, "keep_clip_bool=%d\n", *data->k_clip_bool);
-	fprintf(cf, "keep_cnet_bool=%d\n", *data->k_cnet_bool);
-	fprintf(cf, "keep_vae_bool=%d\n", *data->k_vae_bool);
-	fprintf(cf, "flash_attention_bool=%d\n", *data->fa_bool);
-	fprintf(cf, "taesd_bool=%d\n", *data->taesd_bool);
+	fprintf(cf, "last_image_path=%s\n", data->output_path);
+	fprintf(cf, "checkpoint=%s\n", data->checkpoint_filename);
+	fprintf(cf, "vae=%s\n", data->vae_filename);
+	fprintf(cf, "cnet=%s\n", data->cnet_filename);
+	fprintf(cf, "upscaler=%s\n", data->upscaler_filename);
+	fprintf(cf, "clip_l=%s\n", data->clip_l_filename);
+	fprintf(cf, "clip_g=%s\n", data->clip_g_filename);
+	fprintf(cf, "text_enc=%s\n", data->text_enc_filename);
+	fprintf(cf, "sampler_index=%d\n", data->sampler_index);
+	fprintf(cf, "scheduler_index=%d\n", data->scheduler_index);
+	fprintf(cf, "img_width_index=%d\n", data->width_index);
+	fprintf(cf, "img_height_index=%d\n", data->height_index);
+	fprintf(cf, "n_steps=%.1f\n", (float)data->step_count_value);
+	fprintf(cf, "batch_count=%.1f\n", (float)data->batch_count_value);
+	fprintf(cf, "kontext_bool=%d\n", data->kontext_enabled);
+	fprintf(cf, "sd_based_bool=%d\n", data->sd_based_enabled);
+	fprintf(cf, "llm_bool=%d\n", data->llm_mode_enabled);
+	fprintf(cf, "cpu_mode_bool=%d\n", data->cpu_mode_enabled);
+	fprintf(cf, "vae_tiling_bool=%d\n", data->vae_tiling_enabled);
+	fprintf(cf, "ram_offload_bool=%d\n", data->ram_offload_enabled);
+	fprintf(cf, "keep_clip_bool=%d\n", data->keep_clip_cpu_enabled);
+	fprintf(cf, "keep_cnet_bool=%d\n", data->keep_cnet_cpu_enabled);
+	fprintf(cf, "keep_vae_bool=%d\n", data->keep_vae_cpu_enabled);
+	fprintf(cf, "flash_attention_bool=%d\n", data->flash_att_enabled);
+	fprintf(cf, "taesd_bool=%d\n", data->taesd_enabled);
 	fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
-	fprintf(cf, "verbose_bool=%d\n", *data->verbose_bool);
-	fprintf(cf, "seed=%lld\n", *data->seed_value);
-	fprintf(cf, "cfg_scale=%.1f\n", *data->cfg_value);
-	fprintf(cf, "cnet_strength=%.2f\n", *data->cnet_value);
-	fprintf(cf, "denoise_strength=%.2f\n", *data->denoise_value);
-	fprintf(cf, "clip_skip=%.1f\n", *data->clip_skip_value);
-	fprintf(cf, "repeat_upscale=%.1f\n", *data->up_repeat_value);
+	fprintf(cf, "verbose_bool=%d\n", data->verbose_enabled);
+	fprintf(cf, "seed=%lld\n", data->seed_value);
+	fprintf(cf, "cfg_scale=%.1f\n", data->cfg_scale_value);
+	fprintf(cf, "cnet_strength=%.2f\n", data->cnet_strength_value);
+	fprintf(cf, "denoise_strength=%.2f\n", data->denoise_strength_value);
+	fprintf(cf, "clip_skip=%.1f\n", (float)data->clip_skip_value);
+	fprintf(cf, "repeat_upscale=%.1f\n", (float)data->upscale_passes_value);
 	fclose(cf);
 
 	return;
