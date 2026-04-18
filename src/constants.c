@@ -29,10 +29,10 @@ const size_t LIST_RESOLUTIONS_STR_COUNT = sizeof(LIST_RESOLUTIONS_STR) / sizeof(
 const char* LIST_STEPS_STR[] = {"1", "2", "4", "8", "12", "16", "20", "24", "30", "36", "42", "50", "60", NULL};
 const size_t LIST_STEPS_STR_COUNT = sizeof(LIST_STEPS_STR) / sizeof(LIST_STEPS_STR[0]);
 
-const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2mv2", "dpm++2s_a", "dpm2", "euler", "euler_a", "heun", "ipndm", "ipndm_v", "lcm", "tcd", NULL};
+const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2mv2", "dpm++2s_a", "dpm2", "er_sde", "euler", "euler_a", "heun", "ipndm", "ipndm_v", "lcm", "res_2s", "res_multistep", "tcd", NULL};
 const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);  
 
-const char* LIST_SCHEDULES[] = {"ays", "discrete", "exponential", "gits", "karras", "kl_optimal", "lcm", "sgm_uniform", "simple", "smoothstep", NULL};
+const char* LIST_SCHEDULES[] = {"ays", "bong_tangent", "discrete", "exponential", "gits", "karras", "kl_optimal", "lcm", "sgm_uniform", "simple", "smoothstep", NULL};
 const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]); 
  
 const char* POSITIVE_PROMPT = "masterpiece, ultra-detailed snow globe glowing softly on a wooden table, magical internal light illuminating a miniature winter village inside, tiny houses with warm windows, snow-covered pine trees, swirling snow particles, crystal glass sphere with smooth reflections, subtle frost and condensation, ornate metal base, cinematic lighting, dark cozy room background, deep shadows with soft rim light, volumetric glow, dreamy atmosphere, shallow depth of field, macro perspective, highly detailed, fantasy realism, dramatic contrast, beautiful composition";
