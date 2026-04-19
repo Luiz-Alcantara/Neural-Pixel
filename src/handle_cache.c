@@ -57,8 +57,8 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "scheduler_index=%d\n", DEFAULT_SCHEDULER);
 		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);
 		fprintf(cf, "img_height_index=%d\n", DEFAULT_SIZE);
-		fprintf(cf, "n_steps=%.1f\n", DEFAULT_N_STEPS);
-		fprintf(cf, "batch_count=%.1f\n", DEFAULT_BATCH_COUNT);
+		fprintf(cf, "n_steps=%d.0\n", DEFAULT_N_STEPS);
+		fprintf(cf, "batch_count=%d.0\n", DEFAULT_BATCH_COUNT);
 		fprintf(cf, "kontext_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
@@ -76,8 +76,8 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "cnet_strength=%.2f\n", DEFAULT_CNET_STRENGTH);
 		fprintf(cf, "denoise_strength=%.2f\n", DEFAULT_DENOISE);
-		fprintf(cf, "clip_skip=%.1f\n", DEFAULT_CLIP_SKIP);
-		fprintf(cf, "repeat_upscale=%.1f\n", DEFAULT_RP_UPSCALE);
+		fprintf(cf, "clip_skip=%d\n", DEFAULT_CLIP_SKIP);
+		fprintf(cf, "repeat_upscale=%d.0\n", DEFAULT_RP_UPSCALE);
 		fclose(cf);
 	}
 	return;
@@ -514,7 +514,15 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(ncf, "%s", data->negative_prompt);
 	fclose(ncf);
 
-	fprintf(cf, "last_image_path=%s\n", data->output_path);
+	if (data->batch_count_value > 1) {
+		size_t result_img_len = strlen(data->output_path);
+		char *bn = g_strndup(data->output_path, result_img_len - 4);
+		fprintf(cf, "last_image_path=%s_%d.png\n", bn, data->batch_count_value - 1);
+		g_free(bn);
+	} else {
+		fprintf(cf, "last_image_path=%s\n", data->output_path);
+	}
+	
 	fprintf(cf, "checkpoint=%s\n", data->checkpoint_filename);
 	fprintf(cf, "vae=%s\n", data->vae_filename);
 	fprintf(cf, "cnet=%s\n", data->cnet_filename);

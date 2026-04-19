@@ -277,16 +277,27 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	*data->sdpid = 0;
 	const char *icon_n = gtk_button_get_icon_name (GTK_BUTTON(data->preview_image_toggle_visibility_btn));
 	
-	if (check_file_exists(data->output_path, 0) == 1) {
+	char *result_img_path;
+	
+	if (data->batch_count_value > 1) {
+		size_t result_img_len = strlen(data->output_path);
+		char *bn = g_strndup(data->output_path, result_img_len - 4);
+		result_img_path = g_strdup_printf("%s_%d.png", bn, data->batch_count_value - 1);
+		g_free(bn);
+	} else {
+		result_img_path = g_strdup(data->output_path);
+	}
+	
+	if (check_file_exists(result_img_path, 0) == 1) {
 		get_png_files(data->preview_image_files);
 		
-		set_current_image_index(data->output_path + 2,
+		set_current_image_index(result_img_path + 2,
 			data->preview_label_string, data->preview_image_files,
 			data->preview_image_index, data->total_time);
 		
 		if (data->preview_image_files->len > 0) {
 			if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
-				gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), data->output_path);
+				gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), result_img_path);
 			} else {
 				gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), EMPTY_IMG_PATH);
 			}
@@ -299,7 +310,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	} else {
 		g_printerr(
 			"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
-			data->output_path
+			result_img_path
 		);
 		gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
 	}
@@ -308,6 +319,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), TRUE);
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
 	g_ptr_array_set_size(data->sd_cmd_array, 0);
+	g_free(result_img_path);
 	g_free(data->output_path);
 	g_free(data->img2img_file_path);
 	g_free(data->positive_prompt);
