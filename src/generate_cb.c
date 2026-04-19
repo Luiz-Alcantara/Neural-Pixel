@@ -184,13 +184,13 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					data->gen_latent_completed = 1;
 					gtk_button_set_label(GTK_BUTTON(data->button), "Decoding latent(s)...");
 				} else if (strstr(line, "decoding") != NULL) {
-					data->is_decoding_latents = 1;
 					int x;
 					int n_dec_latents;
 
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%i - decoding %i latents",
 					&x, &n_dec_latents) == 2) {
+						data->is_decoding_latents = 1;
 						gtk_button_set_label(GTK_BUTTON(data->button), "Decoding...");
 						data->n_current_latent++;
 					}
