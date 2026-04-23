@@ -268,16 +268,17 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			strncpy(vae_str, start, len);
 			vae_str[len] = '\0';
 			
-			GtkWidget *vae_dd = data->vae_dd;
-			GtkStringList *vae_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(vae_dd)));
+			GtkStringList *vae_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(data->vae_dd)));
 			int vae_i = check_gtk_list_contains_item(vae_items, vae_str);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_dd), vae_i);
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), vae_i);
 		} else {
 			fprintf(stderr, "Failed to parse VAE data.\n");
+			if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
 			n_err++;
 		}
 	} else {
 		fprintf(stderr, "Failed to parse VAE data.\n");
+		if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
 		n_err++;
 	}
 	
