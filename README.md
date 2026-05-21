@@ -37,6 +37,7 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 |--------|-------|
 | txt2img | Generate images from text prompts |
 | img2img / Flux Kontext | Transform existing images using prompts |
+| Mask-based Inpainting | Modify specific areas of an image using a mask |
 
 ## Supported Weight Formats
 | Supported weight formats |
