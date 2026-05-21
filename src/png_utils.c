@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <png.h>
 #include <stdio.h>
+#include <arpa/inet.h>
 #include "constants.h"
 #include "file_utils.h"
 #include "str_utils.h"
@@ -9,6 +10,33 @@
 
 #define MAX_METADATA_PROMPT_LENGTH 2048
 #define MAX_PROPERTY_LENGTH 512
+
+int get_png_dimensions(const char *filename, uint32_t *w, uint32_t *h)
+{
+	const uint8_t png_signature[8] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+	uint8_t buffer[8];
+	uint32_t data[2];
+
+	FILE *f = fopen(filename, "rb");
+	if (!f) { g_printerr("Could not open png file: '%s'\n", filename); return -1; }
+
+	if (fread(buffer, 1, 8, f) != 8) { fclose(f); return -1; }
+
+	if (memcmp(buffer, png_signature, 8) != 0) { fclose(f); g_printerr("The file is not a png file."); return -1; }
+
+	if (fseek(f, 8, SEEK_CUR) != 0) { fclose(f); return -1; }
+
+	if (fread(data, 4, 2, f) != 2) { fclose(f); return -1; }
+
+	fclose(f);
+
+	*w = ntohl(data[0]);
+	*h = ntohl(data[1]);
+	
+	printf("Ref image dimensions: W=%dx%d\n", *w, *h);
+
+	return 0;
+}
 
 static void set_png_metadata(gchar *path, gpointer user_data)
 {

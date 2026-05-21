@@ -20,6 +20,7 @@ typedef struct {
 	int w_index;
 	int h_index;
 	int kontext_bool;
+	int inpaint_bool;
 	int sd_based_bool;
 	int llm_bool;
 	int cpu_bool;
@@ -81,6 +82,7 @@ typedef struct {
 	char *output_path;
 	char *img2img_file_path;
 	int kontext_enabled;
+	int inpaint_enabled;
 	char *positive_prompt;
 	char *negative_prompt;
 	char *checkpoint_filename;
@@ -132,7 +134,9 @@ typedef struct {
 typedef struct {
 	GtkWidget *win;
 	GtkWidget *img2img_expander;
+	GtkWidget *overlay_img2img;
 	GtkWidget *image_wgt;
+	GtkWidget *inpaint_check;
 	GString *img2img_file_path;
 	GCancellable *cancellable;
 } LoadImg2ImgData;
@@ -163,6 +167,23 @@ typedef struct {
 	GtkWidget *scheduler_dd;
 	GCancellable *cancellable;
 } LoadPNGData;
+
+typedef struct {
+	GtkWidget *main_win;
+	GString *img2img_file_path;
+} MaskWinData;
+
+typedef struct {
+	GtkWidget *overlay_img2img;
+	GtkWidget *inpaint_check;
+	GtkWidget *drawing_area;
+	GtkWidget *brush_width_spin;
+	cairo_surface_t *surface;
+	double last_x;
+	double last_y;
+	int ref_w;
+	int ref_h;
+} MaskData;
 
 typedef struct {
 	char *var_str;

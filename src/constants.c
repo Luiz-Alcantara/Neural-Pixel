@@ -40,6 +40,7 @@ const char* NEGATIVE_PROMPT = "worst quality, low quality, blurry, flat lighting
 const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const char* EMPTY_IMG_PATH = "./resources/empty.png";
+const char* MASK_IMG_PATH = ".cache/mask.png";
 const int DEFAULT_MODELS = 0;
 const int DEFAULT_SAMPLER = 7;
 const int DEFAULT_SCHEDULER = 5;

@@ -9,6 +9,7 @@
 #include "file_utils.h"
 #include "generate_cb.h"
 #include "handle_cache.h"
+#include "mask_utils.h"
 #include "png_utils.h"
 #include "str_utils.h"
 #include "structs.h"
@@ -44,9 +45,10 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *info_btn, *reload_btn, *reset_default_btn, *load_from_img_btn;
 	
 	GtkWidget *img2img_expander;
-	GtkWidget *box_img2img, *box_img2img_buttons, *box_preview_img2img;
+	GtkWidget *box_img2img, *box_img2img_top_buttons, *box_preview_img2img, *box_img2img_bottom_buttons;
 	GtkWidget *load_img2img_btn, *kontext_check, *clear_img2img_btn;
-	GtkWidget *preview_img2img;
+	GtkWidget *overlay_img2img, *preview_img2img;
+	GtkWidget *mask_img2img_btn, *clear_mask_btn, *inpaint_check;
 
 	GtkWidget *box_prompts ,*box_pos_prompt, *box_neg_prompt;
 	
@@ -205,29 +207,29 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_set_homogeneous (GTK_BOX (box_img2img), FALSE);
 	gtk_expander_set_child(GTK_EXPANDER(img2img_expander), box_img2img);
 	
-	box_img2img_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (box_img2img_buttons), FALSE);
-	gtk_box_append (GTK_BOX (box_img2img), box_img2img_buttons);
+	box_img2img_top_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_img2img_top_buttons), FALSE);
+	gtk_box_append (GTK_BOX (box_img2img), box_img2img_top_buttons);
 	
 	load_img2img_btn = gtk_button_new_with_label ("Choose Image");
 	gtk_widget_set_hexpand (load_img2img_btn, TRUE);
 	gtk_widget_add_css_class(load_img2img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_img2img_btn),
 	"Select the source image that will be used for img2img, Flux Kontext, or ControlNet processing.");
-	gtk_box_append (GTK_BOX (box_img2img_buttons), load_img2img_btn);
+	gtk_box_append (GTK_BOX (box_img2img_top_buttons), load_img2img_btn);
 	
 	clear_img2img_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
 	gtk_widget_add_css_class(clear_img2img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(clear_img2img_btn),
 	"Clear the source image to stop using it as a template.");
-	gtk_box_append (GTK_BOX (box_img2img_buttons), clear_img2img_btn);
+	gtk_box_append (GTK_BOX (box_img2img_top_buttons), clear_img2img_btn);
 	
 	kontext_check = gtk_check_button_new_with_label("Kontext");
 	gtk_widget_add_css_class(kontext_check, "custom_check");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(kontext_check), app_data->kontext_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(kontext_check), "Enables Flux-Kontext for superior structural adherence to your reference image.\nEnsure you are using a compatible Kontext checkpoint.");
 	g_signal_connect(kontext_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->kontext_bool);
-	gtk_box_append (GTK_BOX (box_img2img_buttons), kontext_check);
+	gtk_box_append (GTK_BOX (box_img2img_top_buttons), kontext_check);
 	
 	box_preview_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_add_css_class(box_preview_img2img, "img_preview_box");
@@ -236,8 +238,39 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_vexpand (box_preview_img2img, FALSE);
 	gtk_box_append (GTK_BOX (box_img2img), box_preview_img2img);
 	
+	overlay_img2img = gtk_overlay_new();
+	gtk_widget_set_size_request(overlay_img2img, 412, 400);
+	
 	preview_img2img = gtk_picture_new_for_filename(EMPTY_IMG_PATH);
-	gtk_box_append (GTK_BOX (box_preview_img2img), preview_img2img);
+	gtk_widget_set_valign(preview_img2img, GTK_ALIGN_CENTER);
+	gtk_widget_set_halign(preview_img2img, GTK_ALIGN_CENTER);
+	
+	gtk_overlay_set_child(GTK_OVERLAY(overlay_img2img), preview_img2img);
+	gtk_box_append (GTK_BOX (box_preview_img2img), overlay_img2img);
+	
+	box_img2img_bottom_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_img2img_bottom_buttons), FALSE);
+	gtk_box_append (GTK_BOX (box_img2img), box_img2img_bottom_buttons);
+	
+	mask_img2img_btn = gtk_button_new_with_label ("Draw Mask");
+	gtk_widget_set_hexpand (mask_img2img_btn, TRUE);
+	gtk_widget_add_css_class(mask_img2img_btn, "custom_btn");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(mask_img2img_btn),
+	"Create an inpaint mask to modify specific areas.");
+	gtk_box_append (GTK_BOX (box_img2img_bottom_buttons), mask_img2img_btn);
+	
+	clear_mask_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
+	gtk_widget_add_css_class(clear_mask_btn, "custom_btn");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(clear_mask_btn),
+	"Delete mask image.");
+	gtk_box_append (GTK_BOX (box_img2img_bottom_buttons), clear_mask_btn);
+	
+	inpaint_check = gtk_check_button_new_with_label("Enable Inpaint");
+	gtk_widget_add_css_class(inpaint_check, "custom_check");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(inpaint_check), FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(inpaint_check), "Enables Inpainting for precise modification of masked regions within your image.\nFor optimal results try using a inpainting-specific model.");
+	g_signal_connect(inpaint_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->inpaint_bool);
+	gtk_box_append (GTK_BOX (box_img2img_bottom_buttons), inpaint_check);
 
 	//Set Prompts Box
 	box_prompts = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
@@ -998,10 +1031,14 @@ app_activate (GApplication *app, gpointer user_data)
 	load_img2img_file_d = g_new0 (LoadImg2ImgData, 1);
 	load_img2img_file_d->win = win;
 	load_img2img_file_d->img2img_expander = img2img_expander;
+	load_img2img_file_d->overlay_img2img = overlay_img2img;
+	load_img2img_file_d->inpaint_check = inpaint_check;
 	load_img2img_file_d->image_wgt = preview_img2img;
 	load_img2img_file_d->img2img_file_path = app_data->img2img_file_path;
 	g_signal_connect (load_img2img_btn, "clicked", G_CALLBACK (load_img2img_btn_cb), load_img2img_file_d);
 	g_signal_connect (clear_img2img_btn, "clicked", G_CALLBACK (clear_img2img_btn_cb), load_img2img_file_d);
+	g_signal_connect (mask_img2img_btn, "clicked", G_CALLBACK (show_mask_area), load_img2img_file_d);
+	g_signal_connect (clear_mask_btn, "clicked", G_CALLBACK (clear_mask_btn_cb), load_img2img_file_d);
 	g_signal_connect (clear_img2img_btn, "destroy", G_CALLBACK (on_clear_img2img_btn_destroy), load_img2img_file_d);
 	
 	load_img2img_from_preview_d = g_new0 (LoadImg2ImgFromPreviewData, 1);

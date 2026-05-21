@@ -38,6 +38,7 @@ extern const char* NEGATIVE_PROMPT;
 extern const char* OPTIONAL_ITEMS;
 extern const char* DEFAULT_IMG_PATH;
 extern const char* EMPTY_IMG_PATH;
+extern const char* MASK_IMG_PATH;
 extern const int DEFAULT_MODELS;
 extern const int DEFAULT_SAMPLER;
 extern const int DEFAULT_SCHEDULER;

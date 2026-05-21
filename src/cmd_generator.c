@@ -62,6 +62,17 @@ void gen_sd_string(GenerationSnapshotData *data)
 		} else {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled == 1 ? "--ref-image" : "--init-img"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
+			if (data->inpaint_enabled == 1) {
+				int result = check_file_exists((char *)MASK_IMG_PATH, 0);
+				
+				if (result == 1) {
+					g_ptr_array_add(data->sd_cmd_array, g_strdup("--mask"));
+					g_ptr_array_add(data->sd_cmd_array, g_strdup(MASK_IMG_PATH));
+				} else {
+					show_error_message(data->win, "Could not find mask image.",
+					"Please check that you’ve saved the mask image.");
+				}
+			}
 		}
 	}
 

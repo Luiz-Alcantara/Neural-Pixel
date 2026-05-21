@@ -13,6 +13,10 @@ void array_strings_free(const char **list);
 
 void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
 
+void clear_img2img_overlay(GtkOverlay *overlay);
+
+void clear_mask_btn_cb (GtkButton *btn, gpointer user_data);
+
 gboolean close_app_callback (GtkWindow *win, gpointer user_data);
 
 static gboolean disable_scroll_cb (GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data);
@@ -34,6 +38,8 @@ void navigate_img_prev(GtkButton* btn, gpointer user_data);
 void navigate_img_next(GtkButton* btn, gpointer user_data);
 
 void navigate_10_img_next(GtkButton* btn, gpointer user_data);
+
+void on_add_mask_btn_destroy (GtkWindow *win, gpointer user_data);
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data);
 

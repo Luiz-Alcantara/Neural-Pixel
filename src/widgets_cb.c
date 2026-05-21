@@ -181,7 +181,7 @@ void array_strings_free (const char **list)
 	}
 }
 
-void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data)
+void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
 {
 	LoadImg2ImgData *data = user_data;
 	gtk_widget_remove_css_class(data->img2img_expander, "img2img_active");
@@ -189,6 +189,25 @@ void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data)
 	g_string_assign(gstr, "None");
 	GtkPicture *preview_img = GTK_PICTURE(data->image_wgt);
 	gtk_picture_set_filename(preview_img, EMPTY_IMG_PATH);
+}
+
+void clear_img2img_overlay(GtkOverlay *overlay)
+{
+	GtkWidget *base_child = gtk_overlay_get_child(overlay);
+	GtkWidget *child = gtk_widget_get_first_child(GTK_WIDGET(overlay));
+	
+	while (child != NULL) {
+		GtkWidget *next = gtk_widget_get_next_sibling(child);
+		if (child != base_child) gtk_overlay_remove_overlay(overlay, child);
+		child = next;
+	}
+}
+
+void clear_mask_btn_cb (GtkButton *btn, gpointer user_data)
+{
+	LoadImg2ImgData *data = user_data;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(data->inpaint_check), FALSE);
+	clear_img2img_overlay(GTK_OVERLAY(data->overlay_img2img));
 }
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)
@@ -318,6 +337,19 @@ void navigate_10_img_next(GtkButton* btn, gpointer user_data)
 {
 	navigate_images((PreviewImageData*)user_data, 10);
 }
+
+void on_add_mask_btn_destroy (GtkWindow *win, gpointer user_data)
+{
+	MaskData *data = (MaskData *)user_data;
+	
+	if (data->surface) {
+		cairo_surface_destroy(data->surface);
+		data->surface = NULL;
+	}
+	
+	g_free(data);
+}
+
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {

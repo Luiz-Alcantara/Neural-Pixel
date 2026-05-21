@@ -467,6 +467,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	
 	snapshot_data->img2img_file_path = g_strdup(app_data->img2img_file_path->str);
 	snapshot_data->kontext_enabled = app_data->kontext_bool;
+	snapshot_data->inpaint_enabled = app_data->inpaint_bool;
 	
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;
