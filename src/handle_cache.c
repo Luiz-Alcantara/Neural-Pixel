@@ -364,9 +364,11 @@ void load_cache(gpointer user_data)
 			data->kontext_bool = DISABLED_OPT;
 		}
 		
+		
 		char *inpaint_bool_str = ini_file_get_value(cache_filename, "inpaint_bool");
 		if (inpaint_bool_str) {
-			sscanf(inpaint_bool_str, "%d", &data->inpaint_bool);
+			//Keep it disabled at startup for now.
+			data->inpaint_bool = DISABLED_OPT;
 		} else {
 			data->inpaint_bool = DISABLED_OPT;
 		}
