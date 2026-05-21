@@ -350,9 +350,7 @@ void on_mask_area_destroy (GtkWindow *win, gpointer user_data)
 	g_free(data);
 	
 	//TODO: Search for better fix
-	#ifdef _WIN32
-		gtk_window_destroy(win);
-	#endif
+	gtk_window_destroy(win);
 }
 
 
