@@ -19,5 +19,9 @@ target_compile_options(neural_pixel PRIVATE ${GTK4_CFLAGS})
 
 target_link_libraries(neural_pixel PRIVATE PNG::PNG)
 
+if (WIN32)
+	target_link_libraries(neural_pixel PRIVATE ws2_32)
+endif()
+
 file(COPY resources/ DESTINATION ${CMAKE_BINARY_DIR}/resources)
 

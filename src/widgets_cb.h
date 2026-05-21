@@ -39,7 +39,7 @@ void navigate_img_next(GtkButton* btn, gpointer user_data);
 
 void navigate_10_img_next(GtkButton* btn, gpointer user_data);
 
-void on_add_mask_btn_destroy (GtkWindow *win, gpointer user_data);
+void on_mask_area_destroy (GtkWindow *win, gpointer user_data);
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data);
 

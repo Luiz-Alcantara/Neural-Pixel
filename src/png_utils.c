@@ -1,7 +1,12 @@
 #include <gtk/gtk.h>
 #include <png.h>
 #include <stdio.h>
-#include <arpa/inet.h>
+#ifdef _WIN32
+	#include <winsock2.h>
+	#include <stdint.h>
+#else
+	#include <arpa/inet.h>
+#endif
 #include "constants.h"
 #include "file_utils.h"
 #include "str_utils.h"

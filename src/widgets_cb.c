@@ -338,7 +338,7 @@ void navigate_10_img_next(GtkButton* btn, gpointer user_data)
 	navigate_images((PreviewImageData*)user_data, 10);
 }
 
-void on_add_mask_btn_destroy (GtkWindow *win, gpointer user_data)
+void on_mask_area_destroy (GtkWindow *win, gpointer user_data)
 {
 	MaskData *data = (MaskData *)user_data;
 	
@@ -348,6 +348,11 @@ void on_add_mask_btn_destroy (GtkWindow *win, gpointer user_data)
 	}
 	
 	g_free(data);
+	
+	//TODO: Search for better fix
+	#ifdef _WIN32
+		gtk_window_destroy(win);
+	#endif
 }
 
 

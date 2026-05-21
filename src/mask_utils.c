@@ -237,7 +237,7 @@ void show_mask_area (GtkWidget *wgt, gpointer user_data)
 	g_signal_connect(save_btn, "clicked", G_CALLBACK(save_png_mask), mask_data);
 	g_signal_connect(clear_btn, "clicked", G_CALLBACK(clear_canvas), mask_data);
 	g_signal_connect(done_btn, "clicked", G_CALLBACK(quit_btn_callback), mask_win);
-	g_signal_connect (mask_win, "close-request", G_CALLBACK (on_add_mask_btn_destroy), mask_data);
+	g_signal_connect (mask_win, "close-request", G_CALLBACK (on_mask_area_destroy), mask_data);
 
 	gtk_window_present(GTK_WINDOW(mask_win));
 }
