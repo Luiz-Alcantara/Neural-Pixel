@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.5.4";
+const char* APP_NAME_VERSION = "Neural Pixel v0.6.0";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -29,7 +29,7 @@ const size_t LIST_RESOLUTIONS_STR_COUNT = sizeof(LIST_RESOLUTIONS_STR) / sizeof(
 const char* LIST_STEPS_STR[] = {"1", "2", "4", "8", "12", "16", "20", "24", "30", "36", "42", "50", "60", NULL};
 const size_t LIST_STEPS_STR_COUNT = sizeof(LIST_STEPS_STR) / sizeof(LIST_STEPS_STR[0]);
 
-const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2mv2", "dpm++2s_a", "dpm2", "er_sde", "euler", "euler_a", "heun", "ipndm", "ipndm_v", "lcm", "res_2s", "res_multistep", "tcd", NULL};
+const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2mv2", "dpm++2s_a", "dpm2", "er_sde", "euler", "euler_a", "euler_a_cfg_pp", "euler_cfg_pp", "heun", "ipndm", "ipndm_v", "lcm", "res_2s", "res_multistep", "tcd", NULL};
 const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);  
 
 const char* LIST_SCHEDULES[] = {"ays", "bong_tangent", "discrete", "exponential", "gits", "karras", "kl_optimal", "lcm", "sgm_uniform", "simple", "smoothstep", NULL};
