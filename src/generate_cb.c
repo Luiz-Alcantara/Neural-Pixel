@@ -75,83 +75,50 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 	} else if (bytes_read > 0) {
 		g_string_append_len(data->stdout_string, data->read_buffer, bytes_read);
 
+		gsize r = 0, w = 0;
+		
+		while (r < data->stdout_string->len) {
+			if (data->stdout_string->str[r] != '\0') data->stdout_string->str[w++] = data->stdout_string->str[r]; r++;
+		}
+		
+		data->stdout_string->len = w;
+		data->stdout_string->str[w] = '\0';
+
 		while (TRUE) {
-			char *clear_escape = strstr(data->stdout_string->str, "\033[K");
-			char *return_escape = strchr(data->stdout_string->str, '\r');
-			char *newline_escape = strchr(data->stdout_string->str, '\n');
+			gsize buf_len = data->stdout_string->len;
+			char *buf = data->stdout_string->str;
 			
-			char *progress_escape = clear_escape ? clear_escape : return_escape;
-			size_t progress_escape_len = clear_escape ? 3 : 1;
-
-			if (progress_escape) {
-				size_t end_index = (progress_escape - data->stdout_string->str) + progress_escape_len;
-				char *raw_string = progress_escape_len == 3 ? g_strndup(data->stdout_string->str, end_index) : g_strdup(progress_escape + 1);
-				
-				char *final_string = progress_escape_len == 3 ? strrchr(raw_string, '\r') : raw_string;
-				
-				if (final_string) {
-					if (data->verbose_bool) {
-						printf("%s\n", final_string);
-					}
-					
-					const char *last_pipe = strrchr(final_string, '|');
-					if (last_pipe) {
-						int step, steps;
-						float time_or_speed;
-						char unit_part1[10], unit_part2[10];
-
-						if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]", &step, &steps, &time_or_speed, unit_part1, unit_part2) == 5) {
-							int percentage = (int)(((float)step / steps) * 100 + 0.5);
-							char progress_label[64];
-							
-							int written = 0;
-							
-							if (data->is_img2img_encoding) {
-								written = snprintf(progress_label,
-									sizeof(progress_label), "Encoding... %d%% (1/1) at %.2f%s/%s",
-									percentage, time_or_speed, unit_part1, unit_part2);
-							} else if (data->is_generating_latent) {
-								written = snprintf(progress_label,
-									sizeof(progress_label), "Generating... %d%% (%d/%d) at %.2f%s/%s",
-									percentage, data->n_current_image, data->n_total_images, time_or_speed, unit_part1, unit_part2);
-							} else if (data->is_decoding_latents) {
-								written = snprintf(progress_label,
-									sizeof(progress_label), "Decoding... %d%% (%d/%d) at %.2f%s/%s",
-									percentage, data->n_current_latent, data->n_total_images, time_or_speed, unit_part1, unit_part2);
-							} else if (data->is_upscaling) {
-								written = snprintf(progress_label,
-									sizeof(progress_label), "Upscaling... %d%% (%d/%d) at %.2f%s/%s",
-									percentage, data->n_current_upscale, data->n_total_images, time_or_speed, unit_part1, unit_part2);
-							}
-							
-							if (written > 0) {
-								gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
-							} else {
-								gtk_button_set_label(GTK_BUTTON(data->button), "Loading...");
-								g_printerr("Error: Could not fetch progress from line: %s\n", final_string);
-							}
-						}
+			char *clear_escape = g_strstr_len(buf, buf_len, "\033[K");
+			char *return_escape = memchr(buf, '\r', buf_len);
+			char *newline_escape = memchr(buf, '\n', buf_len);
+			
+			char *progress_cr  = NULL;
+			char *progress_esc = NULL;
+		
+			if (clear_escape) {
+				const char *p = clear_escape;
+				while (p > buf) {
+					--p;
+					if (*p == '\n') { break; }
+					if (*p == '\r') {
+						progress_cr  = (char *)p;
+						progress_esc = clear_escape;
+						break;
 					}
 				}
-
-				g_free(raw_string);
-				g_string_erase(data->stdout_string, 0, end_index);
-				continue;
 			}
-
-			if (newline_escape) {
-				size_t end_index = (newline_escape - data->stdout_string->str);
-				char *line = g_strndup(data->stdout_string->str, end_index);
+		
+			if (newline_escape && (!progress_esc || newline_escape < progress_cr)) {
+				size_t end_index = newline_escape - buf;
+				char *line = g_strndup(buf, end_index);
 				
 				// Avoid "unused lora tensor" span
-				if (data->verbose_bool && strstr(line, "[WARN ] lora.hpp:") == NULL) {
-					printf("%s\n", line);
-				}
+				if (data->verbose_bool && strstr(line, "[WARN ] lora.hpp:") == NULL) printf("%s\n", line);
 				
 				if (strstr(line, "target") != NULL) {
 					int x;
 					int n_img2img_tiles;
-
+		
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%i - target t_enc is %i steps",
 					&x, &n_img2img_tiles) == 2) {
@@ -167,12 +134,12 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					int n_current_image;
 					int n_total_images;
 					long long int img_seed;
-
+		
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%i - generating image: %i/%i - seed %lld",
 					&x, &n_current_image, &n_total_images, &img_seed) == 4) {
 						gtk_button_set_label(GTK_BUTTON(data->button), "Generating...");
-
+		
 						data->is_generating_latent = 1;
 						data->n_current_image = n_current_image;
 						data->n_total_images = n_total_images;
@@ -186,7 +153,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				} else if (strstr(line, "decoding") != NULL) {
 					int x;
 					int n_dec_latents;
-
+		
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%i - decoding %i latents",
 					&x, &n_dec_latents) == 2) {
@@ -225,7 +192,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					int oh;
 					int nw;
 					int nh;
-
+		
 					if (sscanf(line,
 					"[INFO ] upscaler.cpp:%i   - upscaling from (%i x %i) to (%i x %i)",
 					&x, &ow, &oh, &nw, &nh) == 5 ) {
@@ -244,19 +211,89 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						g_printerr("Error: Could not extract time from string: \"%s\"\n", line);
 					}
 				}
-
+				
 				g_free(line);
 				g_string_erase(data->stdout_string, 0, end_index + 1);
 				continue;
 			}
-
+		
+			if (progress_esc) {
+				size_t end_index = (progress_esc - buf) + 3;
+				
+				size_t seg_len   = progress_esc - progress_cr;
+				char *raw_string = g_strndup(progress_cr, seg_len + 3);
+				
+				char *final_string = raw_string;
+				
+				if (final_string) {
+					if (data->verbose_bool)
+					printf("%s\n", final_string);
+					
+					const char *last_pipe = strrchr(final_string, '|');
+					if (last_pipe) {
+						int step, steps;
+						float time_or_speed;
+						char unit_part1[10], unit_part2[10];
+						
+						if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]",
+						&step, &steps, &time_or_speed, unit_part1, unit_part2) == 5) {
+							
+							int percentage = (int)(((float)step / steps) * 100 + 0.5f);
+							char progress_label[64];
+							int written = 0;
+							
+							if (data->is_img2img_encoding) {
+								written = snprintf(progress_label, sizeof(progress_label),
+									"Encoding... %d%% (1/1) at %.2f%s/%s",
+									percentage, time_or_speed, unit_part1, unit_part2);	
+							} else if (data->is_generating_latent) {
+								written = snprintf(progress_label, sizeof(progress_label),
+									"Generating... %d%% (%d/%d) at %.2f%s/%s",
+									percentage, data->n_current_image, data->n_total_images,
+									time_or_speed, unit_part1, unit_part2);
+							} else if (data->is_decoding_latents) {
+								written = snprintf(progress_label, sizeof(progress_label),
+									"Decoding... %d%% (%d/%d) at %.2f%s/%s",
+									percentage, data->n_current_latent, data->n_total_images,
+									time_or_speed, unit_part1, unit_part2);
+							} else if (data->is_upscaling) {
+								written = snprintf(progress_label, sizeof(progress_label),
+									"Upscaling... %d%% (%d/%d) at %.2f%s/%s",
+									percentage, data->n_current_upscale, data->n_total_images,
+									time_or_speed, unit_part1, unit_part2);
+							}
+							
+							if (written > 0) {
+								gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
+							} else {
+								gtk_button_set_label(GTK_BUTTON(data->button), "Loading...");
+								g_printerr("Error: Could not fetch progress from line: %s\n", final_string);
+							}
+						}
+					}
+				}
+			
+				g_free(raw_string);
+				g_string_erase(data->stdout_string, 0, end_index);
+				continue;
+    			}
+		
+			if (!newline_escape && !progress_esc) break;
+			
+			if (return_escape && newline_escape && return_escape < newline_escape) {
+				g_string_erase(data->stdout_string, 0, (return_escape - buf) + 1);
+				continue;
+			}
+			
 			break;
 		}
+		
 		g_input_stream_read_async(G_INPUT_STREAM(stream_obj), data->read_buffer, sizeof(data->read_buffer), 
 		G_PRIORITY_DEFAULT, NULL, 
 		show_progress, user_data);
 		
 	} else {
+		printf("[NP DEBUG] Closing stdout stream\n");
 		g_input_stream_close(G_INPUT_STREAM(stream_obj), NULL, NULL);
 		data->out_pipe_stream = NULL;
 		if (data->stdout_string != NULL) {
