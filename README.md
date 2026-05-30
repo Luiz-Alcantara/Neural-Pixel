@@ -12,17 +12,17 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 
 
 ## Supported Models
-| Supported base models | Supported variations | Notes |
+| Supported models | Supported variations | Notes |
 |--------|--------|-------|
 | Anima  | Base | The turbo LoRA also works |
-| SD 1.4 | Not tested | None |
+| SD 1.4 | Only base tested | None |
 | SD 1.5 | Base, LCM, Turbo & Hyper | Some SD 1.5 Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
 | SD 2.X | Only base tested | None |
 |  SDXL  | Base, Lightning, Hyper, Pony, Illustrious & NoobAI | Some SDXL Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
-| SD 3.X | Not tested | None |
+| SD 3.X | Only base tested | None |
 | Flux.1 | Dev, Schnell and Kontext | Flux models needs to be converted to `GGUF` to work, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/flux.md). You'll also need: [Flux VAE](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/ae.safetensors), [clip_l](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/clip_l.safetensors), and [t5xxl](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/t5xxl_fp16.safetensors). |
 | Chroma1 | Base, Radiance | None |
-| Qwen | Not tested | None |
+| Qwen | Only base tested | None |
 
 ## Supported Add-ons
 | Supported add-ons | Notes |
