@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.6.0";
+const char* APP_NAME_VERSION = "Neural Pixel v0.7.0";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -33,7 +33,13 @@ const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2mv2", "dpm++2s_
 const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);  
 
 const char* LIST_SCHEDULES[] = {"ays", "bong_tangent", "discrete", "exponential", "gits", "karras", "kl_optimal", "lcm", "sgm_uniform", "simple", "smoothstep", NULL};
-const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]); 
+const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]);
+
+const char* LIST_BACKENDS[] = {"auto", "cpu", "cuda0", "cuda1", "rocm0", "rocm1", "sycl0", "sycl1", "vulkan0", "vulkan1", NULL};
+const size_t LIST_BACKENDS_COUNT = sizeof(LIST_BACKENDS) / sizeof(LIST_BACKENDS[0]);
+
+const char* LIST_VAE_TILE_SIZES[] = {"Disabled", "32x32", "48x48", "64x64", "80x80", "96x96", "128x128", NULL};
+const size_t LIST_VAE_TILE_SIZES_COUNT = sizeof(LIST_VAE_TILE_SIZES) / sizeof(LIST_VAE_TILE_SIZES[0]);
  
 const char* POSITIVE_PROMPT = "masterpiece, ultra-detailed snow globe glowing softly on a wooden table, magical internal light illuminating a miniature winter village inside, tiny houses with warm windows, snow-covered pine trees, swirling snow particles, crystal glass sphere with smooth reflections, subtle frost and condensation, ornate metal base, cinematic lighting, dark cozy room background, deep shadows with soft rim light, volumetric glow, dreamy atmosphere, shallow depth of field, macro perspective, highly detailed, fantasy realism, dramatic contrast, beautiful composition";
 const char* NEGATIVE_PROMPT = "worst quality, low quality, blurry, flat lighting, harsh shadows, oversaturated, plastic look, bad reflections, warped glass, extra objects, cluttered composition, cartoon, anime, photorealistic face, text, watermark, logo";
@@ -41,6 +47,7 @@ const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const char* EMPTY_IMG_PATH = "./resources/empty.png";
 const char* MASK_IMG_PATH = ".cache/mask.png";
+const int DEFAULT_BACKEND = 0;
 const int DEFAULT_MODELS = 0;
 const int DEFAULT_SAMPLER = 7;
 const int DEFAULT_SCHEDULER = 5;

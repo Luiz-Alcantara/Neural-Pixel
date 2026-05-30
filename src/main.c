@@ -101,9 +101,47 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *upscale_str_lab, *upscale_spin;
 	GtkWidget *cnet_strength_lab, *cnet_strength_spin;
 	
-	GtkWidget *extra_opts_expander, *box_extra_opts, *box_extra_opts_col1, *box_extra_opts_col2;
+	GtkWidget *extra_opts_expander, *box_extra_opts, *box_extra_opts_row1, *box_extra_opts_col1, *box_extra_opts_col2;
 	
-	GtkWidget *cpu_check, *tiling_check, *ram_offload_check, *clip_check, *cnet_check, *vae_check, *flash_check, *taesd_check, *update_cache_check, *verbose_check;
+	GtkWidget *fa_separator;
+	GtkWidget *fa_toggle_lab;
+	GtkWidget *box_fa_toggle;
+	GtkWidget *fa_off_btn, *fa_diffusion_btn, *fa_full_btn;
+	GtkWidget *mmap_check, *taesd_check, *update_cache_check, *verbose_check;
+	
+	GtkWidget *vae_tiling_separator;
+	GtkWidget *vae_tiling_lab;
+	GtkWidget *vae_tiling_dd;
+	
+	GtkWidget *model_backend_separator;
+	GtkWidget *model_backend_lab;
+	GtkWidget *box_model_backend, *box_model_backend_col1, *box_model_backend_col2;
+	GtkWidget *model_runtime_backend_lab, *model_parameter_backend_lab;
+	GtkWidget *model_runtime_backend_dd, *model_parameter_backend_dd;
+	
+	GtkWidget *te_backend_separator;
+	GtkWidget *te_backend_lab;
+	GtkWidget *box_te_backend, *box_te_backend_col1, *box_te_backend_col2;
+	GtkWidget *te_runtime_backend_lab, *te_parameter_backend_lab;
+	GtkWidget *te_runtime_backend_dd, *te_parameter_backend_dd;
+	
+	GtkWidget *vae_backend_separator;
+	GtkWidget *vae_backend_lab;
+	GtkWidget *box_vae_backend, *box_vae_backend_col1, *box_vae_backend_col2;
+	GtkWidget *vae_runtime_backend_lab, *vae_parameter_backend_lab;
+	GtkWidget *vae_runtime_backend_dd, *vae_parameter_backend_dd;
+	
+	GtkWidget *cnet_backend_separator;
+	GtkWidget *cnet_backend_lab;
+	GtkWidget *box_cnet_backend, *box_cnet_backend_col1, *box_cnet_backend_col2;
+	GtkWidget *cnet_runtime_backend_lab, *cnet_parameter_backend_lab;
+	GtkWidget *cnet_runtime_backend_dd, *cnet_parameter_backend_dd;
+	
+	GtkWidget *upscaler_backend_separator;
+	GtkWidget *upscaler_backend_lab;
+	GtkWidget *box_upscaler_backend, *box_upscaler_backend_col1, *box_upscaler_backend_col2;
+	GtkWidget *upscaler_runtime_backend_lab, *upscaler_parameter_backend_lab;
+	GtkWidget *upscaler_runtime_backend_dd, *upscaler_parameter_backend_dd;
 
 	GtkWidget *box_generation;
 	GtkWidget *sd_halt_btn;
@@ -730,77 +768,86 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(extra_opts_expander, "param_label");
 	gtk_box_append (GTK_BOX (box_properties), extra_opts_expander);
 	
-	box_extra_opts = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts), TRUE);
+	box_extra_opts = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_add_css_class(box_extra_opts, "inner_box");
+	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts), FALSE);
 	gtk_expander_set_child(GTK_EXPANDER(extra_opts_expander), box_extra_opts);
+	
+	box_extra_opts_row1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_row1), TRUE);
+	gtk_box_append (GTK_BOX (box_extra_opts), box_extra_opts_row1);
 	
 	box_extra_opts_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_col1), TRUE);
-	gtk_box_append (GTK_BOX (box_extra_opts), box_extra_opts_col1);
+	gtk_box_append (GTK_BOX (box_extra_opts_row1), box_extra_opts_col1);
 	
 	box_extra_opts_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_col2), TRUE);
-	gtk_box_append (GTK_BOX (box_extra_opts), box_extra_opts_col2);
+	gtk_box_append (GTK_BOX (box_extra_opts_row1), box_extra_opts_col2);
 	
 	//Set Extra Options Widgets
-		
-	cpu_check = gtk_check_button_new_with_label("Run in CPU");
-	gtk_widget_add_css_class(cpu_check, "custom_check");
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(cpu_check), app_data->cpu_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(cpu_check), "Run all the processing using your CPU.\n(Very Slow)");
-	g_signal_connect(cpu_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->cpu_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col1), cpu_check);
-
-	tiling_check = gtk_check_button_new_with_label("VAE Tiling");
-	gtk_widget_add_css_class(tiling_check, "custom_check");
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(tiling_check), app_data->vt_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(tiling_check), "Process vae in tiles to reduce memory usage.");
-	g_signal_connect(tiling_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->vt_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col1), tiling_check);
 	
-	ram_offload_check = gtk_check_button_new_with_label("RAM Offload");
-	gtk_widget_add_css_class(ram_offload_check, "custom_check");
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(ram_offload_check), app_data->ram_offload_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(ram_offload_check),
-	"Place the weights in RAM to save VRAM, and automatically\nload them into VRAM when needed.");
-	g_signal_connect(ram_offload_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->ram_offload_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col1), ram_offload_check);
-
-	clip_check = gtk_check_button_new_with_label("Keep Clip in CPU");
-	gtk_widget_add_css_class(clip_check, "custom_check");
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(clip_check), app_data->k_clip_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(clip_check), "Keep clip in cpu (for low vram).");
-	g_signal_connect(clip_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->k_clip_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col1), clip_check);
-
-	cnet_check = gtk_check_button_new_with_label("Keep CNet in CPU");
-	gtk_widget_add_css_class(cnet_check, "custom_check");
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(cnet_check), app_data->k_cnet_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(cnet_check), "Keep controlnet in cpu (for low vram).");
-	g_signal_connect(cnet_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->k_cnet_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col1), cnet_check);
-
-	vae_check = gtk_check_button_new_with_label("Keep VAE in CPU");
-	gtk_widget_add_css_class(vae_check, "custom_check");
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(vae_check), app_data->k_vae_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(vae_check), "Keep vae in cpu (for low vram).");
-	g_signal_connect(vae_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->k_vae_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col2), vae_check);
-
-	flash_check = gtk_check_button_new_with_label("Flash Attention");
-	gtk_widget_add_css_class(flash_check, "custom_check");
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(flash_check), app_data->fa_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(flash_check), "Use Flash Attention in the diffusion model.");
-	g_signal_connect(flash_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->fa_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col2), flash_check);
+	fa_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(fa_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_extra_opts), fa_separator);
+	
+	fa_toggle_lab = gtk_label_new ("Flash Attention ⓘ");
+	gtk_widget_add_css_class(fa_toggle_lab, "param_label");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(fa_toggle_lab), "Enables a faster, more memory-efficient attention method that\nreduces VRAM usage and can speed up image generation.");
+	gtk_widget_set_halign(fa_toggle_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), fa_toggle_lab);
+	
+	box_fa_toggle = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_fa_toggle), TRUE);
+	gtk_box_append (GTK_BOX (box_extra_opts), box_fa_toggle);
+	
+	fa_off_btn = gtk_toggle_button_new_with_label("Disabled");
+	gtk_widget_add_css_class(fa_off_btn, "toggle_btn");
+	gtk_widget_set_hexpand(fa_off_btn, TRUE);
+	gtk_widget_set_vexpand(fa_off_btn, FALSE);
+	
+	fa_diffusion_btn = gtk_toggle_button_new_with_label("Diffusion");
+	gtk_widget_add_css_class(fa_diffusion_btn, "toggle_btn");
+	gtk_widget_set_hexpand(fa_diffusion_btn, TRUE);
+	gtk_widget_set_vexpand(fa_diffusion_btn, FALSE);
+	
+	fa_full_btn = gtk_toggle_button_new_with_label("Full");
+	gtk_widget_add_css_class(fa_full_btn, "toggle_btn");
+	gtk_widget_set_hexpand(fa_full_btn, TRUE);
+	gtk_widget_set_vexpand(fa_full_btn, FALSE);
+	
+	gtk_toggle_button_set_group(GTK_TOGGLE_BUTTON(fa_diffusion_btn), GTK_TOGGLE_BUTTON(fa_off_btn));
+	gtk_toggle_button_set_group(GTK_TOGGLE_BUTTON(fa_full_btn), GTK_TOGGLE_BUTTON(fa_off_btn));
+	
+	if (app_data->flash_attn_value == 2) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_full_btn), TRUE);
+	} else if (app_data->flash_attn_value == 1) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_diffusion_btn), TRUE);
+	} else {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_off_btn), TRUE);
+	}
+	
+	g_signal_connect(fa_off_btn, "toggled", G_CALLBACK(toggle_fa_options), &app_data->flash_attn_value);
+	g_signal_connect(fa_diffusion_btn, "toggled", G_CALLBACK(toggle_fa_options), &app_data->flash_attn_value);
+	g_signal_connect(fa_full_btn, "toggled", G_CALLBACK(toggle_fa_options), &app_data->flash_attn_value);
+	
+	gtk_box_append(GTK_BOX(box_fa_toggle), fa_off_btn);
+	gtk_box_append(GTK_BOX(box_fa_toggle), fa_diffusion_btn);
+	gtk_box_append(GTK_BOX(box_fa_toggle), fa_full_btn);
+	
+	mmap_check = gtk_check_button_new_with_label("Enable MMap");
+	gtk_widget_add_css_class(mmap_check, "custom_check");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(mmap_check), app_data->mmap_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(mmap_check), "Speeds up model loading and reduces system RAM usage by\nreading files directly from your disk");
+	g_signal_connect(mmap_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->mmap_bool);
+	gtk_box_append (GTK_BOX (box_extra_opts_col1), mmap_check);
 	
 	taesd_check = gtk_check_button_new_with_label("Enable TAESD");
 	gtk_widget_add_css_class(taesd_check, "custom_check");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), app_data->taesd_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(taesd_check), "Use Tiny AutoEncoder for fast decoding\n(low quality).");
 	g_signal_connect(taesd_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->taesd_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col2), taesd_check);
+	gtk_box_append (GTK_BOX (box_extra_opts_col1), taesd_check);
 	
 	update_cache_check = gtk_check_button_new_with_label("Update Cache");
 	gtk_widget_add_css_class(update_cache_check, "custom_check");
@@ -815,7 +862,218 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(verbose_check), "Print verbose on terminal.");
 	g_signal_connect(verbose_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->verbose_bool);
 	gtk_box_append (GTK_BOX (box_extra_opts_col2), verbose_check);
+	
+	// VAE Tiling Widgets
+	
+	vae_tiling_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(vae_tiling_separator, "horiz_separator");
+	gtk_widget_set_margin_top(vae_tiling_separator, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts), vae_tiling_separator);
+	
+	vae_tiling_lab = gtk_label_new ("VAE Tiling ⓘ");
+	gtk_widget_add_css_class(vae_tiling_lab, "param_label");
+	gtk_widget_set_halign(vae_tiling_lab, LABEL_ALIGNMENT);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(vae_tiling_lab), "Process VAE in tiles to reduce memory usage.");
+	gtk_box_append (GTK_BOX (box_extra_opts), vae_tiling_lab);
+	
+	vae_tiling_dd = gen_const_dd(LIST_VAE_TILE_SIZES, &app_data->vae_tiling_index);
+	gtk_box_append (GTK_BOX (box_extra_opts), vae_tiling_dd);
+	
+	// Diffusion Backend Widgets
+	
+	model_backend_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(model_backend_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_extra_opts), model_backend_separator);
+	
+	model_backend_lab = gtk_label_new ("Model Backend");
+	gtk_widget_add_css_class(model_backend_lab, "param_label");
+	gtk_widget_set_halign(model_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), model_backend_lab);
+	
+	box_model_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_model_backend), TRUE);
+	gtk_widget_set_hexpand (box_model_backend, TRUE);
+	gtk_widget_set_margin_bottom(box_model_backend, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts), box_model_backend);
+	
+	box_model_backend_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_model_backend), box_model_backend_col1);
+	
+	box_model_backend_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_model_backend), box_model_backend_col2);
+	
+	model_runtime_backend_lab = gtk_label_new ("Execution Device");
+	gtk_widget_add_css_class(model_runtime_backend_lab, "param_label");
+	gtk_widget_set_halign(model_runtime_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_model_backend_col1), model_runtime_backend_lab);
+	
+	model_runtime_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->model_runtime_backend_index);
+	gtk_box_append (GTK_BOX (box_model_backend_col1), model_runtime_backend_dd);
 
+	model_parameter_backend_lab = gtk_label_new ("Offload Device");
+	gtk_widget_add_css_class(model_parameter_backend_lab, "param_label");
+	gtk_widget_set_halign(model_parameter_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_model_backend_col2), model_parameter_backend_lab);
+	
+	model_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->model_param_backend_index);
+	gtk_box_append (GTK_BOX (box_model_backend_col2), model_parameter_backend_dd);
+	
+	// Text-Encoder Backend Widgets
+	
+	te_backend_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(te_backend_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_extra_opts), te_backend_separator);
+	
+	te_backend_lab = gtk_label_new ("Text Encoder Backend");
+	gtk_widget_add_css_class(te_backend_lab, "param_label");
+	gtk_widget_set_halign(te_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), te_backend_lab);
+	
+	box_te_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_te_backend), TRUE);
+	gtk_widget_set_hexpand (box_te_backend, TRUE);
+	gtk_widget_set_margin_bottom(box_te_backend, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts), box_te_backend);
+	
+	box_te_backend_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_te_backend), box_te_backend_col1);
+	
+	box_te_backend_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_te_backend), box_te_backend_col2);
+	
+	te_runtime_backend_lab = gtk_label_new ("Execution Device");
+	gtk_widget_add_css_class(te_runtime_backend_lab, "param_label");
+	gtk_widget_set_halign(te_runtime_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_te_backend_col1), te_runtime_backend_lab);
+	
+	te_runtime_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->te_runtime_backend_index);
+	gtk_box_append (GTK_BOX (box_te_backend_col1), te_runtime_backend_dd);
+
+	te_parameter_backend_lab = gtk_label_new ("Offload Device");
+	gtk_widget_add_css_class(te_parameter_backend_lab, "param_label");
+	gtk_widget_set_halign(te_parameter_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_te_backend_col2), te_parameter_backend_lab);
+	
+	te_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->te_param_backend_index);
+	gtk_box_append (GTK_BOX (box_te_backend_col2), te_parameter_backend_dd);
+	
+	// VAE Backend Widgets
+	
+	vae_backend_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(vae_backend_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_extra_opts), vae_backend_separator);
+	
+	vae_backend_lab = gtk_label_new ("VAE Backend");
+	gtk_widget_add_css_class(vae_backend_lab, "param_label");
+	gtk_widget_set_halign(vae_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), vae_backend_lab);
+	
+	box_vae_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_vae_backend), TRUE);
+	gtk_widget_set_hexpand (box_vae_backend, TRUE);
+	gtk_widget_set_margin_bottom(box_vae_backend, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts), box_vae_backend);
+	
+	box_vae_backend_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_vae_backend), box_vae_backend_col1);
+	
+	box_vae_backend_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_vae_backend), box_vae_backend_col2);
+	
+	vae_runtime_backend_lab = gtk_label_new ("Execution Device");
+	gtk_widget_add_css_class(vae_runtime_backend_lab, "param_label");
+	gtk_widget_set_halign(vae_runtime_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_vae_backend_col1), vae_runtime_backend_lab);
+	
+	vae_runtime_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->vae_runtime_backend_index);
+	gtk_box_append (GTK_BOX (box_vae_backend_col1), vae_runtime_backend_dd);
+
+	vae_parameter_backend_lab = gtk_label_new ("Offload Device");
+	gtk_widget_add_css_class(vae_parameter_backend_lab, "param_label");
+	gtk_widget_set_halign(vae_parameter_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_vae_backend_col2), vae_parameter_backend_lab);
+	
+	vae_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->vae_param_backend_index);
+	gtk_box_append (GTK_BOX (box_vae_backend_col2), vae_parameter_backend_dd);
+	
+	// CNet Backend Widgets
+	
+	cnet_backend_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(cnet_backend_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_extra_opts), cnet_backend_separator);
+	
+	cnet_backend_lab = gtk_label_new ("CNet Backend");
+	gtk_widget_add_css_class(cnet_backend_lab, "param_label");
+	gtk_widget_set_halign(cnet_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), cnet_backend_lab);
+	
+	box_cnet_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_cnet_backend), TRUE);
+	gtk_widget_set_hexpand (box_cnet_backend, TRUE);
+	gtk_widget_set_margin_bottom(box_cnet_backend, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts), box_cnet_backend);
+	
+	box_cnet_backend_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_cnet_backend), box_cnet_backend_col1);
+	
+	box_cnet_backend_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_cnet_backend), box_cnet_backend_col2);
+	
+	cnet_runtime_backend_lab = gtk_label_new ("Execution Device");
+	gtk_widget_add_css_class(cnet_runtime_backend_lab, "param_label");
+	gtk_widget_set_halign(cnet_runtime_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_cnet_backend_col1), cnet_runtime_backend_lab);
+	
+	cnet_runtime_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->cnet_runtime_backend_index);
+	gtk_box_append (GTK_BOX (box_cnet_backend_col1), cnet_runtime_backend_dd);
+
+	cnet_parameter_backend_lab = gtk_label_new ("Offload Device");
+	gtk_widget_add_css_class(cnet_parameter_backend_lab, "param_label");
+	gtk_widget_set_halign(cnet_parameter_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_cnet_backend_col2), cnet_parameter_backend_lab);
+	
+	cnet_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->cnet_param_backend_index);
+	gtk_box_append (GTK_BOX (box_cnet_backend_col2), cnet_parameter_backend_dd);
+	
+	// Upscaler Backend Widgets
+	
+	upscaler_backend_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(upscaler_backend_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_extra_opts), upscaler_backend_separator);
+	
+	upscaler_backend_lab = gtk_label_new ("Upscaler Backend");
+	gtk_widget_add_css_class(upscaler_backend_lab, "param_label");
+	gtk_widget_set_halign(upscaler_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), upscaler_backend_lab);
+	
+	box_upscaler_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_upscaler_backend), TRUE);
+	gtk_widget_set_hexpand (box_upscaler_backend, TRUE);
+	gtk_widget_set_margin_bottom(box_upscaler_backend, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts), box_upscaler_backend);
+	
+	box_upscaler_backend_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_upscaler_backend), box_upscaler_backend_col1);
+	
+	box_upscaler_backend_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_upscaler_backend), box_upscaler_backend_col2);
+	
+	upscaler_runtime_backend_lab = gtk_label_new ("Execution Device");
+	gtk_widget_add_css_class(upscaler_runtime_backend_lab, "param_label");
+	gtk_widget_set_halign(upscaler_runtime_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_upscaler_backend_col1), upscaler_runtime_backend_lab);
+	
+	upscaler_runtime_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->upscaler_runtime_backend_index);
+	gtk_box_append (GTK_BOX (box_upscaler_backend_col1), upscaler_runtime_backend_dd);
+
+	upscaler_parameter_backend_lab = gtk_label_new ("Offload Device");
+	gtk_widget_add_css_class(upscaler_parameter_backend_lab, "param_label");
+	gtk_widget_set_halign(upscaler_parameter_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_upscaler_backend_col2), upscaler_parameter_backend_lab);
+	
+	upscaler_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->upscaler_param_backend_index);
+	gtk_box_append (GTK_BOX (box_upscaler_backend_col2), upscaler_parameter_backend_dd);
+	
 	//Set Generation Box
 	box_generation = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_generation), FALSE);
@@ -984,16 +1242,12 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->kontext_check = kontext_check;
 	reset_d->sd_based_check = sd_based_check;
 	reset_d->llm_check = llm_check;
-	reset_d->cpu_check = cpu_check;
-	reset_d->tiling_check = tiling_check;
-	reset_d->ram_offload_check = ram_offload_check;
-	reset_d->clip_check = clip_check;
-	reset_d->cnet_check = cnet_check;
-	reset_d->vae_check = vae_check;
-	reset_d->flash_check = flash_check;
+	reset_d->mmap_check = mmap_check;
+	reset_d->fa_off_btn = fa_off_btn;
 	reset_d->taesd_check = taesd_check;
 	reset_d->update_cache_check = update_cache_check;
 	reset_d->verbose_check = verbose_check;
+	reset_d->vae_tiling_dd = vae_tiling_dd;
 	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_default_btn_cb), reset_d);
 	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 

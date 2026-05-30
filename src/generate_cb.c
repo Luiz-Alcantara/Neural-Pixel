@@ -293,7 +293,6 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		show_progress, user_data);
 		
 	} else {
-		printf("[NP DEBUG] Closing stdout stream\n");
 		g_input_stream_close(G_INPUT_STREAM(stream_obj), NULL, NULL);
 		data->out_pipe_stream = NULL;
 		if (data->stdout_string != NULL) {
@@ -543,16 +542,22 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->clip_skip_value = (int)app_data->clip_skip_value;
 	snapshot_data->upscale_passes_value = (int)app_data->up_repeat_value;
 	snapshot_data->cnet_strength_value = app_data->cnet_value;
-	snapshot_data->cpu_mode_enabled = app_data->cpu_bool;
-	snapshot_data->vae_tiling_enabled = app_data->vt_bool;
-	snapshot_data->ram_offload_enabled = app_data->ram_offload_bool;
-	snapshot_data->keep_clip_cpu_enabled = app_data->k_clip_bool;
-	snapshot_data->keep_cnet_cpu_enabled = app_data->k_cnet_bool;
-	snapshot_data->keep_vae_cpu_enabled = app_data->k_vae_bool;
-	snapshot_data->flash_att_enabled = app_data->fa_bool;
+	snapshot_data->vae_tiling_index = app_data->vae_tiling_index;
+	snapshot_data->flash_attn_value = app_data->flash_attn_value;
+	snapshot_data->mmap_enabled = app_data->mmap_bool;
 	snapshot_data->taesd_enabled = app_data->taesd_bool;
 	snapshot_data->update_cache_enabled = app_data->update_cache_bool;
 	snapshot_data->verbose_enabled = app_data->verbose_bool;
+	snapshot_data->model_runtime_backend_index = app_data->model_runtime_backend_index;
+	snapshot_data->model_param_backend_index = app_data->model_param_backend_index;
+	snapshot_data->te_runtime_backend_index = app_data->te_runtime_backend_index;
+	snapshot_data->te_param_backend_index = app_data->te_param_backend_index;
+	snapshot_data->vae_runtime_backend_index = app_data->vae_runtime_backend_index;
+	snapshot_data->vae_param_backend_index = app_data->vae_param_backend_index;
+	snapshot_data->cnet_runtime_backend_index = app_data->cnet_runtime_backend_index;
+	snapshot_data->cnet_param_backend_index = app_data->cnet_param_backend_index;
+	snapshot_data->upscaler_runtime_backend_index = app_data->upscaler_runtime_backend_index;
+	snapshot_data->upscaler_param_backend_index = app_data->upscaler_param_backend_index;	
 	snapshot_data->total_time = 0;
 	snapshot_data->sdpid = &app_data->sdpid;
 	

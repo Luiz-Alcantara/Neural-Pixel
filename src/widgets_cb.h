@@ -87,4 +87,6 @@ void hide_img_btn_cb(GtkButton *btn, gpointer user_data);
 
 void toggle_extra_options(GtkCheckButton *btn, gpointer user_data);
 
+void toggle_fa_options(GtkToggleButton *btn, gpointer user_data);
+
 #endif // WIDGETS_CB_H

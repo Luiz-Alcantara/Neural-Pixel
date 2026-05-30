@@ -107,6 +107,18 @@
 	background-color: @primary-color-dark;
 }
 
+.toggle_btn {
+	background-image: none;
+	background-color: @primary-color-dark;
+	color: grey;
+}
+
+.toggle_btn:checked {
+	background-image: none;
+	background-color: @primary-color-light;
+	color: white;
+}
+
 
 /* DropDown Widgets */
 .custom_dd > button {
@@ -171,6 +183,12 @@
 .custom_seed_entry {
 	background-image: none;
 	background-color: @primary-color-light;
+}
+
+/* Separators */
+.horiz_separator {
+	background-color: @separator;
+	/*min-height: 2px;*/
 }
 
 

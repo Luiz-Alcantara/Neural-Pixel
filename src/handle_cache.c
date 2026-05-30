@@ -63,16 +63,22 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "inpaint_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "cpu_mode_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "vae_tiling_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "ram_offload_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "keep_clip_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "keep_cnet_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "keep_vae_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "flash_attention_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "flash_attn_value=%d\n", DISABLED_OPT);
+		fprintf(cf, "vae_tiling_index=%d\n", DEFAULT_MODELS);
+		fprintf(cf, "mmap_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "taesd_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "model_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "model_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "te_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "te_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "vae_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "vae_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "cnet_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "cnet_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "upscaler_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "upscaler_param_backend_index=%d\n", DEFAULT_BACKEND);
 		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
 		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "cnet_strength=%.2f\n", DEFAULT_CNET_STRENGTH);
@@ -116,7 +122,7 @@ char* ini_file_get_value(const char *filename, const char *search_key)
 		}
 	}
 
-	g_printerr("Error: Could not find key '%s' in file '%s', using default value(s).\n", search_key, filename);
+	g_printerr("[WARNING]: Could not find key '%s' in file '%s', using default value(s).\n", search_key, filename);
 	fclose(file);
 	return NULL;
 }
@@ -227,13 +233,8 @@ void load_cache_fallback(gpointer user_data)
 	data->inpaint_bool = DISABLED_OPT;
 	data->sd_based_bool = ENABLED_OPT;
 	data->llm_bool = DISABLED_OPT;
-	data->cpu_bool = DISABLED_OPT;
-	data->vt_bool = DISABLED_OPT;
-	data->ram_offload_bool = DISABLED_OPT;
-	data->k_clip_bool = DISABLED_OPT;
-	data->k_cnet_bool = DISABLED_OPT;
-	data->k_vae_bool = DISABLED_OPT;
-	data->fa_bool = DISABLED_OPT;
+	data->flash_attn_value = DISABLED_OPT;
+	data->mmap_bool = DISABLED_OPT;
 	data->taesd_bool = DISABLED_OPT;
 	data->update_cache_bool = ENABLED_OPT;
 	data->verbose_bool = DISABLED_OPT;
@@ -387,53 +388,25 @@ void load_cache(gpointer user_data)
 			data->llm_bool = DISABLED_OPT;
 		}
 		
-		char *cpu_mode_bool_str = ini_file_get_value(cache_filename, "cpu_mode_bool");
-		if (cpu_mode_bool_str) {
-			sscanf(cpu_mode_bool_str, "%d", &data->cpu_bool);
+		char *flash_attn_value_str = ini_file_get_value(cache_filename, "flash_attn_value");
+		if (flash_attn_value_str) {
+			sscanf(flash_attn_value_str, "%d", &data->flash_attn_value);
 		} else {
-			data->cpu_bool = DISABLED_OPT;
+			data->flash_attn_value = DISABLED_OPT;
 		}
 		
-		char *vae_tiling_bool_str = ini_file_get_value(cache_filename, "vae_tiling_bool");
-		if (vae_tiling_bool_str) {
-			sscanf(vae_tiling_bool_str, "%d", &data->vt_bool);
+		char *vae_tiling_index_str = ini_file_get_value(cache_filename, "vae_tiling_index");
+		if (vae_tiling_index_str) {
+			sscanf(vae_tiling_index_str, "%d", &data->vae_tiling_index);
 		} else {
-			data->vt_bool = DISABLED_OPT;
+			data->vae_tiling_index = DEFAULT_MODELS;
 		}
 		
-		char *ram_offload_bool_str = ini_file_get_value(cache_filename, "ram_offload_bool");
-		if (ram_offload_bool_str) {
-			sscanf(ram_offload_bool_str, "%d", &data->ram_offload_bool);
+		char *mmap_bool_str = ini_file_get_value(cache_filename, "mmap_bool");
+		if (mmap_bool_str) {
+			sscanf(mmap_bool_str, "%d", &data->mmap_bool);
 		} else {
-			data->ram_offload_bool = DISABLED_OPT;
-		}
-		
-		char *keep_clip_bool_str = ini_file_get_value(cache_filename, "keep_clip_bool");
-		if (keep_clip_bool_str) {
-			sscanf(keep_clip_bool_str, "%d", &data->k_clip_bool);
-		} else {
-			data->k_clip_bool = DISABLED_OPT;
-		}
-		
-		char *keep_cnet_bool_str = ini_file_get_value(cache_filename, "keep_cnet_bool");
-		if (keep_cnet_bool_str) {
-			sscanf(keep_cnet_bool_str, "%d", &data->k_cnet_bool);
-		} else {
-			data->k_cnet_bool = DISABLED_OPT;
-		}
-		
-		char *keep_vae_bool_str = ini_file_get_value(cache_filename, "keep_vae_bool");
-		if (*keep_vae_bool_str) {
-			sscanf(keep_vae_bool_str, "%d", &data->k_vae_bool);
-		} else {
-			data->k_vae_bool = DISABLED_OPT;
-		}
-		
-		char *flash_attention_bool_str = ini_file_get_value(cache_filename, "flash_attention_bool");
-		if (flash_attention_bool_str) {
-			sscanf(flash_attention_bool_str, "%d", &data->fa_bool);
-		} else {
-			data->fa_bool = DISABLED_OPT;
+			data->mmap_bool = DISABLED_OPT;
 		}
 		
 		char *taesd_bool_str = ini_file_get_value(cache_filename, "taesd_bool");
@@ -455,6 +428,76 @@ void load_cache(gpointer user_data)
 			sscanf(verbose_bool_str, "%d", &data->verbose_bool);
 		} else {
 			data->verbose_bool = DISABLED_OPT;
+		}
+		
+		char *model_runtime_backend_index_str = ini_file_get_value(cache_filename, "model_runtime_backend_index");
+		if (model_runtime_backend_index_str) {
+			sscanf(model_runtime_backend_index_str, "%d", &data->model_runtime_backend_index);
+		} else {
+			data->model_runtime_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *model_param_backend_index_str = ini_file_get_value(cache_filename, "model_param_backend_index");
+		if (model_param_backend_index_str) {
+			sscanf(model_param_backend_index_str, "%d", &data->model_param_backend_index);
+		} else {
+			data->model_param_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *te_runtime_backend_index_str = ini_file_get_value(cache_filename, "te_runtime_backend_index");
+		if (te_runtime_backend_index_str) {
+			sscanf(te_runtime_backend_index_str, "%d", &data->te_runtime_backend_index);
+		} else {
+			data->te_runtime_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *te_param_backend_index_str = ini_file_get_value(cache_filename, "te_param_backend_index");
+		if (te_param_backend_index_str) {
+			sscanf(te_param_backend_index_str, "%d", &data->te_param_backend_index);
+		} else {
+			data->te_param_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *vae_runtime_backend_index_str = ini_file_get_value(cache_filename, "vae_runtime_backend_index");
+		if (vae_runtime_backend_index_str) {
+			sscanf(vae_runtime_backend_index_str, "%d", &data->vae_runtime_backend_index);
+		} else {
+			data->vae_runtime_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *vae_param_backend_index_str = ini_file_get_value(cache_filename, "vae_param_backend_index");
+		if (vae_param_backend_index_str) {
+			sscanf(vae_param_backend_index_str, "%d", &data->vae_param_backend_index);
+		} else {
+			data->vae_param_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *cnet_runtime_backend_index_str = ini_file_get_value(cache_filename, "cnet_runtime_backend_index");
+		if (cnet_runtime_backend_index_str) {
+			sscanf(cnet_runtime_backend_index_str, "%d", &data->cnet_runtime_backend_index);
+		} else {
+			data->cnet_runtime_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *cnet_param_backend_index_str = ini_file_get_value(cache_filename, "cnet_param_backend_index");
+		if (cnet_param_backend_index_str) {
+			sscanf(cnet_param_backend_index_str, "%d", &data->cnet_param_backend_index);
+		} else {
+			data->cnet_param_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *upscaler_runtime_backend_index_str = ini_file_get_value(cache_filename, "upscaler_runtime_backend_index");
+		if (upscaler_runtime_backend_index_str) {
+			sscanf(upscaler_runtime_backend_index_str, "%d", &data->upscaler_runtime_backend_index);
+		} else {
+			data->upscaler_runtime_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *upscaler_param_backend_index_str = ini_file_get_value(cache_filename, "upscaler_param_backend_index");
+		if (upscaler_param_backend_index_str) {
+			sscanf(upscaler_param_backend_index_str, "%d", &data->upscaler_param_backend_index);
+		} else {
+			data->upscaler_param_backend_index = DEFAULT_BACKEND;
 		}
 
 		char *seed_str = ini_file_get_value(cache_filename, "seed");
@@ -551,16 +594,22 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "inpaint_bool=%d\n", data->inpaint_enabled);
 	fprintf(cf, "sd_based_bool=%d\n", data->sd_based_enabled);
 	fprintf(cf, "llm_bool=%d\n", data->llm_mode_enabled);
-	fprintf(cf, "cpu_mode_bool=%d\n", data->cpu_mode_enabled);
-	fprintf(cf, "vae_tiling_bool=%d\n", data->vae_tiling_enabled);
-	fprintf(cf, "ram_offload_bool=%d\n", data->ram_offload_enabled);
-	fprintf(cf, "keep_clip_bool=%d\n", data->keep_clip_cpu_enabled);
-	fprintf(cf, "keep_cnet_bool=%d\n", data->keep_cnet_cpu_enabled);
-	fprintf(cf, "keep_vae_bool=%d\n", data->keep_vae_cpu_enabled);
-	fprintf(cf, "flash_attention_bool=%d\n", data->flash_att_enabled);
+	fprintf(cf, "flash_attn_value=%d\n", data->flash_attn_value);
+	fprintf(cf, "vae_tiling_index=%d\n", data->vae_tiling_index);
+	fprintf(cf, "mmap_bool=%d\n", data->mmap_enabled);
 	fprintf(cf, "taesd_bool=%d\n", data->taesd_enabled);
 	fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 	fprintf(cf, "verbose_bool=%d\n", data->verbose_enabled);
+	fprintf(cf, "model_runtime_backend_index=%d\n", data->model_runtime_backend_index);
+	fprintf(cf, "model_param_backend_index=%d\n", data->model_param_backend_index);
+	fprintf(cf, "te_runtime_backend_index=%d\n", data->te_runtime_backend_index);
+	fprintf(cf, "te_param_backend_index=%d\n", data->te_param_backend_index);
+	fprintf(cf, "vae_runtime_backend_index=%d\n", data->vae_runtime_backend_index);
+	fprintf(cf, "vae_param_backend_index=%d\n", data->vae_param_backend_index);
+	fprintf(cf, "cnet_runtime_backend_index=%d\n", data->cnet_runtime_backend_index);
+	fprintf(cf, "cnet_param_backend_index=%d\n", data->cnet_param_backend_index);
+	fprintf(cf, "upscaler_runtime_backend_index=%d\n", data->upscaler_runtime_backend_index);
+	fprintf(cf, "upscaler_param_backend_index=%d\n", data->upscaler_param_backend_index);
 	fprintf(cf, "seed=%lld\n", data->seed_value);
 	fprintf(cf, "cfg_scale=%.1f\n", data->cfg_scale_value);
 	fprintf(cf, "cnet_strength=%.2f\n", data->cnet_strength_value);

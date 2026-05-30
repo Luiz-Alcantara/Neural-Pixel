@@ -33,12 +33,19 @@ extern const size_t LIST_SAMPLES_COUNT;
 extern const char* LIST_SCHEDULES[];
 extern const size_t LIST_SCHEDULES_COUNT;
 
+extern const char* LIST_BACKENDS[];
+extern const size_t LIST_BACKENDS_COUNT;
+
+extern const char* LIST_VAE_TILE_SIZES[];
+extern const size_t LIST_VAE_TILE_SIZES_COUNT;
+
 extern const char* POSITIVE_PROMPT;
 extern const char* NEGATIVE_PROMPT;
 extern const char* OPTIONAL_ITEMS;
 extern const char* DEFAULT_IMG_PATH;
 extern const char* EMPTY_IMG_PATH;
 extern const char* MASK_IMG_PATH;
+extern const int DEFAULT_BACKEND;
 extern const int DEFAULT_MODELS;
 extern const int DEFAULT_SAMPLER;
 extern const int DEFAULT_SCHEDULER;

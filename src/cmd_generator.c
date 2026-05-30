@@ -16,10 +16,10 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	#ifdef G_OS_WIN32
 		gchar *current_dir = g_get_current_dir();
-		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf(data->cpu_mode_enabled == 1 ? "%s\\sd-cpu": "%s\\sd", current_dir));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%s\\sd", current_dir));
 		g_free(current_dir);
 	#else
-		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->cpu_mode_enabled == 1 ? "./sd-cpu" : "./sd"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("./sd"));
 	#endif
 	
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
@@ -43,9 +43,6 @@ void gen_sd_string(GenerationSnapshotData *data)
 	if (data->vae_filename != NULL && strcmp(data->vae_filename, "None") != 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/vae/%s", data->vae_filename));
-		if (data->keep_vae_cpu_enabled == 1) {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-on-cpu"));
-		}
 	}
 	
 	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path, "None") != 0) {
@@ -56,9 +53,6 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-strength"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->cnet_strength_value));
-			if (data->keep_cnet_cpu_enabled == 1) {
-				g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net-cpu"));
-			}
 		} else {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled == 1 ? "--ref-image" : "--init-img"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
@@ -102,17 +96,13 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/text_encoders/%s", data->text_enc_filename));
 		}
 	}
-	
-	if (data->keep_clip_cpu_enabled == 1) {
-		if (data->clip_l_filename != NULL || data->clip_g_filename != NULL || data->text_enc_filename != NULL) {
-			if (strcmp(data->clip_l_filename, "None") != 0 || strcmp(data->clip_g_filename, "None") != 0 || strcmp(data->text_enc_filename, "None") != 0) {
-				g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip-on-cpu"));
-			}
-		}
-	}
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
 	g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->denoise_strength_value));
+	
+	if (data->mmap_enabled == 1) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mmap"));
+	}
 	
 	if (data->taesd_enabled == 1) {
 		if (check_file_exists(".models/vae/taesd_decoder.safetensors", 0) == 1) {
@@ -154,16 +144,17 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--height"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_RESOLUTIONS_STR[(data->height_index)]));
 	}
-
-	if (data->vae_tiling_enabled == 1) {
-		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-tiling"));
-	}
 	
-	if (data->ram_offload_enabled == 1) {
-		g_ptr_array_add(data->sd_cmd_array, g_strdup("--offload-to-cpu"));
+	if (data->vae_tiling_index < LIST_VAE_TILE_SIZES_COUNT - 1 && data->vae_tiling_index > 0) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-tiling"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-tile-size"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_VAE_TILE_SIZES[(data->vae_tiling_index)]));
 	}
 
-	if (data->flash_att_enabled == 1) {
+	if (data->flash_attn_value == 2) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--fa"));
+		if (data->sd_based_enabled != 1) g_ptr_array_add(data->sd_cmd_array, g_strdup("--chroma-disable-dit-mask"));
+	} else if (data->flash_attn_value == 1) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--diffusion-fa"));
 		if (data->sd_based_enabled != 1) g_ptr_array_add(data->sd_cmd_array, g_strdup("--chroma-disable-dit-mask"));
 	}
@@ -177,6 +168,26 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--negative-prompt"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->negative_prompt));
 	}
+	
+	char *runtime_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s",
+	LIST_BACKENDS[(data->model_runtime_backend_index)],
+	LIST_BACKENDS[(data->te_runtime_backend_index)],
+	LIST_BACKENDS[(data->vae_runtime_backend_index)],
+	LIST_BACKENDS[(data->cnet_runtime_backend_index)],
+	LIST_BACKENDS[(data->upscaler_runtime_backend_index)]);
+	
+	char *parameter_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s",
+	LIST_BACKENDS[(data->model_param_backend_index)],
+	LIST_BACKENDS[(data->te_param_backend_index)],
+	LIST_BACKENDS[(data->vae_param_backend_index)],
+	LIST_BACKENDS[(data->cnet_param_backend_index)],
+	LIST_BACKENDS[(data->upscaler_param_backend_index)]);
+	
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--backend"));
+	g_ptr_array_add(data->sd_cmd_array, runtime_backend_str);
+	
+	g_ptr_array_add(data->sd_cmd_array, g_strdup("--params-backend"));
+	g_ptr_array_add(data->sd_cmd_array, parameter_backend_str);
 	
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--output"));
 	g_ptr_array_add(data->sd_cmd_array, g_strdup(data->output_path));

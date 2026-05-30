@@ -522,27 +522,12 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *llm_check = data->llm_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(llm_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+
+	GtkWidget *mmap_check = data->mmap_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(mmap_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
-	GtkWidget *cpu_check = data->cpu_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(cpu_check), DISABLED_OPT == 1 ? TRUE : FALSE);
-
-	GtkWidget *tiling_check = data->tiling_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(tiling_check), DISABLED_OPT == 1 ? TRUE : FALSE);
-	
-	GtkWidget *ram_offload_check = data->ram_offload_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(ram_offload_check), DISABLED_OPT == 1 ? TRUE : FALSE);
-
-	GtkWidget *clip_check = data->clip_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(clip_check), DISABLED_OPT == 1 ? TRUE : FALSE);
-
-	GtkWidget *cnet_check = data->cnet_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(cnet_check), DISABLED_OPT == 1 ? TRUE : FALSE);
-
-	GtkWidget *vae_check = data->vae_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(vae_check), DISABLED_OPT == 1 ? TRUE : FALSE);
-
-	GtkWidget *flash_check = data->flash_check;
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(flash_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	GtkWidget *fa_off_btn = data->fa_off_btn;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_off_btn), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *taesd_check = data->taesd_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), DISABLED_OPT == 1 ? TRUE : FALSE);
@@ -552,6 +537,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *verbose_check = data->verbose_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
+	GtkWidget *vae_tiling_dd = data->vae_tiling_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_tiling_dd), DEFAULT_MODELS);
 }
 
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)
@@ -732,8 +720,23 @@ void hide_img_btn_cb (GtkButton *btn, gpointer user_data)
 	}
 }
 
-void toggle_extra_options (GtkCheckButton *btn, gpointer user_data)
+void toggle_extra_options(GtkCheckButton *btn, gpointer user_data)
 {
 	int *i = (int *)user_data;
 	*i = gtk_check_button_get_active(btn) == TRUE ? 1 : 0;
+}
+
+void toggle_fa_options(GtkToggleButton *btn, gpointer user_data)
+{
+	int *i = (int *)user_data;
+	
+	if (gtk_toggle_button_get_active(btn) == FALSE) return;
+	
+	if (g_strcmp0(gtk_button_get_label(GTK_BUTTON(btn)), "Full") == 0) {
+		*i = 2;
+	} else if (g_strcmp0(gtk_button_get_label(GTK_BUTTON(btn)), "Diffusion") == 0) {
+		*i = 1;
+	} else {
+		*i = 0;
+	}
 }
