@@ -8,20 +8,21 @@
 ![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/screenshots/img1.png?raw=true)
 </div>
 
-With Neural Pixel, you can use Stable Diffusion on practically any GPU that supports Vulkan and has at least 3GB of VRAM. This is a simple way to generate your images without having to deal with CUDA/ROCm installations or hundreds of Python dependencies.
+Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost any GPU from 2014+ (requires at least 2GB VRAM for SD 1.5 or 3GB for SDXL). Skip the CUDA/ROCm headache and Python dependency hell, Neural Pixel is simple, portable, and high-performing!
 
 
 ## Supported Models
 | Supported base models | Supported variations | Notes |
 |--------|--------|-------|
+| Anima  | Base | The turbo LoRA also works |
 | SD 1.4 | Not tested | None |
-| SD 1.5 | LCM, Turbo & Hyper | Some SD 1.5 Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
-| SD 2.X | Not tested | None |
-|  SDXL  | Lightning, Hyper, Pony & Illustrious | Some SDXL Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
+| SD 1.5 | Base, LCM, Turbo & Hyper | Some SD 1.5 Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
+| SD 2.X | Only base tested | None |
+|  SDXL  | Base, Lightning, Hyper, Pony, Illustrious & NoobAI | Some SDXL Distilled models work too, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/distilled_sd.md). |
 | SD 3.X | Not tested | None |
 | Flux.1 | Dev, Schnell and Kontext | Flux models needs to be converted to `GGUF` to work, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/flux.md). You'll also need: [Flux VAE](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/ae.safetensors), [clip_l](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/clip_l.safetensors), and [t5xxl](https://huggingface.co/comfyanonymous/flux_text_encoders/blob/main/t5xxl_fp16.safetensors). |
-| Chroma1 | Radiance | None |
-|  Qwen   | Not tested | None |
+| Chroma1 | Base, Radiance | None |
+| Qwen | Not tested | None |
 
 ## Supported Add-ons
 | Supported add-ons | Notes |
@@ -30,7 +31,7 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 | Embeddings | None |
 | Control Net | SD 1.5 Only |
 | TAESD | Faster latent decoding/Worse quality |
-| ESRGAN Upscaler | Only [RealESRGAN_x4plus_anime_6B.pth](https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth) works for now. |
+| ESRGAN Upscaler | None |
 
 ## Supported Features
 | Supported features | Notes |
@@ -55,7 +56,7 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 ## Supported Backends
 | Supported backends | Notes |
 |--------|-------|
-| CPU and Vulkan | Included with the release packages |
+| CPU and Vulkan | Included with the release packages (cpu mode must be configured in the backend manager). |
 | CUDA, ROCm... | To compile sd.cpp for other backends, follow the instructions [here](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/build.md), then simply replace the "sd" binary in the Neural-Pixel folder with your newly compiled one (rename if needed). |
 
 ## Notes
@@ -75,12 +76,12 @@ With Neural Pixel, you can use Stable Diffusion on practically any GPU that supp
 - Optional (Vulkan backend):
     - Vulkan (driver, loader and tools)
 
-- A GPU or iGPU with at least 3GB of VRAM for Vulkan.
+- A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
 ## Running on Linux
 
 Download the Linux bundle:
-[![Linux](https://img.shields.io/badge/Linux-v0.6.0-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.6.0/NeuralPixel-Linux_v0.6.0.zip)
+[![Linux](https://img.shields.io/badge/Linux-v0.7.0-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.0/NeuralPixel-Linux_v0.7.0.zip)
 
 Then extract it and run the "run_neural_pixel" file.
 If you want to see errors and details, start the application from a terminal and enable the "Terminal Verbose" option in "Extra Opts."
@@ -88,12 +89,12 @@ If you want to see errors and details, start the application from a terminal and
 ## Windows Requirements
 
 - Microsoft Visual C++ Redistributable latest: [vc_redist](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170).
-- A GPU or iGPU with at least 3GB of VRAM for Vulkan.
+- A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
 ## Running on Windows
 
 Download the Windows bundle:
-[![Windows](https://img.shields.io/badge/Windows-v0.6.0-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.6.0/NeuralPixel-Windows_v0.6.0.zip)
+[![Windows](https://img.shields.io/badge/Windows-v0.7.0-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.0/NeuralPixel-Windows_v0.7.0.zip)
 
 Then extract it and run the "neural_pixel.bat" file.
 You can directly run the "neural pixel" binary, but the variable that defines the dark theme will not be applied, so the app may look weird.
@@ -121,7 +122,7 @@ To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cp
 
 ## Credits
 
-- This project is a GUI to [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp) by [@leejet](https://github.com/leejet).
+- This project is a GUI for [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
 ## Donations
 
