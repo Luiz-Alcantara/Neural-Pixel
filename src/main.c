@@ -1248,6 +1248,16 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->update_cache_check = update_cache_check;
 	reset_d->verbose_check = verbose_check;
 	reset_d->vae_tiling_dd = vae_tiling_dd;
+	reset_d->model_runtime_backend_dd = model_runtime_backend_dd;
+	reset_d->model_parameter_backend_dd = model_parameter_backend_dd;
+	reset_d->te_runtime_backend_dd = te_runtime_backend_dd;
+	reset_d->te_parameter_backend_dd = te_parameter_backend_dd;
+	reset_d->vae_runtime_backend_dd = vae_runtime_backend_dd;
+	reset_d->vae_parameter_backend_dd = vae_parameter_backend_dd;
+	reset_d->cnet_runtime_backend_dd = cnet_runtime_backend_dd;
+	reset_d->cnet_parameter_backend_dd = cnet_parameter_backend_dd;
+	reset_d->upscaler_runtime_backend_dd = upscaler_runtime_backend_dd;
+	reset_d->upscaler_parameter_backend_dd = upscaler_parameter_backend_dd;
 	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_default_btn_cb), reset_d);
 	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 

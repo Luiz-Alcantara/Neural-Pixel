@@ -527,7 +527,7 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(mmap_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *fa_off_btn = data->fa_off_btn;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_off_btn), DISABLED_OPT == 1 ? TRUE : FALSE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_off_btn), ENABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *taesd_check = data->taesd_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), DISABLED_OPT == 1 ? TRUE : FALSE);
@@ -540,6 +540,36 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *vae_tiling_dd = data->vae_tiling_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_tiling_dd), DEFAULT_MODELS);
+	
+	GtkWidget *model_runtime_backend_dd = data->model_runtime_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(model_runtime_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *model_parameter_backend_dd = data->model_parameter_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(model_parameter_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *te_runtime_backend_dd = data->te_runtime_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(te_runtime_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *te_parameter_backend_dd = data->te_parameter_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(te_parameter_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *vae_runtime_backend_dd = data->vae_runtime_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_runtime_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *vae_parameter_backend_dd = data->vae_parameter_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_parameter_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *cnet_runtime_backend_dd = data->cnet_runtime_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(cnet_runtime_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *cnet_parameter_backend_dd = data->cnet_parameter_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(cnet_parameter_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *upscaler_runtime_backend_dd = data->upscaler_runtime_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(upscaler_runtime_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *upscaler_parameter_backend_dd = data->upscaler_parameter_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(upscaler_parameter_backend_dd), DEFAULT_BACKEND);
 }
 
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)

@@ -256,6 +256,16 @@ typedef struct {
 	GtkWidget *update_cache_check;
 	GtkWidget *verbose_check;
 	GtkWidget *vae_tiling_dd;
+	GtkWidget *model_runtime_backend_dd;
+	GtkWidget *model_parameter_backend_dd;
+	GtkWidget *te_runtime_backend_dd;
+	GtkWidget *te_parameter_backend_dd;
+	GtkWidget *vae_runtime_backend_dd;
+	GtkWidget *vae_parameter_backend_dd;
+	GtkWidget *cnet_runtime_backend_dd;
+	GtkWidget *cnet_parameter_backend_dd;
+	GtkWidget *upscaler_runtime_backend_dd;
+	GtkWidget *upscaler_parameter_backend_dd;
 } ResetCbData;
 
 typedef struct {
