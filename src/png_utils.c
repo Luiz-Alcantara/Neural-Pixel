@@ -377,6 +377,7 @@ static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data
 			if (check_file_exists(path, 0) == 1) {
 				gtk_picture_set_filename(prev_img, path);
 				gtk_widget_add_css_class(data->img2img_expander, "img2img_active");
+				clear_mask_btn_cb(NULL, user_data);
 			} else {
 				g_printerr(
 					"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
@@ -430,6 +431,7 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 				if (check_file_exists(path, 0) == 1) {
 					gtk_picture_set_filename(prev_img, path);
 					gtk_widget_add_css_class(data->img2img_expander, "img2img_active");
+					clear_mask_btn_cb(NULL, user_data);
 				} else {
 					g_printerr(
 						"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
@@ -514,10 +516,10 @@ void load_from_img_btn_cb(GtkWidget *btn, gpointer user_data)
 
 void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data)
 {
-	#if GTK_CHECK_VERSION(4, 10, 0)
-		LoadImg2ImgData *data = user_data;
-		GtkWindow *win = GTK_WINDOW(data->win);
+	LoadImg2ImgData *data = user_data;
+	GtkWindow *win = GTK_WINDOW(data->win);
 
+	#if GTK_CHECK_VERSION(4, 10, 0)
 		GtkFileDialog* load_img_dialog = gtk_file_dialog_new();
 		gtk_file_dialog_set_title(load_img_dialog, "Choose the image file:");
 		gtk_file_dialog_set_modal(load_img_dialog, TRUE);
@@ -536,9 +538,6 @@ void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data)
 
 		gtk_file_dialog_open(load_img_dialog, win, data->cancellable, (GAsyncReadyCallback)set_file_path, user_data);
 	#else
-		LoadImg2ImgData *data = user_data;
-		GtkWindow *win = GTK_WINDOW(data->win);
-
 		GtkWidget *load_img_dialog = gtk_file_chooser_dialog_new ("Choose the image:",
 						win,
 						GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -560,6 +559,9 @@ void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data)
 void set_current_preview_to_img2img(GtkWidget *btn, gpointer user_data)
 {
 	LoadImg2ImgFromPreviewData *data = user_data;
+	
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(data->inpaint_check), FALSE);
+	clear_img2img_overlay(GTK_OVERLAY(data->overlay_img2img));
 
 	char *path = g_ptr_array_index(data->image_files, *data->current_image_index);
 	if (path != NULL && data->image_files->len > 0 && check_file_exists(path, 0) == 1) {

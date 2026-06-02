@@ -159,6 +159,8 @@ typedef struct {
 	GString *img2img_file_path;
 	GtkWidget *image_wgt;
 	GtkWidget *img2img_expander;
+	GtkWidget *overlay_img2img;
+	GtkWidget *inpaint_check;
 } LoadImg2ImgFromPreviewData;
 
 typedef struct {
