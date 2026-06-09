@@ -81,7 +81,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 ## Running on Linux
 
 Download the Linux bundle:
-[![Linux](https://img.shields.io/badge/Linux-v0.7.1-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.1/NeuralPixel-Linux_v0.7.1.zip)
+[![Linux](https://img.shields.io/badge/Linux-v0.7.2-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.2/NeuralPixel-Linux_v0.7.2.zip)
 
 Then extract it and run the "run_neural_pixel" file.
 If you want to see errors and details, start the application from a terminal and enable the "Terminal Verbose" option in "Extra Opts."
@@ -94,7 +94,7 @@ If you want to see errors and details, start the application from a terminal and
 ## Running on Windows
 
 Download the Windows bundle:
-[![Windows](https://img.shields.io/badge/Windows-v0.7.1-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.1/NeuralPixel-Windows_v0.7.1.zip)
+[![Windows](https://img.shields.io/badge/Windows-v0.7.2-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.2/NeuralPixel-Windows_v0.7.2.zip)
 
 Then extract it and run the "neural_pixel.bat" file.
 You can directly run the "neural pixel" binary, but the variable that defines the dark theme will not be applied, so the app may look weird.
