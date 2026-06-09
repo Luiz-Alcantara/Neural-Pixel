@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.7.1";
+const char* APP_NAME_VERSION = "Neural Pixel v0.7.2";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -40,6 +40,9 @@ const size_t LIST_BACKENDS_COUNT = sizeof(LIST_BACKENDS) / sizeof(LIST_BACKENDS[
 
 const char* LIST_VAE_TILE_SIZES[] = {"Disabled", "32x32", "48x48", "64x64", "80x80", "96x96", "128x128", NULL};
 const size_t LIST_VAE_TILE_SIZES_COUNT = sizeof(LIST_VAE_TILE_SIZES) / sizeof(LIST_VAE_TILE_SIZES[0]);
+
+const char* LIST_HIRES_UPSCALERS[] = {"Disabled", "Lanczos", "Latent", "Latent (nearest)", "Latent (antialiased)", "Nearest", NULL};
+const size_t LIST_HIRES_UPSCALERS_COUNT = sizeof(LIST_HIRES_UPSCALERS) / sizeof(LIST_HIRES_UPSCALERS[0]);
  
 const char* POSITIVE_PROMPT = "masterpiece, ultra-detailed snow globe glowing softly on a wooden table, magical internal light illuminating a miniature winter village inside, tiny houses with warm windows, snow-covered pine trees, swirling snow particles, crystal glass sphere with smooth reflections, subtle frost and condensation, ornate metal base, cinematic lighting, dark cozy room background, deep shadows with soft rim light, volumetric glow, dreamy atmosphere, shallow depth of field, macro perspective, highly detailed, fantasy realism, dramatic contrast, beautiful composition";
 const char* NEGATIVE_PROMPT = "worst quality, low quality, blurry, flat lighting, harsh shadows, oversaturated, plastic look, bad reflections, warped glass, extra objects, cluttered composition, cartoon, anime, photorealistic face, text, watermark, logo";
@@ -54,6 +57,7 @@ const int DEFAULT_SCHEDULER = 5;
 const int DEFAULT_CLIP_SKIP = 0;
 const int DEFAULT_RP_UPSCALE = 1;
 const int DEFAULT_N_STEPS = 20;
+const int DEFAULT_HIRES_STEPS = 12;
 const int DEFAULT_BATCH_COUNT = 1;
 const int DEFAULT_SIZE = 7;
 const int ENABLED_OPT = 1;
@@ -70,3 +74,5 @@ const long long int DEFAULT_SEED = -1;
 const double DEFAULT_CFG = 6.0;
 const double DEFAULT_CNET_STRENGTH = 0.90;
 const double DEFAULT_DENOISE = 0.75;
+const double DEFAULT_HIRES_SCALE = 1.50;
+const double DEFAULT_HIRES_DENOISE_STR = 0.4;

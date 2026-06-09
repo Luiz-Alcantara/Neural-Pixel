@@ -23,6 +23,7 @@ typedef struct {
 	int inpaint_bool;
 	int sd_based_bool;
 	int llm_bool;
+	int hires_upscaler_index;
 	int vae_tiling_index;
 	int flash_attn_value;
 	int mmap_bool;
@@ -49,6 +50,9 @@ typedef struct {
 	double up_repeat_value;
 	double steps_value;
 	double batch_count_value;
+	double hires_scale_value;
+	double hires_steps_value;
+	double hires_denoise_value;
 } AppStartData;
 
 typedef struct {
@@ -100,6 +104,10 @@ typedef struct {
 	char *clip_g_filename;
 	char *text_enc_filename;
 	int llm_mode_enabled;
+	int hires_upscaler_index;
+	double hires_scale_value;
+	double hires_denoise_value;
+	int hires_steps_value;
 	int width_index;
 	int height_index;
 	int step_count_value;
@@ -247,6 +255,10 @@ typedef struct {
 	GtkWidget *scheduler_dd;
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;
+	GtkWidget *hires_upscaler_dd;
+	GtkWidget *hires_scale_spin;
+	GtkWidget *hires_steps_spin;
+	GtkWidget *hires_denoise_spin;
 	GtkWidget *steps_spin;
 	GtkWidget *batch_count_spin;
 	GtkWidget *kontext_check;
@@ -280,6 +292,8 @@ typedef struct {
 	int is_decoding_latents;
 	int n_current_latent;
 	int dec_latents_completed;
+	int n_current_hires;
+	int is_hires_fix;
 	int is_upscaling;
 	int n_current_upscale;
 	int verbose_bool;

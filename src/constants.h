@@ -39,6 +39,9 @@ extern const size_t LIST_BACKENDS_COUNT;
 extern const char* LIST_VAE_TILE_SIZES[];
 extern const size_t LIST_VAE_TILE_SIZES_COUNT;
 
+extern const char* LIST_HIRES_UPSCALERS[];
+extern const size_t LIST_HIRES_UPSCALERS_COUNT;
+
 extern const char* POSITIVE_PROMPT;
 extern const char* NEGATIVE_PROMPT;
 extern const char* OPTIONAL_ITEMS;
@@ -52,6 +55,7 @@ extern const int DEFAULT_SCHEDULER;
 extern const int DEFAULT_CLIP_SKIP;
 extern const int DEFAULT_RP_UPSCALE;
 extern const int DEFAULT_N_STEPS;
+extern const int DEFAULT_HIRES_STEPS;
 extern const int DEFAULT_BATCH_COUNT;
 extern const int DEFAULT_SIZE;
 extern const int ENABLED_OPT;
@@ -68,5 +72,7 @@ extern const long long int DEFAULT_SEED;
 extern const double DEFAULT_CFG;
 extern const double DEFAULT_CNET_STRENGTH;
 extern const double DEFAULT_DENOISE;
+extern const double DEFAULT_HIRES_SCALE;
+extern const double DEFAULT_HIRES_DENOISE_STR;
 
 #endif  // CONSTANTS_H

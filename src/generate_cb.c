@@ -150,7 +150,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				} else if (strstr(line, "latent images completed, taking") != NULL && data->n_current_image == data->n_total_images) {
 					data->is_generating_latent = 0;
 					data->gen_latent_completed = 1;
-					gtk_button_set_label(GTK_BUTTON(data->button), "Decoding latent(s)...");
+					gtk_button_set_label(GTK_BUTTON(data->button), "Continuing...");
 				} else if (strstr(line, "decoding") != NULL) {
 					int x;
 					int n_dec_latents;
@@ -186,7 +186,28 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					} else {
 						g_printerr("Error: Could not extract time from string: \"%s\"\n", line);
 					}
+				} else if (strstr(line, "hires") != NULL) {
+					int x;
+					char str_01[16];
+					char str_02[16];
+					int iw;
+					int ih;
+					int uw;
+					int uh;
+					
+					if (sscanf(line,
+					"[INFO ] stable-diffusion.cpp:%d - hires %15s image upscale %dx%d -> %dx%d",
+					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
+					"[INFO ] stable-diffusion.cpp:%d - hires %15s upscale %dx%d -> %dx%d",
+					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
+					"[INFO ] stable-diffusion.cpp:%d - hires %15s (%15[^)]) upscale %dx%d -> %dx%d",
+					&x, str_01, str_02, &iw, &ih, &uw, &uh) == 7) {
+						data->is_hires_fix = 1;
+						gtk_button_set_label(GTK_BUTTON(data->button), "HiRes Refining...");
+						data->n_current_hires++;
+					}
 				} else if (strstr(line, "- upscaling from") != NULL) {
+					data->is_hires_fix = 0;
 					data->is_upscaling = 1;
 					int x;
 					int ow;
@@ -199,17 +220,6 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					&x, &ow, &oh, &nw, &nh) == 5 ) {
 						gtk_button_set_label(GTK_BUTTON(data->button), "Upscaling...");
 						data->n_current_upscale++;
-					}
-				} else if (strstr(line, "- input_image_tensor upscaled, taking") != NULL) {
-					int x;
-					double upscale_seconds;
-					
-					if (sscanf(line,
-					"[INFO ] upscaler.cpp:%i   - input_image_tensor upscaled, taking %lfs",
-					&x, &upscale_seconds) == 2) {
-						*(data->total_time) += (int)upscale_seconds;
-					} else {
-						g_printerr("Error: Could not extract time from string: \"%s\"\n", line);
 					}
 				}
 				
@@ -259,6 +269,11 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 								written = snprintf(progress_label, sizeof(progress_label),
 									"Decoding... %d%% (%d/%d) at %.2f%s/%s",
 									percentage, data->n_current_latent, data->n_total_images,
+									time_or_speed, unit_part1, unit_part2);
+							} else if (data->is_hires_fix) {
+								written = snprintf(progress_label, sizeof(progress_label),
+									"Refining... %d%% (%d/%d) at %.2f%s/%s",
+									percentage, data->n_current_hires, data->n_total_images,
 									time_or_speed, unit_part1, unit_part2);
 							} else if (data->is_upscaling) {
 								written = snprintf(progress_label, sizeof(progress_label),
@@ -476,6 +491,8 @@ static void start_generation(gpointer user_data)
 		output_d->is_decoding_latents = 0;
 		output_d->n_current_latent = 0;
 		output_d->dec_latents_completed = 0;
+		output_d->n_current_hires = 0;
+		output_d->is_hires_fix = 0;
 		output_d->is_upscaling = 0;
 		output_d->n_current_upscale = 0;
 		output_d->verbose_bool = data->verbose_enabled;
@@ -536,6 +553,10 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	
 	snapshot_data->llm_mode_enabled = app_data->llm_bool;
 	
+	snapshot_data->hires_upscaler_index = app_data->hires_upscaler_index;
+	snapshot_data->hires_scale_value = app_data->hires_scale_value;
+	snapshot_data->hires_steps_value = (int)app_data->hires_steps_value;
+	snapshot_data->hires_denoise_value = app_data->hires_denoise_value;
 	snapshot_data->width_index = app_data->w_index;
 	snapshot_data->height_index = app_data->h_index;
 	snapshot_data->step_count_value = (int)app_data->steps_value;

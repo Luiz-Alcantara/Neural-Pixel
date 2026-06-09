@@ -63,6 +63,10 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "inpaint_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "hires_upscaler_index=%d\n", DISABLED_OPT);
+		fprintf(cf, "hires_scale_value=%.2f\n", DEFAULT_HIRES_SCALE);
+		fprintf(cf, "hires_steps_value=%d.0\n", DEFAULT_HIRES_STEPS);
+		fprintf(cf, "hires_denoise_value=%.1f\n", DEFAULT_HIRES_DENOISE_STR);
 		fprintf(cf, "flash_attn_value=%d\n", DISABLED_OPT);
 		fprintf(cf, "vae_tiling_index=%d\n", DEFAULT_MODELS);
 		fprintf(cf, "mmap_bool=%d\n", DISABLED_OPT);
@@ -233,6 +237,7 @@ void load_cache_fallback(gpointer user_data)
 	data->inpaint_bool = DISABLED_OPT;
 	data->sd_based_bool = ENABLED_OPT;
 	data->llm_bool = DISABLED_OPT;
+	data->hires_upscaler_index = DISABLED_OPT;
 	data->flash_attn_value = DISABLED_OPT;
 	data->mmap_bool = DISABLED_OPT;
 	data->taesd_bool = DISABLED_OPT;
@@ -246,6 +251,9 @@ void load_cache_fallback(gpointer user_data)
 	data->denoise_value = DEFAULT_DENOISE;
 	data->clip_skip_value = DEFAULT_CLIP_SKIP;
 	data->up_repeat_value = DEFAULT_RP_UPSCALE;
+	data->hires_scale_value = DEFAULT_HIRES_SCALE;
+	data->hires_steps_value = DEFAULT_HIRES_STEPS;
+	data->hires_denoise_value = DEFAULT_HIRES_DENOISE_STR;
 }
 
 void load_cache(gpointer user_data)
@@ -386,6 +394,37 @@ void load_cache(gpointer user_data)
 			sscanf(llm_bool_str, "%d", &data->llm_bool);
 		} else {
 			data->llm_bool = DISABLED_OPT;
+		}
+		
+		char *hires_upscaler_index_str = ini_file_get_value(cache_filename, "hires_upscaler_index");
+		if (hires_upscaler_index_str) {
+			sscanf(hires_upscaler_index_str, "%d", &data->hires_upscaler_index);
+		} else {
+			data->hires_upscaler_index = DISABLED_OPT;
+		}
+		
+		char *hires_scale_value_str = ini_file_get_value(cache_filename, "hires_scale_value");
+		if (hires_scale_value_str) {
+			char *endptr;
+			data->hires_scale_value = strtod(hires_scale_value_str, &endptr);
+		} else {
+			data->hires_scale_value = DEFAULT_HIRES_SCALE;
+		}
+		
+		char *hires_steps_value_str = ini_file_get_value(cache_filename, "hires_steps_value");
+		if (hires_steps_value_str) {
+			char *endptr;
+			data->hires_steps_value = strtod(hires_steps_value_str, &endptr);
+		} else {
+			data->hires_steps_value = DEFAULT_HIRES_STEPS;
+		}
+		
+		char *hires_denoise_value_str = ini_file_get_value(cache_filename, "hires_denoise_value");
+		if (hires_denoise_value_str) {
+			char *endptr;
+			data->hires_denoise_value = strtod(hires_denoise_value_str, &endptr);
+		} else {
+			data->hires_denoise_value = DEFAULT_HIRES_DENOISE_STR;
 		}
 		
 		char *flash_attn_value_str = ini_file_get_value(cache_filename, "flash_attn_value");
@@ -594,6 +633,10 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "inpaint_bool=%d\n", data->inpaint_enabled);
 	fprintf(cf, "sd_based_bool=%d\n", data->sd_based_enabled);
 	fprintf(cf, "llm_bool=%d\n", data->llm_mode_enabled);
+	fprintf(cf, "hires_upscaler_index=%d\n", data->hires_upscaler_index);
+	fprintf(cf, "hires_scale_value=%.2f\n", data->hires_scale_value);
+	fprintf(cf, "hires_steps_value=%.1f\n", (float)data->hires_steps_value);
+	fprintf(cf, "hires_denoise_value=%.2f\n", data->hires_denoise_value);
 	fprintf(cf, "flash_attn_value=%d\n", data->flash_attn_value);
 	fprintf(cf, "vae_tiling_index=%d\n", data->vae_tiling_index);
 	fprintf(cf, "mmap_bool=%d\n", data->mmap_enabled);

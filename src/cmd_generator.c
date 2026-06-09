@@ -69,6 +69,22 @@ void gen_sd_string(GenerationSnapshotData *data)
 			}
 		}
 	}
+	
+	if (data->hires_upscaler_index < LIST_HIRES_UPSCALERS_COUNT - 1 && data->hires_upscaler_index > 0) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires"));
+		
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-upscaler"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_HIRES_UPSCALERS[(data->hires_upscaler_index)]));
+		
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-scale"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->hires_scale_value));
+		
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-steps"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%d", data->hires_steps_value));
+		
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-denoising-strength"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->hires_denoise_value));
+	}
 
 	if (data->upscaler_filename != NULL && strcmp(data->upscaler_filename, "None") != 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--upscale-model"));

@@ -508,6 +508,18 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *height_dd = data->height_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(height_dd), DEFAULT_SIZE);
 	
+	GtkWidget *hires_upscaler_dd = data->hires_upscaler_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(hires_upscaler_dd), DISABLED_OPT);
+	
+	GtkWidget *hires_scale_spin = data->hires_scale_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), DEFAULT_HIRES_SCALE);
+	
+	GtkWidget *hires_steps_spin = data->hires_steps_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_steps_spin), DEFAULT_HIRES_STEPS);
+	
+	GtkWidget *hires_denoise_spin = data->hires_denoise_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_denoise_spin), DEFAULT_HIRES_DENOISE_STR);
+
 	GtkWidget *steps_spin = data->steps_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), DEFAULT_N_STEPS);
 

@@ -101,6 +101,13 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *upscale_str_lab, *upscale_spin;
 	GtkWidget *cnet_strength_lab, *cnet_strength_spin;
 	
+	GtkWidget *box_hires;
+	GtkWidget *box_hires_col1, *box_hires_col2;
+	GtkWidget *hires_upscaler_lab, *hires_upscaler_dd;
+	GtkWidget *hires_scale_lab, *hires_scale_spin;
+	GtkWidget *hires_steps_lab, *hires_steps_spin;
+	GtkWidget *hires_denoise_lab, *hires_denoise_spin;
+	
 	GtkWidget *extra_opts_expander, *box_extra_opts, *box_extra_opts_row1, *box_extra_opts_col1, *box_extra_opts_col2;
 	
 	GtkWidget *fa_separator;
@@ -762,6 +769,83 @@ app_activate (GApplication *app, gpointer user_data)
 	stop_spinbutton_scroll(cnet_strength_spin);
 	gtk_box_append (GTK_BOX (box_params_row7), cnet_strength_spin);
 	
+	//Set Hires Widgets
+	
+	box_hires = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_hires), TRUE);
+	gtk_widget_add_css_class(box_hires, "inner_box");
+	gtk_box_append (GTK_BOX (box_properties), box_hires);
+	
+	box_hires_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_hires_col1), TRUE);
+	gtk_box_append (GTK_BOX (box_hires), box_hires_col1);
+	
+	box_hires_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_hires_col2), TRUE);
+	gtk_box_append (GTK_BOX (box_hires), box_hires_col2);
+
+	//Set Hires DD Widgets
+
+	hires_upscaler_lab = gtk_label_new ("Hires Upscaler");
+	gtk_widget_add_css_class(hires_upscaler_lab, "param_label");
+	gtk_widget_set_halign(hires_upscaler_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_hires_col1), hires_upscaler_lab);
+	
+	hires_upscaler_dd = gen_const_dd(LIST_HIRES_UPSCALERS, &app_data->hires_upscaler_index);
+	gtk_box_append (GTK_BOX (box_hires_col1), hires_upscaler_dd);
+	
+	//Set Hires Scale Widgets
+
+	hires_scale_lab = gtk_label_new ("Hires Scale");
+	gtk_widget_set_halign(hires_scale_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(hires_scale_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_hires_col1), hires_scale_lab);
+	
+	hires_scale_spin = gtk_spin_button_new_with_range (1.0, 4.0, 0.05);
+	gtk_widget_add_css_class(hires_scale_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(hires_scale_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), app_data->hires_scale_value);
+	g_signal_connect (hires_scale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->hires_scale_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(hires_scale_spin),
+	"Controls how much the image is enlarged during the Hires fix step.\nA value of 1.2 increases the image size by 20%, 2.0 doubles it,\nand 1.0 keeps the original size.");
+	stop_spinbutton_scroll(hires_scale_spin);
+	gtk_box_append (GTK_BOX (box_hires_col1), hires_scale_spin);
+	
+	//Set Hires Steps Widgets
+
+	hires_steps_lab = gtk_label_new ("Hires Steps");
+	gtk_widget_set_halign(hires_steps_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(hires_steps_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_hires_col2), hires_steps_lab);
+	
+	hires_steps_spin = gtk_spin_button_new_with_range (1.0, 50.0, 1.0);
+	gtk_widget_add_css_class(hires_steps_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(hires_steps_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_steps_spin), app_data->hires_steps_value);
+	g_signal_connect (hires_steps_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->hires_steps_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(hires_steps_spin),
+	"Number of refinement steps used during Hires processing.\nMore steps = better detail, longer generation time.");
+	stop_spinbutton_scroll(hires_steps_spin);
+	gtk_box_append (GTK_BOX (box_hires_col2), hires_steps_spin);
+	
+	//Set Hires Denoise Str Widgets
+
+	hires_denoise_lab = gtk_label_new ("Hires Denoise Str");
+	gtk_widget_set_halign(hires_denoise_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(hires_denoise_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_hires_col2), hires_denoise_lab);
+	
+	hires_denoise_spin = gtk_spin_button_new_with_range (0, 1.0, 0.05);
+	gtk_widget_add_css_class(hires_denoise_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(hires_denoise_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_denoise_spin), app_data->hires_denoise_value);
+	g_signal_connect (hires_denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->hires_denoise_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(hires_denoise_spin),
+	"Controls how much the image is altered during Hires processing.\nHigher values allow greater changes and new details.");
+	stop_spinbutton_scroll(hires_denoise_spin);
+	gtk_box_append (GTK_BOX (box_hires_col2), hires_denoise_spin);
+	
+	
 	//Set Extra Options Widgets
 	
 	extra_opts_expander = gtk_expander_new ("Extra Options");
@@ -1237,6 +1321,10 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->scheduler_dd = scheduler_dd;
 	reset_d->width_dd = width_dd;
 	reset_d->height_dd = height_dd;
+	reset_d->hires_upscaler_dd = hires_upscaler_dd;
+	reset_d->hires_scale_spin = hires_scale_spin;
+	reset_d->hires_steps_spin = hires_steps_spin;
+	reset_d->hires_denoise_spin = hires_denoise_spin;
 	reset_d->steps_spin = steps_spin;
 	reset_d->batch_count_spin = batch_count_spin;
 	reset_d->kontext_check = kontext_check;
@@ -1424,7 +1512,7 @@ main (int argc, char **argv)
 	
 	int s;
 
-	app = gtk_application_new ("com.github.LuizAlcantara.NeuralPixel", 0);
+	app = gtk_application_new ("com.github.LuizAlcantara.NeuralPixel", G_APPLICATION_NON_UNIQUE);
 	g_signal_connect (app, "activate", G_CALLBACK (app_activate), data);
 	s = g_application_run (G_APPLICATION (app), argc, argv);
 	if (data != NULL) {
