@@ -39,6 +39,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 | txt2img | Generate images from text prompts |
 | img2img / Flux Kontext | Transform existing images using prompts |
 | Mask-based Inpainting | Modify specific areas of an image using a mask |
+| Hires Fix | Upscales and refines images with added detail |
 
 ## Supported Weight Formats
 | Supported weight formats |
