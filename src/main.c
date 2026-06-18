@@ -1376,6 +1376,10 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->vae_dd = vae_dd;
 	load_png_info_d->sampler_dd = sampler_dd;
 	load_png_info_d->scheduler_dd = scheduler_dd;
+	load_png_info_d->hires_upscaler_dd = hires_upscaler_dd;
+	load_png_info_d->hires_scale_spin = hires_scale_spin;
+	load_png_info_d->hires_steps_spin = hires_steps_spin;
+	load_png_info_d->hires_denoise_spin = hires_denoise_spin;
 	g_signal_connect (load_from_img_btn, "clicked", G_CALLBACK (load_from_img_btn_cb), load_png_info_d);
 	g_signal_connect (load_from_current_btn, "clicked", G_CALLBACK (load_from_img_preview), load_png_info_d);
 	g_signal_connect (load_from_img_btn, "destroy", G_CALLBACK (on_load_from_img_btn_destroy), load_png_info_d);

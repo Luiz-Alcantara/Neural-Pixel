@@ -181,16 +181,6 @@ void array_strings_free (const char **list)
 	}
 }
 
-void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
-{
-	LoadImg2ImgData *data = user_data;
-	gtk_widget_remove_css_class(data->img2img_expander, "img2img_active");
-	GString *gstr = data->img2img_file_path;
-	g_string_assign(gstr, "None");
-	GtkPicture *preview_img = GTK_PICTURE(data->image_wgt);
-	gtk_picture_set_filename(preview_img, EMPTY_IMG_PATH);
-}
-
 void clear_img2img_overlay(GtkOverlay *overlay)
 {
 	GtkWidget *base_child = gtk_overlay_get_child(overlay);
@@ -208,6 +198,17 @@ void clear_mask_btn_cb (GtkButton *btn, gpointer user_data)
 	LoadImg2ImgData *data = user_data;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(data->inpaint_check), FALSE);
 	clear_img2img_overlay(GTK_OVERLAY(data->overlay_img2img));
+}
+
+void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
+{
+	LoadImg2ImgData *data = user_data;
+	gtk_widget_remove_css_class(data->img2img_expander, "img2img_active");
+	GString *gstr = data->img2img_file_path;
+	g_string_assign(gstr, "None");
+	GtkPicture *preview_img = GTK_PICTURE(data->image_wgt);
+	gtk_picture_set_filename(preview_img, EMPTY_IMG_PATH);
+	clear_mask_btn_cb(NULL, user_data);
 }
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)

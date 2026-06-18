@@ -187,6 +187,10 @@ typedef struct {
 	GtkWidget *vae_dd;
 	GtkWidget *sampler_dd;
 	GtkWidget *scheduler_dd;
+	GtkWidget *hires_upscaler_dd;
+	GtkWidget *hires_scale_spin;
+	GtkWidget *hires_steps_spin;
+	GtkWidget *hires_denoise_spin;
 	GCancellable *cancellable;
 } LoadPNGData;
 

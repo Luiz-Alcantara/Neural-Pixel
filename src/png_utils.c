@@ -148,8 +148,13 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			n_err++;
 		}
 	} else {
-		fprintf(stderr, "Failed to parse negative prompt data.\n");
-		n_err++;
+		if (n_err == 0) {
+			GtkTextBuffer *ntb = data->neg_tb;
+			gtk_text_buffer_set_text(ntb, "", -1);
+		} else {
+			fprintf(stderr, "Failed to parse negative prompt data.\n");
+			n_err++;
+		}
 	}
 	
 	//Set Steps
@@ -327,6 +332,93 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 		}
 	} else {
 		fprintf(stderr, "Failed to parse Clip skip data.\n");
+		n_err++;
+	}
+	
+	//Set Hires upscaler
+	ptr = strstr(l1->str, ", Hires upscale: ");
+	if (ptr) {
+		const char *start = ptr + strlen(", Hires upscale: ");
+		const char *end = strstr(start, ",");
+		if (start && end && start < end) {
+			size_t len = end - start;
+			if (len >= MAX_PROPERTY_LENGTH) {
+				len = MAX_PROPERTY_LENGTH - 1;
+			}
+			char hires_upscaler_str[MAX_PROPERTY_LENGTH];
+			strncpy(hires_upscaler_str, start, len);
+			hires_upscaler_str[len] = '\0';
+			
+			GtkStringList *hires_upscaler_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(data->hires_upscaler_dd)));
+			int hires_upscaler_i = check_gtk_list_contains_item(hires_upscaler_items, hires_upscaler_str);
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), hires_upscaler_i);
+		} else {
+			fprintf(stderr, "Failed to parse Hires upscale data.\n");
+			if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
+			n_err++;
+		}
+	} else {
+		fprintf(stderr, "Failed to parse Hires upscale data.\n");
+		if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
+		n_err++;
+	}
+	
+	//Set Hires Scale Value
+	ptr = strstr(l1->str, ", Hires scale: ");
+	if (ptr) {
+		double hires_scale_double;
+		if (sscanf(ptr + strlen(", Hires scale: "), "%lf", &hires_scale_double) == 1) {
+			GtkWidget *hires_scale_spin = data->hires_scale_spin;
+			gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), hires_scale_double);
+		} else {
+			fprintf(stderr, "Failed to parse Hires scale data.\n");
+			n_err++;
+		}
+	} else {
+		fprintf(stderr, "Failed to parse Hires scale data.\n");
+		n_err++;
+	}
+	
+	//Set Hires Resize Value
+	/*ptr = strstr(l1->str, ", Hires resize: ");
+	if (ptr) {
+		int hires_width_int;
+		int hires_heigth_int;
+	} else {
+		fprintf(stderr, "Failed to parse Hires resize data.\n");
+		n_err++;
+	}*/
+	
+	//Set Hires Steps
+	ptr = strstr(l1->str, ", Hires steps: ");
+	if (ptr) {
+		int hires_steps_int;
+		if (sscanf(ptr + strlen(", Hires steps: "), "%d", &hires_steps_int) == 1) {
+			
+			GtkWidget *hires_steps_spin = data->hires_steps_spin;
+			gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_steps_spin), hires_steps_int);
+		} else {
+			fprintf(stderr, "Failed to parse Hires steps data.\n");
+			n_err++;
+		}
+	} else {
+		fprintf(stderr, "Failed to parse Hires steps data.\n");
+		n_err++;
+	}
+	
+	//Set Hires Denoising strength
+	ptr = strstr(l1->str, ", Denoising strength: ");
+	if (ptr) {
+		double hires_denoising_str_double;
+		if (sscanf(ptr + strlen(", Denoising strength: "), "%lf", &hires_denoising_str_double) == 1) {
+			GtkWidget *hires_denoise_spin = data->hires_denoise_spin;
+			gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_denoise_spin), hires_denoising_str_double);
+		} else {
+			fprintf(stderr, "Failed to parse Hires denoising strength data.\n");
+			n_err++;
+		}
+	} else {
+		fprintf(stderr, "Failed to parse Hires denoising strength data.\n");
 		n_err++;
 	}
 

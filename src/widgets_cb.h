@@ -11,11 +11,11 @@ void app_start_data_free (gpointer user_data);
 
 void array_strings_free(const char **list);
 
-void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
-
 void clear_img2img_overlay(GtkOverlay *overlay);
 
 void clear_mask_btn_cb (GtkButton *btn, gpointer user_data);
+
+void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data);
 
