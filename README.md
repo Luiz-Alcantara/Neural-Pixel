@@ -41,7 +41,10 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 
 ## Recommended checkpoints
 
-- Attention: Due to hardware limitations, I used `q5_1` quantization and the DMD2 speed LoRA (0.7 weight) to generate these examples. The `Sam semi-realistic` model is the only exception, as it has the LoRA built-in. If you use the base model, your results may differ slightly.
+- Due to hardware limitations, I used `q5_1` quantization and the DMD2 speed LoRA (0.7 weight) to generate these examples. The `Sam semi-realistic` model is the only exception, as it has the LoRA built-in. If you use the base model, your results may differ slightly.
+
+> [!WARNING]
+> The links to get the models may display NSFW, mature, or suggestive preview images. Viewer discretion is advised.
 
 <table>
 	<thead>
