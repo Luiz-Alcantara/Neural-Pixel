@@ -41,8 +41,43 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 
 ## Recommended checkpoints
 
-- For realistic style: [Photon](https://huggingface.co/sam749/Photon-v1/blob/main/photon_v1.safetensors).
-- For anime style: [SoteMix](https://civitai.com/models/72182/sotemix).
+- Attention: Due to hardware limitations, I used `q5_1` quantization and the DMD2 speed LoRA (0.7 weight) to generate these examples. The `Sam semi-realistic` model is the only exception, as it has the LoRA built-in. If you use the base model, your results may differ slightly.
+
+<table>
+	<thead>
+		<tr>
+			<th><a href="https://civarchive.com/models/24149?modelVersionId=1540184" target="_blank" rel="noopener noreferrer">Mistoon NAI</a></th>
+			<th><a href="https://civarchive.com/models/941345?modelVersionId=2182820" target="_blank" rel="noopener noreferrer">Hoseki V2</a></th>
+			<th><a href="https://civarchive.com/models/24149?modelVersionId=1540184" target="_blank" rel="noopener noreferrer">Dixar 4</a></th>
+			<th><a href="https://civarchive.com/models/1876119?modelVersionId=2123506" target="_blank" rel="noopener noreferrer">Sam semi-realistic V1</a></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td><img src="./assets/mistoon_01.webp" width="100%" alt="Model A Output"></td>
+			<td><img src="./assets/hoseki_01.webp" width="100%" alt="Model B Output"></td>
+			<td><img src="./assets/dixar_01.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/samSemiRealistic_01.webp" width="100%" alt="Model C Output"></td>
+		</tr>
+		<tr>
+			<td><img src="./assets/mistoon_02.webp" width="100%" alt="Model A Output"></td>
+			<td><img src="./assets/hoseki_02.webp" width="100%" alt="Model B Output"></td>
+			<td><img src="./assets/dixar_02.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/samSemiRealistic_02.webp" width="100%" alt="Model C Output"></td>
+		</tr>
+		<tr>
+			<td><img src="./assets/mistoon_03.webp" width="100%" alt="Model A Output"></td>
+			<td><img src="./assets/hoseki_03.webp" width="100%" alt="Model B Output"></td>
+			<td><img src="./assets/dixar_03.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/samSemiRealistic_03.webp" width="100%" alt="Model C Output"></td>
+		</tr>
+	</tbody>
+</table>
+
+### Settings used
+- Sampler: `Euler A` (more detail) or `LCM` (smoother/less detail)
+- Scheduler: ays, exponential, or smoothstep
+- Steps: 8-12
 
 ## Build
 
@@ -67,20 +102,11 @@ To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cp
 ## Donations
 
 - PayPal: [`Donate`](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ)
-
 - Bitcoin
 ```
 bc1qhxxgy52s2ps9j2gyzfxtykccrrpkzpu9uvnhhe
 ```
-- Ethereum
-```
-0x5da0a849D04085C7F1943871F469cb77394aa84b
-```
 - Litecoin
 ```
 ltc1q8fu7j3zyckl0w4e6m2q85xc69ywvtpnjzdjhvq
-```
-- BAT (Brave's Basic Attention Tokens)
-```
-0x8c6bB60AAC4565582471B8BA812058aeafc05cd7
 ```
