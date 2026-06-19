@@ -14,47 +14,30 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 
 - Neural Pixel supports leading image generation models such as SDXL and FLUX, plus a broad range of community models, extensions, and runtimes.
 - By default, the release ZIP packages include support for Vulkan and CPU inference only.
-- See docs/compatibility.md for the full list of supported models, features, formats, platforms, and backends.
-
-## Notes
-
 - No video support at the moment.
-- You can change the application's theme color in the `resources/styles.css` file.
+- See [docs](./docs/compatibility.md) for the full list of supported models, features, formats, platforms, and backends.
 
-## Linux Requirements (usually preinstalled on most systems)
+## Linux Setup & Running
 
-- Linux Distro with kernel >= 5.14 (Tested on RHEL 9, Fedora 42, and Arch Linux).
+### 1. Requirements
+- OS: Linux kernel >= 5.14 (Tested on RHEL 9, Fedora 42, and Arch).
+- Dependencies: GTK >= 4.12, libpng, zlib.
+- Vulkan backend (Optional): Vulkan driver/loader/tools & >= 2GB of VRAM.
 
-- Required:
-    - GTK >= 4.12
-    - libpng
-    - zlib
+### 2. How to Run
+- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.7.2-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.2/NeuralPixel-Linux_v0.7.2.zip)
+- Extract the archive and execute the `run_neural_pixel` file.
+- Tip: For debugging, launch from a terminal and enable Terminal Verbose under Extra Options.
 
-- Optional (Vulkan backend):
-    - Vulkan (driver, loader and tools)
-
-- A GPU or iGPU with at least 2GB of VRAM for Vulkan.
-
-## Running on Linux
-
-Download the Linux bundle:
-[![Linux](https://img.shields.io/badge/Linux-v0.7.2-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.2/NeuralPixel-Linux_v0.7.2.zip)
-
-Then extract it and run the "run_neural_pixel" file.
-If you want to see errors and details, start the application from a terminal and enable the "Terminal Verbose" option in "Extra Opts."
-
-## Windows Requirements
-
+## Windows Setup & Running
+### 1. Requirements
 - Microsoft Visual C++ Redistributable latest: [vc_redist](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
-## Running on Windows
-
-Download the Windows bundle:
-[![Windows](https://img.shields.io/badge/Windows-v0.7.2-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.2/NeuralPixel-Windows_v0.7.2.zip)
-
-Then extract it and run the "neural_pixel.bat" file.
-You can directly run the "neural pixel" binary, but the variable that defines the dark theme will not be applied, so the app may look weird.
+### 2. How to Run
+- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.7.2-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.2/NeuralPixel-Windows_v0.7.2.zip)
+- Extract the archive and execute the `neural_pixel.bat` file.
+- Note: You can run the `neural_pixel` binary directly, but the dark theme variable won't apply, which may cause rendering issues.
 
 ## Recommended checkpoints
 
