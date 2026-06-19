@@ -34,20 +34,28 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		
 		int n_error;
 		int n_error2;
+		int n_error3;
 		char file_name[256];
+		char backend_str[16];
 		
 		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - init model loader from file failed: '%255[^']'",
 		&n_error, file_name) == 2) {
 			char error_dialog_text[16 + strlen(file_name)];
 			strcpy(error_dialog_text, "Error loading: ");
 			strcat(error_dialog_text, file_name);
-
 			show_error_message(data->win, "Error loading file", error_dialog_text);
 		}
 		
 		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - load tensors from model loader failed",
 		&n_error2) == 1) {
 			show_error_message(data->win, "Error loading model", "Error loading tensors from model");
+		}
+		
+		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - backend config failed: backend '%15[^']' was not found",
+		&n_error3, backend_str) == 2) {
+			char error_dialog_text[27 + strlen(backend_str)];
+			snprintf(error_dialog_text, sizeof(error_dialog_text), "Backend: '%s' was not found.", backend_str);
+			show_error_message(data->win, "Error starting backend", error_dialog_text);
 		}
 		
 		g_free(err_string);
