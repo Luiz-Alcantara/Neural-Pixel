@@ -51,7 +51,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 		<tr>
 			<th><a href="https://civarchive.com/models/24149?modelVersionId=1540184" target="_blank" rel="noopener noreferrer">Mistoon NAI</a></th>
 			<th><a href="https://civarchive.com/models/941345?modelVersionId=2182820" target="_blank" rel="noopener noreferrer">Hoseki V2</a></th>
-			<th><a href="https://civarchive.com/models/24149?modelVersionId=1540184" target="_blank" rel="noopener noreferrer">Dixar 4</a></th>
+			<th><a href="https://civarchive.com/models/1456548?modelVersionId=2598560" target="_blank" rel="noopener noreferrer">Dixar 4</a></th>
 			<th><a href="https://civarchive.com/models/1876119?modelVersionId=2123506" target="_blank" rel="noopener noreferrer">Sam semi-realistic V1</a></th>
 		</tr>
 	</thead>
@@ -60,19 +60,19 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 			<td><img src="./assets/mistoon_01.webp" width="100%" alt="Model A Output"></td>
 			<td><img src="./assets/hoseki_01.webp" width="100%" alt="Model B Output"></td>
 			<td><img src="./assets/dixar_01.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/samSemiRealistic_01.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/samSemiRealistic_01.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 		<tr>
 			<td><img src="./assets/mistoon_02.webp" width="100%" alt="Model A Output"></td>
 			<td><img src="./assets/hoseki_02.webp" width="100%" alt="Model B Output"></td>
 			<td><img src="./assets/dixar_02.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/samSemiRealistic_02.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/samSemiRealistic_02.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 		<tr>
 			<td><img src="./assets/mistoon_03.webp" width="100%" alt="Model A Output"></td>
 			<td><img src="./assets/hoseki_03.webp" width="100%" alt="Model B Output"></td>
 			<td><img src="./assets/dixar_03.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/samSemiRealistic_03.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/samSemiRealistic_03.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 	</tbody>
 </table>
