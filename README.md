@@ -49,10 +49,10 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 <table>
 	<thead>
 		<tr>
-			<th><a href="https://civarchive.com/models/24149?modelVersionId=1540184" target="_blank" rel="noopener noreferrer">Mistoon NAI</a></th>
-			<th><a href="https://civarchive.com/models/941345?modelVersionId=2182820" target="_blank" rel="noopener noreferrer">Hoseki V2</a></th>
-			<th><a href="https://civarchive.com/models/1456548?modelVersionId=2598560" target="_blank" rel="noopener noreferrer">Dixar 4</a></th>
-			<th><a href="https://civarchive.com/models/1876119?modelVersionId=2123506" target="_blank" rel="noopener noreferrer">Sam semi-realistic V1</a></th>
+			<th><a href="https://civitai.red/models/24149/mistoonanime?modelVersionId=1540184" target="_blank" rel="noopener noreferrer">Mistoon NAI</a></th>
+			<th><a href="https://civitai.red/models/941345/hoseki-lustrousmix-anima-v10?modelVersionId=2182820" target="_blank" rel="noopener noreferrer">Hoseki V2</a></th>
+			<th><a href="https://civitai.red/models/1456548/dixar?modelVersionId=2598560" target="_blank" rel="noopener noreferrer">Dixar 4</a></th>
+			<th><a href="https://civitai.red/models/1876119/sam-semi-realistic?modelVersionId=2123506" target="_blank" rel="noopener noreferrer">Sam semi-realistic V1</a></th>
 		</tr>
 	</thead>
 	<tbody>
