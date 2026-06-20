@@ -37,7 +37,6 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 ### 2. How to Run
 - Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.7.3-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.7.3/NeuralPixel-Windows_v0.7.3.zip)
 - Extract the archive and execute the `neural_pixel.bat` file.
-- Note: You can run the `neural_pixel` binary directly, but the dark theme variable won't apply, which may cause rendering issues.
 
 ## Recommended checkpoints
 
