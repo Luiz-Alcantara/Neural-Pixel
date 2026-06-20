@@ -51,28 +51,28 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 		<tr>
 			<th><a href="https://civitai.red/models/24149/mistoonanime?modelVersionId=1540184" target="_blank" rel="noopener noreferrer">Mistoon NAI</a></th>
 			<th><a href="https://civitai.red/models/941345/hoseki-lustrousmix-anima-v10?modelVersionId=2182820" target="_blank" rel="noopener noreferrer">Hoseki V2</a></th>
-			<th><a href="https://civitai.red/models/1456548/dixar?modelVersionId=2598560" target="_blank" rel="noopener noreferrer">Dixar 4</a></th>
-			<th><a href="https://civitai.red/models/1876119/sam-semi-realistic?modelVersionId=2123506" target="_blank" rel="noopener noreferrer">Sam semi-realistic V1</a></th>
+			<th><a href="https://civitai.red/models/1456548/dixar?modelVersionId=2598560" target="_blank" rel="noopener noreferrer">Dixar 4: DG</a></th>
+			<th><a href="https://civitai.red/models/1876119/sam-semi-realistic?modelVersionId=2123506" target="_blank" rel="noopener noreferrer">Sam semi. V1</a></th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
-			<td><img src="./assets/examples/mistoon_01.webp" width="100%" alt="Model A Output"></td>
-			<td><img src="./assets/examples/hoseki_01.webp" width="100%" alt="Model B Output"></td>
-			<td><img src="./assets/examples/dixar_01.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/examples/samSemiRealistic_01.webp" width="100%" alt="Model D Output"></td>
+			<td width="25%"><img src="./assets/examples/mistoon_01.webp" width="100%" alt="Model A Output"></td>
+			<td width="25%"><img src="./assets/examples/hoseki_01.webp" width="100%" alt="Model B Output"></td>
+			<td width="25%"><img src="./assets/examples/dixar_01.webp" width="100%" alt="Model C Output"></td>
+			<td width="25%"><img src="./assets/examples/samSemiRealistic_01.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 		<tr>
-			<td><img src="./assets/examples/mistoon_02.webp" width="100%" alt="Model A Output"></td>
-			<td><img src="./assets/examples/hoseki_02.webp" width="100%" alt="Model B Output"></td>
-			<td><img src="./assets/examples/dixar_02.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/examples/samSemiRealistic_02.webp" width="100%" alt="Model D Output"></td>
+			<td width="25%"><img src="./assets/examples/mistoon_02.webp" width="100%" alt="Model A Output"></td>
+			<td width="25%"><img src="./assets/examples/hoseki_02.webp" width="100%" alt="Model B Output"></td>
+			<td width="25%"><img src="./assets/examples/dixar_02.webp" width="100%" alt="Model C Output"></td>
+			<td width="25%"><img src="./assets/examples/samSemiRealistic_02.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 		<tr>
-			<td><img src="./assets/examples/mistoon_03.webp" width="100%" alt="Model A Output"></td>
-			<td><img src="./assets/examples/hoseki_03.webp" width="100%" alt="Model B Output"></td>
-			<td><img src="./assets/examples/dixar_03.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/examples/samSemiRealistic_03.webp" width="100%" alt="Model D Output"></td>
+			<td width="25%"><img src="./assets/examples/mistoon_03.webp" width="100%" alt="Model A Output"></td>
+			<td width="25%"><img src="./assets/examples/hoseki_03.webp" width="100%" alt="Model B Output"></td>
+			<td width="25%"><img src="./assets/examples/dixar_03.webp" width="100%" alt="Model C Output"></td>
+			<td width="25%"><img src="./assets/examples/samSemiRealistic_03.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 	</tbody>
 </table>
