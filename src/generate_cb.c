@@ -206,9 +206,15 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%d - hires %15s image upscale %dx%d -> %dx%d",
 					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
+					"stable-diffusion.cpp:%d - hires %15s image upscale %dx%d -> %dx%d",
+					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%d - hires %15s upscale %dx%d -> %dx%d",
 					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
+					"stable-diffusion.cpp:%d - hires %15s upscale %dx%d -> %dx%d",
+					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%d - hires %15s (%15[^)]) upscale %dx%d -> %dx%d",
+					&x, str_01, str_02, &iw, &ih, &uw, &uh) == 7 || sscanf(line,
+					"stable-diffusion.cpp:%d - hires %15s (%15[^)]) upscale %dx%d -> %dx%d",
 					&x, str_01, str_02, &iw, &ih, &uw, &uh) == 7) {
 						data->is_hires_fix = 1;
 						gtk_button_set_label(GTK_BUTTON(data->button), "HiRes Refining...");

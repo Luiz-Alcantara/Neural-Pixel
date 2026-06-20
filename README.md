@@ -5,7 +5,7 @@
 [![Download](https://img.shields.io/github/downloads/Luiz-Alcantara/Neural-Pixel/total.svg)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/latest)
 
 **A simple GUI wrapper for stable-diffusion.cpp written using C and GTK 4.**
-![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/screenshots/img1.png?raw=true)
+![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/assets/screenshots/img1.png?raw=true)
 </div>
 
 Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost any GPU from 2014+ (requires at least 2GB VRAM for SD 1.5 or 3GB for SDXL). Skip the CUDA/ROCm headache and Python dependency hell, Neural Pixel is simple, portable, and high-performing!
@@ -57,22 +57,22 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 	</thead>
 	<tbody>
 		<tr>
-			<td><img src="./assets/mistoon_01.webp" width="100%" alt="Model A Output"></td>
-			<td><img src="./assets/hoseki_01.webp" width="100%" alt="Model B Output"></td>
-			<td><img src="./assets/dixar_01.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/samSemiRealistic_01.webp" width="100%" alt="Model D Output"></td>
+			<td><img src="./assets/examples/mistoon_01.webp" width="100%" alt="Model A Output"></td>
+			<td><img src="./assets/examples/hoseki_01.webp" width="100%" alt="Model B Output"></td>
+			<td><img src="./assets/examples/dixar_01.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/examples/samSemiRealistic_01.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 		<tr>
-			<td><img src="./assets/mistoon_02.webp" width="100%" alt="Model A Output"></td>
-			<td><img src="./assets/hoseki_02.webp" width="100%" alt="Model B Output"></td>
-			<td><img src="./assets/dixar_02.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/samSemiRealistic_02.webp" width="100%" alt="Model D Output"></td>
+			<td><img src="./assets/examples/mistoon_02.webp" width="100%" alt="Model A Output"></td>
+			<td><img src="./assets/examples/hoseki_02.webp" width="100%" alt="Model B Output"></td>
+			<td><img src="./assets/examples/dixar_02.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/examples/samSemiRealistic_02.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 		<tr>
-			<td><img src="./assets/mistoon_03.webp" width="100%" alt="Model A Output"></td>
-			<td><img src="./assets/hoseki_03.webp" width="100%" alt="Model B Output"></td>
-			<td><img src="./assets/dixar_03.webp" width="100%" alt="Model C Output"></td>
-			<td><img src="./assets/samSemiRealistic_03.webp" width="100%" alt="Model D Output"></td>
+			<td><img src="./assets/examples/mistoon_03.webp" width="100%" alt="Model A Output"></td>
+			<td><img src="./assets/examples/hoseki_03.webp" width="100%" alt="Model B Output"></td>
+			<td><img src="./assets/examples/dixar_03.webp" width="100%" alt="Model C Output"></td>
+			<td><img src="./assets/examples/samSemiRealistic_03.webp" width="100%" alt="Model D Output"></td>
 		</tr>
 	</tbody>
 </table>
