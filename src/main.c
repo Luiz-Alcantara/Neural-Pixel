@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <gtk/gtk.h>
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -1429,6 +1430,10 @@ app_activate (GApplication *app, gpointer user_data)
 int
 main (int argc, char **argv)
 {
+	// This fixes locale-dependent decimal separators.
+	setlocale(LC_ALL, "");
+	setlocale(LC_NUMERIC, "C");
+
 	int a = check_create_base_dirs();
 	if (a != 0) {
 		return 1;

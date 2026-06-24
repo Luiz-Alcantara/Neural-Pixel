@@ -353,7 +353,7 @@ void load_cache(gpointer user_data)
 		char *n_steps_str = ini_file_get_value(cache_filename, "n_steps");
 		if (n_steps_str) {
 			char *endptr;
-			data->steps_value = strtod(n_steps_str, &endptr);
+			data->steps_value = g_ascii_strtod(n_steps_str, &endptr);
 		} else {
 			data->steps_value = DEFAULT_N_STEPS;
 		}
@@ -361,7 +361,7 @@ void load_cache(gpointer user_data)
 		char *batch_count_str = ini_file_get_value(cache_filename, "batch_count");
 		if (batch_count_str) {
 			char *endptr;
-			data->batch_count_value = strtod(batch_count_str, &endptr);
+			data->batch_count_value = g_ascii_strtod(batch_count_str, &endptr);
 		} else {
 			data->batch_count_value = DEFAULT_BATCH_COUNT;
 		}
@@ -406,7 +406,7 @@ void load_cache(gpointer user_data)
 		char *hires_scale_value_str = ini_file_get_value(cache_filename, "hires_scale_value");
 		if (hires_scale_value_str) {
 			char *endptr;
-			data->hires_scale_value = strtod(hires_scale_value_str, &endptr);
+			data->hires_scale_value = g_ascii_strtod(hires_scale_value_str, &endptr);
 		} else {
 			data->hires_scale_value = DEFAULT_HIRES_SCALE;
 		}
@@ -414,7 +414,7 @@ void load_cache(gpointer user_data)
 		char *hires_steps_value_str = ini_file_get_value(cache_filename, "hires_steps_value");
 		if (hires_steps_value_str) {
 			char *endptr;
-			data->hires_steps_value = strtod(hires_steps_value_str, &endptr);
+			data->hires_steps_value = g_ascii_strtod(hires_steps_value_str, &endptr);
 		} else {
 			data->hires_steps_value = DEFAULT_HIRES_STEPS;
 		}
@@ -422,7 +422,7 @@ void load_cache(gpointer user_data)
 		char *hires_denoise_value_str = ini_file_get_value(cache_filename, "hires_denoise_value");
 		if (hires_denoise_value_str) {
 			char *endptr;
-			data->hires_denoise_value = strtod(hires_denoise_value_str, &endptr);
+			data->hires_denoise_value = g_ascii_strtod(hires_denoise_value_str, &endptr);
 		} else {
 			data->hires_denoise_value = DEFAULT_HIRES_DENOISE_STR;
 		}
@@ -549,7 +549,7 @@ void load_cache(gpointer user_data)
 		char *cfg_scale_str = ini_file_get_value(cache_filename, "cfg_scale");
 		if (cfg_scale_str) {
 			char *endptr;
-			data->cfg_value = strtod(cfg_scale_str, &endptr);
+			data->cfg_value = g_ascii_strtod(cfg_scale_str, &endptr);
 		} else {
 			data->cfg_value = DEFAULT_CFG;
 		}
@@ -557,7 +557,7 @@ void load_cache(gpointer user_data)
 		char *cnet_strength_str = ini_file_get_value(cache_filename, "cnet_strength");
 		if (cnet_strength_str) {
 			char *endptr;
-			data->cnet_value = strtod(cnet_strength_str, &endptr);
+			data->cnet_value = g_ascii_strtod(cnet_strength_str, &endptr);
 		} else {
 			data->cnet_value = DEFAULT_CNET_STRENGTH;
 		}
@@ -565,7 +565,7 @@ void load_cache(gpointer user_data)
 		char *denoise_strength_str = ini_file_get_value(cache_filename, "denoise_strength");
 		if (denoise_strength_str) {
 			char *endptr;
-			data->denoise_value = strtod(denoise_strength_str, &endptr);
+			data->denoise_value = g_ascii_strtod(denoise_strength_str, &endptr);
 		} else {
 			data->denoise_value = DEFAULT_DENOISE;
 		}
@@ -573,7 +573,7 @@ void load_cache(gpointer user_data)
 		char *clip_skip_str = ini_file_get_value(cache_filename, "clip_skip");
 		if (clip_skip_str) {
 			char *endptr;
-			data->clip_skip_value = strtod(clip_skip_str, &endptr);
+			data->clip_skip_value = g_ascii_strtod(clip_skip_str, &endptr);
 		} else {
 			data->clip_skip_value = DEFAULT_CLIP_SKIP;
 		}
@@ -581,7 +581,7 @@ void load_cache(gpointer user_data)
 		char *repeat_upscale_str = ini_file_get_value(cache_filename, "repeat_upscale");
 		if (repeat_upscale_str) {
 			char *endptr;
-			data->up_repeat_value = strtod(repeat_upscale_str, &endptr);
+			data->up_repeat_value = g_ascii_strtod(repeat_upscale_str, &endptr);
 		} else {
 			data->up_repeat_value = DEFAULT_RP_UPSCALE;
 		}

@@ -1,6 +1,5 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
-#include <locale.h>
 #include "constants.h"
 #include "cmd_generator.h"
 #include "file_utils.h"
@@ -260,9 +259,6 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						float time_or_speed;
 						char unit_part1[10], unit_part2[10];
 						
-						char *saved_locale = g_strdup(setlocale(LC_NUMERIC, NULL));
-						setlocale(LC_NUMERIC, "C");
-						
 						if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]",
 						&step, &steps, &time_or_speed, unit_part1, unit_part2) == 5) {
 							
@@ -303,8 +299,6 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 								g_printerr("Error: Could not fetch progress from line: %s\n", final_string);
 							}
 						}
-						setlocale(LC_NUMERIC, saved_locale);
-						g_free(saved_locale);
 					}
 				}
 			
