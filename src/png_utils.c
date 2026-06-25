@@ -315,9 +315,12 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			n_err++;
 		}
 	} else {
-		fprintf(stderr, "Failed to parse VAE data.\n");
-		if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
-		n_err++;
+		if (n_err == 0) {
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
+		} else {
+			fprintf(stderr, "Failed to parse VAE data.\n");
+			n_err++;
+		}
 	}
 	
 	//Set Clip Skip
@@ -358,9 +361,12 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			n_err++;
 		}
 	} else {
-		fprintf(stderr, "Failed to parse Hires upscale data.\n");
-		if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
-		n_err++;
+		if (n_err == 0) {
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
+		} else {
+			fprintf(stderr, "Failed to parse Hires upscale data.\n");
+			n_err++;
+		}
 	}
 	
 	//Set Hires Scale Value
@@ -375,8 +381,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			n_err++;
 		}
 	} else {
-		fprintf(stderr, "Failed to parse Hires scale data.\n");
-		n_err++;
+		if (n_err > 0) { fprintf(stderr, "Failed to parse Hires scale data.\n"); n_err++; }
 	}
 	
 	//Set Hires Resize Value
@@ -402,8 +407,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			n_err++;
 		}
 	} else {
-		fprintf(stderr, "Failed to parse Hires steps data.\n");
-		n_err++;
+		if (n_err > 0) { fprintf(stderr, "Failed to parse Hires steps data.\n"); n_err++; }
 	}
 	
 	//Set Hires Denoising strength
@@ -418,8 +422,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			n_err++;
 		}
 	} else {
-		fprintf(stderr, "Failed to parse Hires denoising strength data.\n");
-		n_err++;
+		if (n_err > 0) { fprintf(stderr, "Failed to parse Hires denoising strength data.\n"); n_err++; }
 	}
 
 	png_destroy_read_struct(&png, &info, NULL);

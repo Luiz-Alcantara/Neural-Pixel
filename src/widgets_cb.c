@@ -217,8 +217,15 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 	gtk_window_destroy (win);
 }
 
-static gboolean disable_scroll_cb (GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data)
+static gboolean steal_scroll_cb (GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data)
 {
+	GtkScrolledWindow *properties_scrollable = GTK_SCROLLED_WINDOW(user_data);
+
+	GtkAdjustment *vadjustment = gtk_scrolled_window_get_vadjustment(properties_scrollable);
+	double current = gtk_adjustment_get_value(vadjustment);
+	double step = gtk_adjustment_get_step_increment(vadjustment);
+	gtk_adjustment_set_value(vadjustment, current + dy * step);
+
 	return TRUE;
 }
 
@@ -720,14 +727,14 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 	}
 }
 
-void stop_spinbutton_scroll(GtkWidget *btn)
+void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable)
 {
 	GtkEventController *sc;
-	sc = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
-	
-	gtk_event_controller_set_propagation_phase (sc, GTK_PHASE_CAPTURE);
+	sc = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
 
-	g_signal_connect (sc, "scroll", G_CALLBACK (disable_scroll_cb), NULL);
+	gtk_event_controller_set_propagation_phase(sc, GTK_PHASE_CAPTURE);
+
+	g_signal_connect(sc, "scroll", G_CALLBACK (steal_scroll_cb), GTK_SCROLLED_WINDOW(properties_scrollable));
 	gtk_widget_add_controller (btn, sc);
 }
 
