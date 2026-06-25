@@ -81,7 +81,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - Scheduler: ays, exponential, or smoothstep
 - Steps: 8-12
 
-## Build
+## Build (Linux)
 
 You'll need **GTK 4** and the **libpng development libraries** installed.
 Then, clone this repository using:
@@ -93,7 +93,11 @@ Next, navigate into the cloned directory and run:
 mkdir build && cd build && cmake .. && make
 ```
 
-To build on Windows Use MSYS2.
+## Build (Widows)
+
+To build on Windows follow [Windows Build](./docs/windows_build.md).
+
+## Build Stable-Diffusion.cpp
 
 To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
