@@ -157,7 +157,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				} else if (strstr(line, "latent images completed, taking") != NULL && data->n_current_image == data->n_total_images) {
 					data->is_generating_latent = 0;
 					data->gen_latent_completed = 1;
-					gtk_button_set_label(GTK_BUTTON(data->button), "Continuing...");
+					gtk_button_set_label(GTK_BUTTON(data->button), "Processing...");
 				} else if (strstr(line, "decoding") != NULL) {
 					int x;
 					int n_dec_latents;
@@ -380,8 +380,12 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 		gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
 	}
 	
-	gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Generate");
-	gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), TRUE);
+	if (g_strcmp0(data->checkpoint_string->str, "None") == 0) {
+		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Select a checkpoint first.");
+	} else {
+		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Generate");
+		gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), TRUE);
+	}
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
 	g_ptr_array_set_size(data->sd_cmd_array, 0);
 	g_free(result_img_path);
@@ -549,6 +553,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->negative_prompt = gtk_text_buffer_get_text(neg_tb, &nsi, &nei, FALSE);
 	
 	snapshot_data->checkpoint_filename = g_strdup(app_data->checkpoint_string->str);
+	snapshot_data->checkpoint_string = app_data->checkpoint_string;
 	
 	snapshot_data->sd_based_enabled = app_data->sd_based_bool;
 	

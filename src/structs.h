@@ -139,6 +139,7 @@ typedef struct {
 	int total_time;
 	int *sdpid;
 	gint *preview_image_index;
+	GString *checkpoint_string;
 	GString *preview_label_string;
 	GPtrArray *preview_image_files;
 	GPtrArray *sd_cmd_array;
