@@ -3,6 +3,7 @@
 # Neural-Pixel
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Luiz-Alcantara/Neural-Pixel)
 [![Download](https://img.shields.io/github/downloads/Luiz-Alcantara/Neural-Pixel/total.svg)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/latest)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ)
 
 **A simple GUI wrapper for stable-diffusion.cpp written using C and GTK 4.**
 ![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/assets/screenshots/img1.png?raw=true)
@@ -107,12 +108,9 @@ To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cp
 
 ## Donations
 
-- PayPal: [`Donate`](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ)
-- Bitcoin
-```
-bc1qhxxgy52s2ps9j2gyzfxtykccrrpkzpu9uvnhhe
-```
-- Litecoin
-```
-ltc1q8fu7j3zyckl0w4e6m2q85xc69ywvtpnjzdjhvq
-```
+### Crypto
+
+Coins | Addresses
+--- | ---
+BTC | bc1qhxxgy52s2ps9j2gyzfxtykccrrpkzpu9uvnhhe
+LTC | ltc1q8fu7j3zyckl0w4e6m2q85xc69ywvtpnjzdjhvq
