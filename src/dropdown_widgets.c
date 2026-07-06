@@ -89,7 +89,7 @@ GtkWidget* gen_path_dd(const char* path, GtkTextBuffer *tb, int tb_type, GString
 			g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_item), dd_const_data);
 			if (is_req == 1) {
 				if (g_strcmp0(dd_item_str->str, "None") == 0) {
-					gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a model.");
+					gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a checkpoint first.");
 					gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
 				} else {
 					gtk_button_set_label (GTK_BUTTON(gen_btn), "Generate");
