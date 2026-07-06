@@ -12,7 +12,7 @@
 void show_error_message (GtkWidget *win, char *err_title_text, char *err_text)
 {
 	#if GTK_CHECK_VERSION(4, 10, 0)
-		GtkAlertDialog *error_dialog = gtk_alert_dialog_new (err_title_text);
+		GtkAlertDialog *error_dialog = gtk_alert_dialog_new ("%s", err_title_text);
 		gtk_alert_dialog_set_detail (error_dialog, err_text);
 		gtk_alert_dialog_show (error_dialog, GTK_WINDOW(win));
 		g_object_unref(error_dialog);
@@ -22,10 +22,10 @@ void show_error_message (GtkWidget *win, char *err_title_text, char *err_text)
 		GTK_DIALOG_MODAL,
 		GTK_MESSAGE_ERROR,
 		GTK_BUTTONS_CLOSE,
-		err_title_text
+		"%s", err_title_text
 		);
 
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(error_dialog), err_text);
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(error_dialog), "%s", err_text);
 		g_signal_connect (error_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
 		gtk_widget_show(error_dialog);
 	#endif
