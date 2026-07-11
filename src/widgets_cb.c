@@ -114,6 +114,23 @@ void app_start_data_free (gpointer user_data)
 {
 	if (user_data == NULL) return;
 	AppStartData *data = user_data;
+
+	GenerationSnapshotData *left_jobs;
+	while ((left_jobs = g_queue_pop_head(data->job_queue)) != NULL) {
+		g_free(left_jobs->output_path);
+		g_free(left_jobs->img2img_file_path);
+		g_free(left_jobs->positive_prompt);
+		g_free(left_jobs->negative_prompt);
+		g_free(left_jobs->checkpoint_filename);
+		g_free(left_jobs->vae_filename);
+		g_free(left_jobs->cnet_filename);
+		g_free(left_jobs->upscaler_filename);
+		g_free(left_jobs->clip_l_filename);
+		g_free(left_jobs->clip_g_filename);
+		g_free(left_jobs->text_enc_filename);
+		g_free(left_jobs);
+	}
+	g_queue_free(data->job_queue);
 	
 	if (data->checkpoint_string != NULL) {
 		g_string_free(data->checkpoint_string, TRUE);
@@ -296,6 +313,28 @@ void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
 	}
 }
 
+void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data)
+{
+	CancelAllData *data = user_data;
+	GenerationSnapshotData *left_jobs;
+	while ((left_jobs = g_queue_pop_head(data->job_queue)) != NULL) {
+		g_free(left_jobs->output_path);
+		g_free(left_jobs->img2img_file_path);
+		g_free(left_jobs->positive_prompt);
+		g_free(left_jobs->negative_prompt);
+		g_free(left_jobs->checkpoint_filename);
+		g_free(left_jobs->vae_filename);
+		g_free(left_jobs->cnet_filename);
+		g_free(left_jobs->upscaler_filename);
+		g_free(left_jobs->clip_l_filename);
+		g_free(left_jobs->clip_g_filename);
+		g_free(left_jobs->text_enc_filename);
+		g_free(left_jobs);
+	}
+
+	kill_stable_diffusion_process(GTK_BUTTON(data->halt_btn), data->sdpid);
+}
+
 static void navigate_images(PreviewImageData *data, int offset)
 {
 	gsize img_count = data->image_files->len;
@@ -361,6 +400,12 @@ void on_mask_area_destroy (GtkWindow *win, gpointer user_data)
 	gtk_window_destroy(win);
 }
 
+void on_cancel_all_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	CancelAllData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
@@ -715,13 +760,13 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 		const char *dd_string = gtk_string_object_get_string(dd_string_obj);
 		g_string_assign(var_string, dd_string);
 		if (is_req == 1 &&
-		(g_strcmp0(gtk_button_get_label(GTK_BUTTON(data->g_btn)), "Generate") == 0 ||
+		(g_strcmp0(gtk_button_get_label(GTK_BUTTON(data->g_btn)), "Add to Queue") == 0 ||
 		g_strcmp0(gtk_button_get_label(GTK_BUTTON(data->g_btn)), "Select a checkpoint first.") == 0)) {
 			if (g_strcmp0(var_string->str, "None") == 0) {
 				gtk_button_set_label(GTK_BUTTON(data->g_btn), "Select a checkpoint first.");
 				gtk_widget_set_sensitive(GTK_WIDGET(data->g_btn), FALSE);
 			} else {
-				gtk_button_set_label(GTK_BUTTON(data->g_btn), "Generate");
+				gtk_button_set_label(GTK_BUTTON(data->g_btn), "Add to Queue");
 				gtk_widget_set_sensitive(GTK_WIDGET(data->g_btn), TRUE);
 			}
 		}

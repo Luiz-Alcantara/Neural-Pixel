@@ -14,6 +14,8 @@ typedef struct {
 	GString *img2img_file_path;
 	GPtrArray *preview_image_files;
 	GPtrArray *sd_cmd_array;
+	GQueue *job_queue;
+	gboolean is_generating;
 	int sdpid;
 	int sampler_index;
 	int scheduler_index;
@@ -56,6 +58,12 @@ typedef struct {
 } AppStartData;
 
 typedef struct {
+	int *sdpid;
+	GQueue *job_queue;
+	GtkWidget *halt_btn;
+} CancelAllData;
+
+typedef struct {
 	char *pos_p;
 	char *neg_p;
 	char *img_name;
@@ -84,11 +92,15 @@ typedef struct {
 	GtkWidget *preview_image_widget;
 	GtkWidget *preview_label;
 	GtkWidget *preview_image_toggle_visibility_btn;
+	GtkWidget *generation_label;
+	GtkWidget *queue_size_label;
+	GtkWidget *cancel_all_btn;
 	GtkWidget *halt_btn;
 	GtkWidget *win;
 } GenerationData;
 
 typedef struct {
+	AppStartData *app_data;
 	char *output_path;
 	char *img2img_file_path;
 	int kontext_enabled;
@@ -147,6 +159,9 @@ typedef struct {
 	GtkWidget *preview_input_widget;
 	GtkWidget *preview_image_widget;
 	GtkWidget *preview_label;
+	GtkWidget *generation_label;
+	GtkWidget *queue_size_label;
+	GtkWidget *cancel_all_btn;
 	GtkWidget *gen_btn;
 	GtkWidget *halt_btn;
 	GtkWidget *win;
@@ -303,6 +318,7 @@ typedef struct {
 	int n_current_upscale;
 	int verbose_bool;
 	int *total_time;
+	GtkWidget *generation_label;
 	GtkWidget *button;
 	int *sdpid;
 	GInputStream *out_pipe_stream;

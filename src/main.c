@@ -152,7 +152,8 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *upscaler_runtime_backend_dd, *upscaler_parameter_backend_dd;
 
 	GtkWidget *box_generation;
-	GtkWidget *sd_halt_btn;
+	GtkWidget *box_status, *generation_label, *queue_size_label;
+	GtkWidget *box_stop_buttons, *sd_halt_btn, *cancel_all_btn;
 
 	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_box, *boxr_bottom_right_box;
 	GtkWidget *preview_img;
@@ -160,6 +161,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
+	CancelAllData *cancel_all_d;
 	GenerationData *gen_d;
 	LoadPNGData *load_png_info_d;
 	LoadImg2ImgData *load_img2img_file_d;
@@ -386,7 +388,7 @@ app_activate (GApplication *app, gpointer user_data)
 	box_checkpoint_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_checkpoint), box_checkpoint_buttons);
 	
-	generate_btn = gtk_button_new_with_label ("Generate");
+	generate_btn = gtk_button_new_with_label ("Add to Queue");
 	gtk_widget_add_css_class(generate_btn, "gen_btn");
 	gtk_widget_set_focusable(generate_btn, FALSE);
 	
@@ -1158,22 +1160,54 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	upscaler_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->upscaler_param_backend_index);
 	gtk_box_append (GTK_BOX (box_upscaler_backend_col2), upscaler_parameter_backend_dd);
-	
+
 	//Set Generation Box
-	box_generation = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	box_generation = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_generation), FALSE);
 	gtk_box_append (GTK_BOX (box_left), box_generation);
 
-	sd_halt_btn = gtk_button_new_from_icon_name ("process-stop-symbolic");
-	gtk_widget_add_css_class(sd_halt_btn, "custom_btn");
-	gtk_widget_set_focusable(sd_halt_btn, FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_halt_btn), "Stops the sd.cpp process.");
-	g_signal_connect (sd_halt_btn, "clicked", G_CALLBACK (kill_stable_diffusion_process), &app_data->sdpid);
-	gtk_widget_set_sensitive(GTK_WIDGET(sd_halt_btn), FALSE);
-	gtk_box_append (GTK_BOX (box_generation), sd_halt_btn);
+	box_status = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_add_css_class(box_status, "status_box");
+	gtk_widget_set_size_request(GTK_WIDGET(box_status), -1, 36);
+	gtk_widget_set_margin_end (box_status, SMALL_SPACING);
+	gtk_widget_set_margin_start (box_status, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_status), FALSE);
+	gtk_box_append (GTK_BOX (box_generation), box_status);
+	
+	generation_label = gtk_label_new ("Ready");
+	gtk_widget_add_css_class(generation_label, "generation_label");
+	gtk_widget_set_hexpand (generation_label, TRUE);
+	gtk_box_append (GTK_BOX (box_status), generation_label);
+
+	queue_size_label = gtk_label_new ("Queue: 0");
+	gtk_widget_add_css_class(queue_size_label, "queue_size_label");
+	gtk_widget_set_margin_end (queue_size_label, LARGE_SPACING);
+	gtk_widget_set_visible(queue_size_label, FALSE);
+	gtk_box_append (GTK_BOX (box_status), queue_size_label);
 
 	gtk_widget_set_hexpand (generate_btn, TRUE);
 	gtk_box_append (GTK_BOX (box_generation), generate_btn);
+
+	box_stop_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_stop_buttons), TRUE);
+	gtk_box_append (GTK_BOX (box_generation), box_stop_buttons);
+
+	sd_halt_btn = gtk_button_new_with_label ("Stop Current");
+	gtk_widget_add_css_class(sd_halt_btn, "custom_btn");
+	gtk_widget_set_focusable(sd_halt_btn, FALSE);
+	gtk_widget_set_hexpand (sd_halt_btn, TRUE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_halt_btn), "Stops the current generation.");
+	g_signal_connect (sd_halt_btn, "clicked", G_CALLBACK (kill_stable_diffusion_process), &app_data->sdpid);
+	gtk_widget_set_sensitive(GTK_WIDGET(sd_halt_btn), FALSE);
+	gtk_box_append (GTK_BOX (box_stop_buttons), sd_halt_btn);
+
+	cancel_all_btn = gtk_button_new_with_label ("Cancel All Jobs");
+	gtk_widget_add_css_class(cancel_all_btn, "custom_btn");
+	gtk_widget_set_focusable(cancel_all_btn, FALSE);
+	gtk_widget_set_hexpand (cancel_all_btn, TRUE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(cancel_all_btn), "Cancel all active and queued generations.");
+	gtk_widget_set_sensitive(GTK_WIDGET(cancel_all_btn), FALSE);
+	gtk_box_append (GTK_BOX (box_stop_buttons), cancel_all_btn);
 
 	//Set Box Right Image
 	boxr_img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
@@ -1409,6 +1443,13 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (set_img2img_from_preview_btn, "clicked", G_CALLBACK (set_current_preview_to_img2img), load_img2img_from_preview_d);
 	g_signal_connect (set_img2img_from_preview_btn, "destroy", G_CALLBACK (on_set_img2img_from_preview_btn_destroy), load_img2img_from_preview_d);
 
+	cancel_all_d = g_new0 (CancelAllData, 1);
+	cancel_all_d->sdpid = &app_data->sdpid;
+	cancel_all_d->job_queue = app_data->job_queue;
+	cancel_all_d->halt_btn = sd_halt_btn;
+	g_signal_connect (cancel_all_btn, "clicked", G_CALLBACK (kill_cancel_all_btn_cb), cancel_all_d);
+	g_signal_connect (cancel_all_btn, "destroy", G_CALLBACK (on_cancel_all_btn_destroy), cancel_all_d);
+
 	gen_d = g_new0 (GenerationData, 1);
 	gen_d->app_data = app_data;
 	gen_d->pos_p = pos_tb;
@@ -1416,6 +1457,9 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->preview_image_widget = preview_img;
 	gen_d->preview_label = img_index_label;
 	gen_d->preview_image_toggle_visibility_btn = hide_img_btn;
+	gen_d->generation_label = generation_label;
+	gen_d->queue_size_label = queue_size_label;
+	gen_d->cancel_all_btn = cancel_all_btn;
 	gen_d->halt_btn = sd_halt_btn;
 	gen_d->win = win;
 	g_signal_connect (generate_btn, "clicked", G_CALLBACK (prepare_gen_data), gen_d);
@@ -1518,6 +1562,9 @@ main (int argc, char **argv)
 	
 	data->preview_image_index = 0;
 	data->sdpid = 0;
+
+	data->job_queue = g_queue_new();
+	data->is_generating = FALSE;
 	
 	int s;
 

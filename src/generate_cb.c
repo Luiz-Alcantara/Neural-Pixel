@@ -7,6 +7,8 @@
 #include "str_utils.h"
 #include "widgets_cb.h"
 
+static void start_generation(gpointer user_data);
+
 static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_data)
 {
 	SDProcessErrorData *data = user_data;
@@ -130,13 +132,13 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%i - target t_enc is %i steps",
 					&x, &n_img2img_tiles) == 2) {
-						gtk_button_set_label(GTK_BUTTON(data->button), "Encoding...");
+						gtk_label_set_text(GTK_LABEL(data->generation_label), "Encoding...");
 						data->is_img2img_encoding = 1;
 					}
 				} else if (strstr(line, "encode_first_stage completed, taking") != NULL && data->is_img2img_encoding) {
 					data->is_img2img_encoding = 0;
 					data->img2img_enc_completed = 1;
-					gtk_button_set_label(GTK_BUTTON(data->button), "Generating...");
+					gtk_label_set_text(GTK_LABEL(data->generation_label), "Generating...");
 				} else if (strstr(line, "generating image:") != NULL) {
 					int x;
 					int n_current_image;
@@ -146,8 +148,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%i - generating image: %i/%i - seed %lld",
 					&x, &n_current_image, &n_total_images, &img_seed) == 4) {
-						gtk_button_set_label(GTK_BUTTON(data->button), "Generating...");
-		
+						gtk_label_set_text(GTK_LABEL(data->generation_label), "Generating...");
 						data->is_generating_latent = 1;
 						data->n_current_image = n_current_image;
 						data->n_total_images = n_total_images;
@@ -157,7 +158,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				} else if (strstr(line, "latent images completed, taking") != NULL && data->n_current_image == data->n_total_images) {
 					data->is_generating_latent = 0;
 					data->gen_latent_completed = 1;
-					gtk_button_set_label(GTK_BUTTON(data->button), "Processing...");
+					gtk_label_set_text(GTK_LABEL(data->generation_label), "Processing...");
 				} else if (strstr(line, "decoding") != NULL) {
 					int x;
 					int n_dec_latents;
@@ -166,7 +167,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					"[INFO ] stable-diffusion.cpp:%i - decoding %i latents",
 					&x, &n_dec_latents) == 2) {
 						data->is_decoding_latents = 1;
-						gtk_button_set_label(GTK_BUTTON(data->button), "Decoding...");
+						gtk_label_set_text(GTK_LABEL(data->generation_label), "Decoding...");
 						data->n_current_latent++;
 					}
 				} else if (strstr(line, "decoded, taking") != NULL && data->is_decoding_latents) {
@@ -216,7 +217,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					"stable-diffusion.cpp:%d - hires %15s (%15[^)]) upscale %dx%d -> %dx%d",
 					&x, str_01, str_02, &iw, &ih, &uw, &uh) == 7) {
 						data->is_hires_fix = 1;
-						gtk_button_set_label(GTK_BUTTON(data->button), "HiRes Refining...");
+						gtk_label_set_text(GTK_LABEL(data->generation_label), "HiRes Refining...");
 						data->n_current_hires++;
 					}
 				} else if (strstr(line, "- upscaling from") != NULL) {
@@ -231,7 +232,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					if (sscanf(line,
 					"[INFO ] upscaler.cpp:%i   - upscaling from (%i x %i) to (%i x %i)",
 					&x, &ow, &oh, &nw, &nh) == 5 ) {
-						gtk_button_set_label(GTK_BUTTON(data->button), "Upscaling...");
+						gtk_label_set_text(GTK_LABEL(data->generation_label), "Upscaling...");
 						data->n_current_upscale++;
 					}
 				}
@@ -263,39 +264,39 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						&step, &steps, &time_or_speed, unit_part1, unit_part2) == 5) {
 							
 							int percentage = (int)(((float)step / steps) * 100 + 0.5f);
-							char progress_label[64];
+							char progress_label[96];
 							int written = 0;
 							
 							if (data->is_img2img_encoding) {
 								written = snprintf(progress_label, sizeof(progress_label),
-									"Encoding... %d%% (1/1) at %.2f%s/%s",
+									"Encoding %d%% (1/1) @ %.1f%s/%s",
 									percentage, time_or_speed, unit_part1, unit_part2);	
 							} else if (data->is_generating_latent) {
 								written = snprintf(progress_label, sizeof(progress_label),
-									"Generating... %d%% (%d/%d) at %.2f%s/%s",
+									"Generating %d%% (%d/%d) @ %.1f%s/%s",
 									percentage, data->n_current_image, data->n_total_images,
 									time_or_speed, unit_part1, unit_part2);
 							} else if (data->is_decoding_latents) {
 								written = snprintf(progress_label, sizeof(progress_label),
-									"Decoding... %d%% (%d/%d) at %.2f%s/%s",
+									"Decoding %d%% (%d/%d) @ %.1f%s/%s",
 									percentage, data->n_current_latent, data->n_total_images,
 									time_or_speed, unit_part1, unit_part2);
 							} else if (data->is_hires_fix) {
 								written = snprintf(progress_label, sizeof(progress_label),
-									"Refining... %d%% (%d/%d) at %.2f%s/%s",
+									"Refining %d%% (%d/%d) @ %.1f%s/%s",
 									percentage, data->n_current_hires, data->n_total_images,
 									time_or_speed, unit_part1, unit_part2);
 							} else if (data->is_upscaling) {
 								written = snprintf(progress_label, sizeof(progress_label),
-									"Upscaling... %d%% (%d/%d) at %.2f%s/%s",
+									"Upscaling %d%% (%d/%d) @ %.1f%s/%s",
 									percentage, data->n_current_upscale, data->n_total_images,
 									time_or_speed, unit_part1, unit_part2);
 							}
 							
 							if (written > 0) {
-								gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
+								gtk_label_set_text(GTK_LABEL(data->generation_label), progress_label);
 							} else {
-								gtk_button_set_label(GTK_BUTTON(data->button), "Loading...");
+								gtk_label_set_text(GTK_LABEL(data->generation_label), "Loading...");
 								g_printerr("Error: Could not fetch progress from line: %s\n", final_string);
 							}
 						}
@@ -305,7 +306,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				g_free(raw_string);
 				g_string_erase(data->stdout_string, 0, end_index);
 				continue;
-    			}
+			}
 		
 			if (!newline_escape && !progress_esc) break;
 			
@@ -339,6 +340,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointer user_data)
 {
 	GenerationSnapshotData *data = user_data;
+	AppStartData *app_data = data->app_data;
 	*data->sdpid = 0;
 	const char *icon_n = gtk_button_get_icon_name (GTK_BUTTON(data->preview_image_toggle_visibility_btn));
 	
@@ -383,7 +385,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	if (g_strcmp0(data->checkpoint_string->str, "None") == 0) {
 		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Select a checkpoint first.");
 	} else {
-		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Generate");
+		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Add to Queue");
 		gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), TRUE);
 	}
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
@@ -400,8 +402,29 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	g_free(data->clip_l_filename);
 	g_free(data->clip_g_filename);
 	g_free(data->text_enc_filename);
-	g_free(data);
-	g_object_unref(source_object);
+	
+	if (!g_queue_is_empty(app_data->job_queue)) {
+		GenerationSnapshotData *next_job = g_queue_pop_head(app_data->job_queue);
+		int queue_size = g_queue_get_length(app_data->job_queue);
+		if (queue_size == 0) {
+			gtk_widget_set_sensitive(GTK_WIDGET(data->cancel_all_btn), FALSE);
+			gtk_widget_set_visible(data->queue_size_label, FALSE);
+		} else {
+			char *label_text = g_strdup_printf("Queue: %i", queue_size);
+			gtk_label_set_text(GTK_LABEL(data->queue_size_label), label_text);
+			g_free(label_text);
+		}
+		g_free(data);
+		g_object_unref(source_object);
+		start_generation(next_job);
+	} else {
+		gtk_label_set_text(GTK_LABEL(data->generation_label), "Ready");
+		gtk_widget_set_sensitive(GTK_WIDGET(data->cancel_all_btn), FALSE);
+		gtk_widget_set_visible(data->queue_size_label, FALSE);
+		app_data->is_generating = FALSE;
+		g_free(data);
+		g_object_unref(source_object);
+	}
 }
 
 static void start_reading_error(gpointer user_data)
@@ -444,11 +467,8 @@ static void start_generation(gpointer user_data)
 		
 		return;
 	}
-	if (g_strcmp0 (gtk_button_get_label (GTK_BUTTON(data->gen_btn)), "Generate") == 0) {
-		gtk_button_set_label (GTK_BUTTON(data->gen_btn), "Loading Files...");
-		gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), FALSE);
-		gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), TRUE);
-	}
+	gtk_label_set_text (GTK_LABEL(data->generation_label), "Loading Files...");
+	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), TRUE);
 
 	gen_sd_string(data);
 
@@ -467,7 +487,7 @@ static void start_generation(gpointer user_data)
 		
 		g_ptr_array_set_size(data->sd_cmd_array, 0);
 		
-		gtk_button_set_label (GTK_BUTTON(data->gen_btn), "Generate");
+		gtk_button_set_label (GTK_BUTTON(data->gen_btn), "Add to Queue");
 		gtk_widget_set_sensitive(data->gen_btn, TRUE);
 		gtk_widget_set_sensitive(data->halt_btn, FALSE);
 		
@@ -509,6 +529,7 @@ static void start_generation(gpointer user_data)
 		output_d->n_current_upscale = 0;
 		output_d->verbose_bool = data->verbose_enabled;
 		output_d->total_time = &data->total_time;
+		output_d->generation_label = data->generation_label;
 		output_d->button = data->gen_btn;
 		output_d->sdpid = data->sdpid;
 		output_d->out_pipe_stream = stdout_stream;
@@ -628,9 +649,27 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->preview_image_toggle_visibility_btn = data->preview_image_toggle_visibility_btn;
 	snapshot_data->preview_image_widget = data->preview_image_widget;
 	snapshot_data->preview_label = data->preview_label;
+	snapshot_data->generation_label = data->generation_label;
+	snapshot_data->queue_size_label = data->queue_size_label;
+	snapshot_data->cancel_all_btn = data->cancel_all_btn;
 	snapshot_data->gen_btn = gen_btn;
 	snapshot_data->halt_btn = data->halt_btn;
 	snapshot_data->win = data->win;
+	snapshot_data->app_data = app_data;
 	
-	start_generation(snapshot_data);
+	g_queue_push_tail(app_data->job_queue, snapshot_data);
+	
+	if (!app_data->is_generating) {
+		app_data->is_generating = TRUE;
+		gtk_widget_set_visible(data->queue_size_label, FALSE);
+		GenerationSnapshotData *next_job = g_queue_pop_head(app_data->job_queue);
+		start_generation(next_job);
+	} else {
+		int queue_size = g_queue_get_length(app_data->job_queue);
+		char *label_text = g_strdup_printf("Queue: %i", queue_size);
+		gtk_label_set_text(GTK_LABEL(data->queue_size_label), label_text);
+		g_free(label_text);
+		gtk_widget_set_visible(data->queue_size_label, TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(data->cancel_all_btn), TRUE);
+	}
 }

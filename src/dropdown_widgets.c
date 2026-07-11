@@ -92,7 +92,7 @@ GtkWidget* gen_path_dd(const char* path, GtkTextBuffer *tb, int tb_type, GString
 					gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a checkpoint first.");
 					gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
 				} else {
-					gtk_button_set_label (GTK_BUTTON(gen_btn), "Generate");
+					gtk_button_set_label (GTK_BUTTON(gen_btn), "Add to Queue");
 					gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
 				}
 			}

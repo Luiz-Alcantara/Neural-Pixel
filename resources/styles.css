@@ -261,6 +261,15 @@
 	background-color: @primary-color-darker;
 }
 
+/* Status Box */
+.status_box {
+	border: 1px solid @primary-color-accent;
+	border-top-right-radius: 6pt;
+	border-top-left-radius: 6pt;
+	border-bottom-right-radius: 3pt;
+	border-bottom-left-radius: 3pt;
+}
+
 
 /* Widget Labels */
 .param_label, .pos_prompt_label, .neg_prompt_label {
