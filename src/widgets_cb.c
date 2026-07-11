@@ -599,6 +599,12 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *update_cache_check = data->update_cache_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), ENABLED_OPT == 1 ? TRUE : FALSE);
+
+	GtkWidget *chroma_dit_mask_check = data->chroma_dit_mask_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(chroma_dit_mask_check), ENABLED_OPT == 1 ? TRUE : FALSE);
+
+	GtkWidget *qwen_zero_cond_t_check = data->qwen_zero_cond_t_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(qwen_zero_cond_t_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *verbose_check = data->verbose_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), DISABLED_OPT == 1 ? TRUE : FALSE);

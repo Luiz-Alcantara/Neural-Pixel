@@ -32,6 +32,8 @@ typedef struct {
 	int taesd_bool;
 	int update_cache_bool;
 	int verbose_bool;
+	int chroma_dit_mask_bool;
+	int qwen_zero_cond_t_bool;
 	int model_runtime_backend_index;
 	int model_param_backend_index;
 	int te_runtime_backend_index;
@@ -138,6 +140,8 @@ typedef struct {
 	int taesd_enabled;
 	int update_cache_enabled;
 	int verbose_enabled;
+	int chroma_dit_mask_enabled;
+	int qwen_zero_cond_t_enabled;
 	int model_runtime_backend_index;
 	int model_param_backend_index;
 	int te_runtime_backend_index;
@@ -288,6 +292,8 @@ typedef struct {
 	GtkWidget *fa_off_btn;
 	GtkWidget *taesd_check;
 	GtkWidget *update_cache_check;
+	GtkWidget *chroma_dit_mask_check;
+	GtkWidget *qwen_zero_cond_t_check;
 	GtkWidget *verbose_check;
 	GtkWidget *vae_tiling_dd;
 	GtkWidget *model_runtime_backend_dd;

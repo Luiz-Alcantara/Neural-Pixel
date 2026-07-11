@@ -73,6 +73,8 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "taesd_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "chroma_dit_mask_bool=%d\n", ENABLED_OPT);
+		fprintf(cf, "qwen_zero_cond_t_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "model_runtime_backend_index=%d\n", DEFAULT_BACKEND);
 		fprintf(cf, "model_param_backend_index=%d\n", DEFAULT_BACKEND);
 		fprintf(cf, "te_runtime_backend_index=%d\n", DEFAULT_BACKEND);
@@ -243,6 +245,8 @@ void load_cache_fallback(gpointer user_data)
 	data->taesd_bool = DISABLED_OPT;
 	data->update_cache_bool = ENABLED_OPT;
 	data->verbose_bool = DISABLED_OPT;
+	data->chroma_dit_mask_bool = ENABLED_OPT;
+	data->qwen_zero_cond_t_bool = DISABLED_OPT;
 	
 	data->seed_value = DEFAULT_SEED;
 	
@@ -468,6 +472,20 @@ void load_cache(gpointer user_data)
 		} else {
 			data->verbose_bool = DISABLED_OPT;
 		}
+
+		char *chroma_dit_mask_bool_str = ini_file_get_value(cache_filename, "chroma_dit_mask_bool");
+		if (chroma_dit_mask_bool_str) {
+			sscanf(chroma_dit_mask_bool_str, "%d", &data->chroma_dit_mask_bool);
+		} else {
+			data->chroma_dit_mask_bool = ENABLED_OPT;
+		}
+
+		char *qwen_zero_cond_t_bool_str = ini_file_get_value(cache_filename, "qwen_zero_cond_t_bool");
+		if (qwen_zero_cond_t_bool_str) {
+			sscanf(qwen_zero_cond_t_bool_str, "%d", &data->qwen_zero_cond_t_bool);
+		} else {
+			data->qwen_zero_cond_t_bool = DISABLED_OPT;
+		}
 		
 		char *model_runtime_backend_index_str = ini_file_get_value(cache_filename, "model_runtime_backend_index");
 		if (model_runtime_backend_index_str) {
@@ -643,6 +661,8 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "taesd_bool=%d\n", data->taesd_enabled);
 	fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
 	fprintf(cf, "verbose_bool=%d\n", data->verbose_enabled);
+	fprintf(cf, "chroma_dit_mask_bool=%d\n", data->chroma_dit_mask_enabled);
+	fprintf(cf, "qwen_zero_cond_t_bool=%d\n", data->qwen_zero_cond_t_enabled);
 	fprintf(cf, "model_runtime_backend_index=%d\n", data->model_runtime_backend_index);
 	fprintf(cf, "model_param_backend_index=%d\n", data->model_param_backend_index);
 	fprintf(cf, "te_runtime_backend_index=%d\n", data->te_runtime_backend_index);

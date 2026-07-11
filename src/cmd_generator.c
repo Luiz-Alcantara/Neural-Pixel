@@ -169,10 +169,14 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	if (data->flash_attn_value == 2) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--fa"));
-		if (data->sd_based_enabled != 1) g_ptr_array_add(data->sd_cmd_array, g_strdup("--chroma-disable-dit-mask"));
 	} else if (data->flash_attn_value == 1) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--diffusion-fa"));
-		if (data->sd_based_enabled != 1) g_ptr_array_add(data->sd_cmd_array, g_strdup("--chroma-disable-dit-mask"));
+	}
+
+	if (data->chroma_dit_mask_enabled == 0 || data->qwen_zero_cond_t_enabled == 1) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--model-args"));
+		if (data->chroma_dit_mask_enabled == 0) g_ptr_array_add(data->sd_cmd_array, g_strdup("chroma_use_dit_mask=false"));
+		if (data->qwen_zero_cond_t_enabled == 1) g_ptr_array_add(data->sd_cmd_array, g_strdup("qwen_image_zero_cond_t=true"));
 	}
 
 	if (data->positive_prompt != NULL) {

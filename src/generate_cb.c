@@ -609,6 +609,8 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->taesd_enabled = app_data->taesd_bool;
 	snapshot_data->update_cache_enabled = app_data->update_cache_bool;
 	snapshot_data->verbose_enabled = app_data->verbose_bool;
+	snapshot_data->chroma_dit_mask_enabled = app_data->chroma_dit_mask_bool;
+	snapshot_data->qwen_zero_cond_t_enabled = app_data->qwen_zero_cond_t_bool;
 	snapshot_data->model_runtime_backend_index = app_data->model_runtime_backend_index;
 	snapshot_data->model_param_backend_index = app_data->model_param_backend_index;
 	snapshot_data->te_runtime_backend_index = app_data->te_runtime_backend_index;

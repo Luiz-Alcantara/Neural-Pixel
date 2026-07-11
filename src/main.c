@@ -110,6 +110,10 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *hires_denoise_lab, *hires_denoise_spin;
 	
 	GtkWidget *extra_opts_expander, *box_extra_opts, *box_extra_opts_row1, *box_extra_opts_col1, *box_extra_opts_col2;
+
+	GtkWidget *model_args_separator;
+	GtkWidget *model_args_lab;
+	GtkWidget *chroma_dit_mask_check, *qwen_zero_cond_t_check;
 	
 	GtkWidget *fa_separator;
 	GtkWidget *fa_toggle_lab;
@@ -871,6 +875,30 @@ app_activate (GApplication *app, gpointer user_data)
 	box_extra_opts_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_col2), TRUE);
 	gtk_box_append (GTK_BOX (box_extra_opts_row1), box_extra_opts_col2);
+
+	// Set Model-specific Args Widgets
+	model_args_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(model_args_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_extra_opts), model_args_separator);
+
+	model_args_lab = gtk_label_new ("Model-specific Args");
+	gtk_widget_add_css_class(model_args_lab, "param_label");
+	gtk_widget_set_halign(model_args_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), model_args_lab);
+
+	chroma_dit_mask_check = gtk_check_button_new_with_label("Enable Chroma DiT Masking");
+	gtk_widget_add_css_class(chroma_dit_mask_check, "custom_check");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(chroma_dit_mask_check), app_data->chroma_dit_mask_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(chroma_dit_mask_check), "Uses a DiT mask to isolate and protect color channels.\nOn by default. Won't affect other checkpoint types.");
+	g_signal_connect(chroma_dit_mask_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->chroma_dit_mask_bool);
+	gtk_box_append (GTK_BOX (box_extra_opts), chroma_dit_mask_check);
+
+	qwen_zero_cond_t_check = gtk_check_button_new_with_label("Enable Qwen Image Zero Cond T");
+	gtk_widget_add_css_class(qwen_zero_cond_t_check, "custom_check");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(qwen_zero_cond_t_check), app_data->qwen_zero_cond_t_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(qwen_zero_cond_t_check), "Enhances image edit fidelity and detail resolution.");
+	g_signal_connect(qwen_zero_cond_t_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->qwen_zero_cond_t_bool);
+	gtk_box_append (GTK_BOX (box_extra_opts), qwen_zero_cond_t_check);
 	
 	//Set Extra Options Widgets
 	
@@ -1369,6 +1397,8 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->fa_off_btn = fa_off_btn;
 	reset_d->taesd_check = taesd_check;
 	reset_d->update_cache_check = update_cache_check;
+	reset_d->chroma_dit_mask_check = chroma_dit_mask_check;
+	reset_d->qwen_zero_cond_t_check = qwen_zero_cond_t_check;
 	reset_d->verbose_check = verbose_check;
 	reset_d->vae_tiling_dd = vae_tiling_dd;
 	reset_d->model_runtime_backend_dd = model_runtime_backend_dd;
