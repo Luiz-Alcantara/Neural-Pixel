@@ -261,7 +261,8 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						char unit_part1[10], unit_part2[10];
 						
 						if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]",
-						&step, &steps, &time_or_speed, unit_part1, unit_part2) == 5) {
+						&step, &steps, &time_or_speed, unit_part1, unit_part2) == 5
+						&& (g_strcmp0(unit_part1, "it") == 0 || g_strcmp0(unit_part2, "it") == 0)) {
 							
 							int percentage = (int)(((float)step / steps) * 100 + 0.5f);
 							char progress_label[96];
@@ -415,7 +416,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 			g_free(label_text);
 		}
 		g_free(data);
-		g_object_unref(source_object);
+		if (source_object) g_object_unref(source_object);
 		start_generation(next_job);
 	} else {
 		gtk_label_set_text(GTK_LABEL(data->generation_label), "Ready");
@@ -423,7 +424,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 		gtk_widget_set_visible(data->queue_size_label, FALSE);
 		app_data->is_generating = FALSE;
 		g_free(data);
-		g_object_unref(source_object);
+		if (source_object) g_object_unref(source_object);
 	}
 }
 
@@ -465,7 +466,7 @@ static void start_generation(gpointer user_data)
 		"Error reading generation data",
 		"Error reading generation data;\ntry restarting the app or deleting the \".cache\" folder.");
 		
-		return;
+		on_subprocess_end(NULL, NULL, user_data);
 	}
 	gtk_label_set_text (GTK_LABEL(data->generation_label), "Loading Files...");
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), TRUE);
@@ -485,13 +486,7 @@ static void start_generation(gpointer user_data)
 		"Error spawning process",
 		"Error spawning the sd.cpp process;\nlook at the terminal log for details.");
 		
-		g_ptr_array_set_size(data->sd_cmd_array, 0);
-		
-		gtk_button_set_label (GTK_BUTTON(data->gen_btn), "Add to Queue");
-		gtk_widget_set_sensitive(data->gen_btn, TRUE);
-		gtk_widget_set_sensitive(data->halt_btn, FALSE);
-		
-		return;
+		on_subprocess_end(NULL, NULL, user_data);
 	} else {
 		data->total_time = 0;
 		const gchar* sd_pid = g_subprocess_get_identifier(sd_process);

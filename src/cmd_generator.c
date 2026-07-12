@@ -52,7 +52,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-image"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-strength"));
-			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->cnet_strength_value));
+			g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->cnet_strength_value));
 		} else {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled == 1 ? "--ref-image" : "--init-img"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
@@ -77,13 +77,13 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_HIRES_UPSCALERS[(data->hires_upscaler_index)]));
 		
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-scale"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->hires_scale_value));
+		g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->hires_scale_value));
 		
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-steps"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%d", data->hires_steps_value));
 		
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-denoising-strength"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->hires_denoise_value));
+		g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->hires_denoise_value));
 	}
 
 	if (data->upscaler_filename != NULL && strcmp(data->upscaler_filename, "None") != 0) {
@@ -114,7 +114,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
-	g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.2f", data->denoise_strength_value));
+	g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->denoise_strength_value));
 	
 	if (data->mmap_enabled == 1) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mmap"));
@@ -130,7 +130,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--cfg-scale"));
-	g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%.1f", data->cfg_scale_value));
+	g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.1f", data->cfg_scale_value));
 	
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip-skip"));
 	g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%d", data->clip_skip_value));

@@ -11,6 +11,13 @@
 #endif
 #include "constants.h"
 
+gchar *ascii_format_double(const char *format, double value)
+{
+	gchar result[G_ASCII_DTOSTR_BUF_SIZE];
+	g_ascii_formatd(result, sizeof(result), format, value);
+	return g_strdup(result);
+}
+
 int check_list_contains_item(const char* const* list, const char* item)
 {
 	int i = 0;

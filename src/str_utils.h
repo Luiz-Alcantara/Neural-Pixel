@@ -1,6 +1,8 @@
 #ifndef STR_UTILS_H
 #define STR_UTILS_H
 
+gchar *ascii_format_double(const char *format, double value);
+
 int check_list_contains_item(const char* const* list, const char* item);
 
 int check_gtk_list_contains_item(GtkStringList *list, const char* item);

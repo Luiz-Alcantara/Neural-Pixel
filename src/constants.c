@@ -29,7 +29,7 @@ const size_t LIST_RESOLUTIONS_STR_COUNT = sizeof(LIST_RESOLUTIONS_STR) / sizeof(
 const char* LIST_STEPS_STR[] = {"1", "2", "4", "8", "12", "16", "20", "24", "30", "36", "42", "50", "60", NULL};
 const size_t LIST_STEPS_STR_COUNT = sizeof(LIST_STEPS_STR) / sizeof(LIST_STEPS_STR[0]);
 
-const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2mv2", "dpm++2s_a", "dpm2", "er_sde", "euler", "euler_a", "euler_a_cfg_pp", "euler_cfg_pp", "heun", "ipndm", "ipndm_v", "lcm", "res_2s", "res_multistep", "tcd", NULL};
+const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2m_sde", "dpm++2mv2", "dpm++2s_a", "dpm2", "er_sde", "euler", "euler_a", "euler_a_cfg_pp", "euler_cfg_pp", "heun", "ipndm", "ipndm_v", "lcm", "res_2s", "res_multistep", "tcd", NULL};
 const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);  
 
 const char* LIST_SCHEDULES[] = {"ays", "bong_tangent", "discrete", "exponential", "gits", "karras", "kl_optimal", "lcm", "sgm_uniform", "simple", "smoothstep", NULL};
@@ -52,7 +52,7 @@ const char* EMPTY_IMG_PATH = "./resources/empty.png";
 const char* MASK_IMG_PATH = ".cache/mask.png";
 const int DEFAULT_BACKEND = 0;
 const int DEFAULT_MODELS = 0;
-const int DEFAULT_SAMPLER = 7;
+const int DEFAULT_SAMPLER = 8;
 const int DEFAULT_SCHEDULER = 5;
 const int DEFAULT_CLIP_SKIP = 0;
 const int DEFAULT_RP_UPSCALE = 1;

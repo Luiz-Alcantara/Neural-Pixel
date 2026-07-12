@@ -19,6 +19,10 @@
 static void
 app_activate (GApplication *app, gpointer user_data)
 {
+	// This fixes locale-dependent decimal separators.
+	setlocale(LC_ALL, "");
+	setlocale(LC_NUMERIC, "C");
+
 	AppStartData *app_data = user_data;
 	load_cache(user_data);
 	
@@ -1504,10 +1508,6 @@ app_activate (GApplication *app, gpointer user_data)
 int
 main (int argc, char **argv)
 {
-	// This fixes locale-dependent decimal separators.
-	setlocale(LC_ALL, "");
-	setlocale(LC_NUMERIC, "C");
-
 	int a = check_create_base_dirs();
 	if (a != 0) {
 		return 1;
