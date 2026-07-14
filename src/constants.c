@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.8.0";
+const char* APP_NAME_VERSION = "Neural Pixel v0.8.1";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -44,8 +44,8 @@ const size_t LIST_VAE_TILE_SIZES_COUNT = sizeof(LIST_VAE_TILE_SIZES) / sizeof(LI
 const char* LIST_HIRES_UPSCALERS[] = {"Disabled", "Lanczos", "Latent", "Latent (nearest)", "Latent (antialiased)", "Nearest", NULL};
 const size_t LIST_HIRES_UPSCALERS_COUNT = sizeof(LIST_HIRES_UPSCALERS) / sizeof(LIST_HIRES_UPSCALERS[0]);
  
-const char* POSITIVE_PROMPT = "masterpiece, ultra-detailed snow globe glowing softly on a wooden table, magical internal light illuminating a miniature winter village inside, tiny houses with warm windows, snow-covered pine trees, swirling snow particles, crystal glass sphere with smooth reflections, subtle frost and condensation, ornate metal base, cinematic lighting, dark cozy room background, deep shadows with soft rim light, volumetric glow, dreamy atmosphere, shallow depth of field, macro perspective, highly detailed, fantasy realism, dramatic contrast, beautiful composition";
-const char* NEGATIVE_PROMPT = "worst quality, low quality, blurry, flat lighting, harsh shadows, oversaturated, plastic look, bad reflections, warped glass, extra objects, cluttered composition, cartoon, anime, photorealistic face, text, watermark, logo";
+const char* POSITIVE_PROMPT = "masterpiece, high quality, realistic, ultra-detailed, rose, red flower, dewdrops, lush green grass, soft sunlight, cozy atmosphere, (bokeh, macro shot), depth of field, blurry background, mountain in distance, ethereal, RAW photo, photo noise, film grain";
+const char* NEGATIVE_PROMPT = "(worst quality, blurry, out of focus, hazy, low quality:1.4), text, watermark";
 const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const char* EMPTY_IMG_PATH = "./resources/empty.png";

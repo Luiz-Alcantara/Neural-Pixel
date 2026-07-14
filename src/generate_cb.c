@@ -124,6 +124,20 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				
 				// Avoid "unused lora tensor" span
 				if (data->verbose_bool && strstr(line, "[WARN ] lora.hpp:") == NULL) printf("%s\n", line);
+
+				if (strstr(line, "- can not found lora")) {
+					char lora_path[512];
+					if (sscanf(line, "[WARN ] common.cpp:%*d - can not found lora %511[^\n]", lora_path) == 1) {
+						char *filename = strrchr(lora_path, '/');
+						filename = filename ? filename + 1 : lora_path;
+						if (*filename) {
+							char error_dialog_text[60 + strlen(filename)];
+							snprintf(error_dialog_text, sizeof(error_dialog_text),
+							"LoRA: '%s' was not found.\nGeneration will proceed without it.", filename);
+							show_error_message(data->win, "LoRA not found", error_dialog_text);
+						}
+					}
+				}
 				
 				if (strstr(line, "target") != NULL) {
 					int x;
@@ -524,9 +538,10 @@ static void start_generation(gpointer user_data)
 		output_d->n_current_upscale = 0;
 		output_d->verbose_bool = data->verbose_enabled;
 		output_d->total_time = &data->total_time;
+		output_d->sdpid = data->sdpid;
 		output_d->generation_label = data->generation_label;
 		output_d->button = data->gen_btn;
-		output_d->sdpid = data->sdpid;
+		output_d->win = data->win;
 		output_d->out_pipe_stream = stdout_stream;
 		output_d->stdout_string = g_string_new("");
 		

@@ -309,6 +309,7 @@ typedef struct {
 } ResetCbData;
 
 typedef struct {
+	char read_buffer[4096];
 	int is_img2img_encoding;
 	int img2img_enc_completed;
 	int is_generating_latent;
@@ -324,11 +325,11 @@ typedef struct {
 	int n_current_upscale;
 	int verbose_bool;
 	int *total_time;
+	int *sdpid;
 	GtkWidget *generation_label;
 	GtkWidget *button;
-	int *sdpid;
+	GtkWidget *win;
 	GInputStream *out_pipe_stream;
-	char read_buffer[4096];
 	GString *stdout_string;
 } SDProcessOutputData;
 
