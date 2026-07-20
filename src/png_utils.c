@@ -428,10 +428,11 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	//Set Denoise strength
 	ptr = strstr(l1->str, ",\"strength\":");
 	if (ptr) {
-		int denoise_str_value;
-		if (sscanf(ptr + strlen(",\"strength\":"), "%d", &denoise_str_value) == 1) {
+		double denoise_str_value;
+		if (sscanf(ptr + strlen(",\"strength\":"), "%lf", &denoise_str_value) == 1) {
 			if (denoise_str_value >= 0 && denoise_str_value <= 1) {
-				gtk_spin_button_set_value (GTK_SPIN_BUTTON(data->denoise_spin), denoise_str_value);
+				GtkWidget *denoise_spin = data->denoise_spin;
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), denoise_str_value);
 			}
 		} else {
 			fprintf(stderr, "Failed to parse Denoise strength data.\n");
