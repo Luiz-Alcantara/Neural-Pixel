@@ -425,6 +425,23 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 		if (n_err > 0) { fprintf(stderr, "Failed to parse Hires denoising strength data.\n"); n_err++; }
 	}
 
+	//Set Denoise strength
+	ptr = strstr(l1->str, ",\"strength\":");
+	if (ptr) {
+		int denoise_str_value;
+		if (sscanf(ptr + strlen(",\"strength\":"), "%d", &denoise_str_value) == 1) {
+			if (denoise_str_value >= 0 && denoise_str_value <= 1) {
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(data->denoise_spin), denoise_str_value);
+			}
+		} else {
+			fprintf(stderr, "Failed to parse Denoise strength data.\n");
+			n_err++;
+		}
+	} else {
+		fprintf(stderr, "Failed to parse Denoise strength data.\n");
+		n_err++;
+	}
+
 	png_destroy_read_struct(&png, &info, NULL);
 	fclose(fp);
 	g_free(path);

@@ -62,6 +62,7 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	gtk_box_append (GTK_BOX (info_box), copyright_lab);
 	
 	GtkWidget *np_github_link_btn = gtk_link_button_new_with_label (NP_GITHUB, "Neural Pixel source");
+	gtk_widget_set_hexpand (np_github_link_btn, FALSE);
 	gtk_box_append (GTK_BOX (info_box), np_github_link_btn);
 	
 	GtkWidget *credits_lab = gtk_label_new ("Credits:");
@@ -74,10 +75,16 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	gtk_box_append (GTK_BOX (info_box), sdcpp_lab);
 	
 	GtkWidget *sdcpp_github_link_btn = gtk_link_button_new_with_label (SDCPP_GITHUB, "sd.cpp source");
+	gtk_widget_set_hexpand (sdcpp_github_link_btn, FALSE);
 	gtk_box_append (GTK_BOX (info_box), sdcpp_github_link_btn);
+
+	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
+	gtk_widget_add_css_class(close_window_btn, "custom_btn");
+	gtk_widget_set_hexpand(close_window_btn, TRUE);
+	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), info_win);
+	gtk_box_append(GTK_BOX(info_box), close_window_btn);
 	
 	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
-	
 	gtk_window_present (GTK_WINDOW(info_win));
 }
 
@@ -232,6 +239,18 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 {
 	app_start_data_free(user_data);
 	gtk_window_destroy (win);
+}
+
+void donate_btn_callback(GtkButton *btn, gpointer user_data)
+{
+	GError *error = NULL;
+
+	g_app_info_launch_default_for_uri(DONATE_URL, NULL, &error);
+
+	if (error != NULL) {
+		g_printerr("Failed to open donate URL: %s\n", error->message);
+		g_error_free(error);
+	}
 }
 
 static gboolean steal_scroll_cb (GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data)

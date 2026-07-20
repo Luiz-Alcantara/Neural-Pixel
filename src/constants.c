@@ -6,6 +6,7 @@ const char* APP_NAME_VERSION = "Neural Pixel v0.8.1";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
+const char* DONATE_URL = "https://ko-fi.com/luiz_alcantara";
 const char* NP_GITHUB = "https://github.com/Luiz-Alcantara/Neural-Pixel";
 const char* SDCPP_GITHUB = "https://github.com/leejet/stable-diffusion.cpp";
 
@@ -29,10 +30,10 @@ const size_t LIST_RESOLUTIONS_STR_COUNT = sizeof(LIST_RESOLUTIONS_STR) / sizeof(
 const char* LIST_STEPS_STR[] = {"1", "2", "4", "8", "12", "16", "20", "24", "30", "36", "42", "50", "60", NULL};
 const size_t LIST_STEPS_STR_COUNT = sizeof(LIST_STEPS_STR) / sizeof(LIST_STEPS_STR[0]);
 
-const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2m_sde", "dpm++2mv2", "dpm++2s_a", "dpm2", "er_sde", "euler", "euler_a", "euler_a_cfg_pp", "euler_cfg_pp", "heun", "ipndm", "ipndm_v", "lcm", "res_2s", "res_multistep", "tcd", NULL};
-const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);  
+const char* LIST_SAMPLES[] = {"ddim_trailing", "dpm++2m", "dpm++2m_sde", "dpm++2m_sde_bt", "dpm++2mv2", "dpm++2s_a", "dpm2", "er_sde", "euler", "euler_a", "euler_a_cfg_pp", "euler_cfg_pp", "heun", "ipndm", "ipndm_v", "lcm", "res_2s", "res_multistep", "tcd", NULL};
+const size_t LIST_SAMPLES_COUNT = sizeof(LIST_SAMPLES) / sizeof(LIST_SAMPLES[0]);
 
-const char* LIST_SCHEDULES[] = {"ays", "bong_tangent", "discrete", "exponential", "gits", "karras", "kl_optimal", "lcm", "sgm_uniform", "simple", "smoothstep", NULL};
+const char* LIST_SCHEDULES[] = {"ays", "beta", "bong_tangent", "discrete", "exponential", "flux", "flux2", "gits", "karras", "kl_optimal", "lcm", "logit_normal", "sgm_uniform", "simple", "smoothstep", NULL};
 const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]);
 
 const char* LIST_BACKENDS[] = {"auto", "cpu", "cuda0", "cuda1", "rocm0", "rocm1", "sycl0", "sycl1", "vulkan0", "vulkan1", NULL};
@@ -52,8 +53,8 @@ const char* EMPTY_IMG_PATH = "./resources/empty.png";
 const char* MASK_IMG_PATH = ".cache/mask.png";
 const int DEFAULT_BACKEND = 0;
 const int DEFAULT_MODELS = 0;
-const int DEFAULT_SAMPLER = 8;
-const int DEFAULT_SCHEDULER = 5;
+const int DEFAULT_SAMPLER = 9;
+const int DEFAULT_SCHEDULER = 8;
 const int DEFAULT_CLIP_SKIP = 0;
 const int DEFAULT_RP_UPSCALE = 1;
 const int DEFAULT_N_STEPS = 20;

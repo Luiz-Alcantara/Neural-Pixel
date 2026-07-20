@@ -47,7 +47,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *properties_scrollable;
 
 	GtkWidget *box_properties, *boxl_topbar;
-	GtkWidget *info_btn, *reload_btn, *reset_default_btn, *load_from_img_btn;
+	GtkWidget *info_btn, *donate_btn, *reload_btn, *reset_default_btn, *load_from_img_btn;
 	
 	GtkWidget *img2img_expander;
 	GtkWidget *box_img2img, *box_img2img_top_buttons, *box_preview_img2img, *box_img2img_bottom_buttons;
@@ -209,6 +209,11 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(info_btn, "custom_btn_title");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(info_btn),
 	"About Neural Pixel.");
+
+	donate_btn = gtk_button_new_from_icon_name ("emblem-favorite-symbolic");
+	gtk_widget_add_css_class(donate_btn, "custom_btn_title");
+	g_signal_connect(donate_btn, "clicked", G_CALLBACK (donate_btn_callback), NULL);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(donate_btn), "Support the project.");
 	
 	reload_btn = gtk_button_new_from_icon_name ("view-refresh-symbolic");
 	gtk_widget_add_css_class(reload_btn, "custom_btn_title");
@@ -226,6 +231,7 @@ app_activate (GApplication *app, gpointer user_data)
 	"Load the prompt, model, sampler settings, and other parameters\nfrom the embedded metadata of the selected image file.");
 	
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), info_btn);
+	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), donate_btn);
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), reload_btn);
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), reset_default_btn);
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), load_from_img_btn);
@@ -1437,6 +1443,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->neg_tb = neg_tb;
 	load_png_info_d->steps_spin = steps_spin;
 	load_png_info_d->cfg_spin = cfg_spin;
+	load_png_info_d->denoise_spin = denoise_spin;
 	load_png_info_d->clip_skip_spin = clip_skip_spin;
 	load_png_info_d->seed_entry = seed_entry;
 	load_png_info_d->width_dd = width_dd;

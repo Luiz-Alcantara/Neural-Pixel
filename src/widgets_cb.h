@@ -19,6 +19,8 @@ void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data);
 
+void donate_btn_callback(GtkButton *btn, gpointer user_data);
+
 static gboolean steal_scroll_cb(GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data);
 
 void dropdown_items_update(const char *path, GtkWidget *dd, GApplication *app);

@@ -199,6 +199,7 @@ typedef struct {
 	GtkTextBuffer *neg_tb;
 	GtkWidget *steps_spin;
 	GtkWidget *cfg_spin;
+	GtkWidget *denoise_spin;
 	GtkWidget *clip_skip_spin;
 	GtkWidget *seed_entry;
 	GtkWidget *width_dd;
