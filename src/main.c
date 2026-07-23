@@ -394,9 +394,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(box_checkpoint, "inner_box");
 	gtk_box_append (GTK_BOX (box_properties), box_checkpoint);
 	
-	checkpoint_lab = gtk_label_new ("Checkpoint");
+	checkpoint_lab = gtk_label_new ("Checkpoint ⓘ");
 	gtk_widget_set_halign(checkpoint_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(checkpoint_lab, "param_label");
+	gtk_widget_set_tooltip_text(checkpoint_lab, "Choose the base model file that drives image generation.\nSupported Formats: (.ckpt) (.safetensors) (.gguf)\nFind models on civitai.com or huggingface.co");
 	gtk_box_append (GTK_BOX (box_checkpoint), checkpoint_lab);
 	
 	box_checkpoint_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);

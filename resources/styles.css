@@ -70,12 +70,13 @@
 
 
 /* Window Controls */
-.minimize > *, .maximize > *, .close > * {
+.titlebar button.minimize, .titlebar button.maximize, .titlebar button.close {
 	background-color: @primary-color;
 }
 
-.minimize > image:hover, .maximize > image:hover, .close > image:hover {
+.titlebar button.minimize:hover > image, .titlebar button.maximize:hover > image, .titlebar button.close:hover > image {
 	background-color: @primary-color-light;
+	border-radius: 9999px;
 }
 
 
