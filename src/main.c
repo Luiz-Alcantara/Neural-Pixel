@@ -40,7 +40,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	GtkWidget *titlebar;
 
-	GtkWidget *box;
+	GtkWidget *paned;
 	
 	GtkWidget *box_left;
 	
@@ -190,20 +190,25 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(titlebar, "titlebar");
 	gtk_window_set_titlebar (GTK_WINDOW (win), titlebar);
 	
-	//Main box
-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, ZERO_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (box), FALSE);
-	gtk_window_set_child (GTK_WINDOW (win), box);
-		
+	//Main container
+	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_window_set_child (GTK_WINDOW (win), paned);
+	
 	//Set Box Left and Right
 	box_left = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
+	gtk_widget_set_vexpand(box_left, TRUE);
 	gtk_widget_add_css_class(box_left, "left_box");
-	gtk_widget_set_size_request(GTK_WIDGET(box_left), 460, -1);
-	gtk_widget_set_hexpand(box_left, FALSE);
-	gtk_box_append (GTK_BOX (box), box_left);
+
 	box_right = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_add_css_class(box_right, "right_box");
-	gtk_box_append (GTK_BOX (box), box_right);
+
+	gtk_paned_set_start_child(GTK_PANED(paned), box_left);
+	gtk_paned_set_resize_start_child(GTK_PANED(paned), TRUE);
+	gtk_paned_set_shrink_start_child(GTK_PANED(paned), FALSE);
+	gtk_paned_set_end_child(GTK_PANED(paned), box_right);
+	gtk_paned_set_resize_end_child(GTK_PANED(paned), TRUE);
+	gtk_paned_set_shrink_end_child(GTK_PANED(paned), FALSE);
+	gtk_paned_set_position(GTK_PANED(paned), 460);
 
 	info_btn = gtk_button_new_from_icon_name ("dialog-information-symbolic");
 	gtk_widget_add_css_class(info_btn, "custom_btn_title");
@@ -238,6 +243,9 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Properties Scrollable
 	properties_scrollable = gtk_scrolled_window_new();
+	gtk_widget_set_vexpand(properties_scrollable, TRUE);
+	gtk_widget_set_hexpand(properties_scrollable, TRUE);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (properties_scrollable), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW (properties_scrollable), GTK_CORNER_BOTTOM_RIGHT);
 	gtk_box_append (GTK_BOX (box_left), properties_scrollable);
 	
@@ -295,17 +303,18 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_preview_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_add_css_class(box_preview_img2img, "img_preview_box");
-	gtk_widget_set_size_request(box_preview_img2img, 412, 400);
 	gtk_widget_set_hexpand (box_preview_img2img, FALSE);
 	gtk_widget_set_vexpand (box_preview_img2img, FALSE);
 	gtk_box_append (GTK_BOX (box_img2img), box_preview_img2img);
 	
 	overlay_img2img = gtk_overlay_new();
-	gtk_widget_set_size_request(overlay_img2img, 412, 400);
 	
 	preview_img2img = gtk_picture_new_for_filename(EMPTY_IMG_PATH);
 	gtk_widget_set_valign(preview_img2img, GTK_ALIGN_CENTER);
 	gtk_widget_set_halign(preview_img2img, GTK_ALIGN_CENTER);
+	gtk_picture_set_content_fit(GTK_PICTURE(preview_img2img), GTK_CONTENT_FIT_CONTAIN);
+	gtk_picture_set_can_shrink(GTK_PICTURE(preview_img2img), TRUE);
+	gtk_widget_set_size_request(preview_img2img, -1, 400);
 	
 	gtk_overlay_set_child(GTK_OVERLAY(overlay_img2img), preview_img2img);
 	gtk_box_append (GTK_BOX (box_preview_img2img), overlay_img2img);
@@ -336,7 +345,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	//Set Prompts Box
 	box_prompts = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
-	gtk_widget_set_size_request(box_prompts, 412, 500);
+	gtk_widget_set_size_request(box_prompts, 400, 500);
 	gtk_widget_set_hexpand (box_prompts, TRUE);
 	gtk_box_set_homogeneous (GTK_BOX (box_prompts), TRUE);
 	gtk_widget_add_css_class(box_prompts, "inner_box");
