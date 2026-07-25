@@ -5,7 +5,12 @@ extern const char* APP_NAME_VERSION;
 extern const char* APP_AUTHOR;
 extern const char* APP_DESC;
 extern const char* APP_DESC2;
+extern const char* APP_MSG_01;
+extern const char* APP_MSG_02;
+extern const char* CIVARCHIVE_URL;
+extern const char* CIVITAI_URL;
 extern const char* DONATE_URL;
+extern const char* HUGGINGFACE_URL;
 extern const char* NP_GITHUB;
 extern const char* SDCPP_GITHUB;
 

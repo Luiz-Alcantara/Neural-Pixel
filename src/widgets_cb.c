@@ -36,6 +36,7 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	GtkWidget *info_win = gtk_window_new ();
 	gtk_widget_add_css_class(info_win, "info_box");
 	gtk_window_set_transient_for(GTK_WINDOW(info_win), GTK_WINDOW(main_win));
+	gtk_window_set_title (GTK_WINDOW(info_win), "About Neural Pixel");
 	gtk_window_set_default_size (GTK_WINDOW(info_win), 400, 100);
 	gtk_window_set_resizable (GTK_WINDOW(info_win), TRUE);
 	gtk_window_set_deletable (GTK_WINDOW(info_win), TRUE);
@@ -43,10 +44,10 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	gtk_window_set_destroy_with_parent (GTK_WINDOW(info_win), TRUE);
 	
 	GtkWidget *info_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
-	gtk_widget_set_margin_bottom (info_box, LARGE_SPACING);
-	gtk_widget_set_margin_end (info_box, LARGE_SPACING);
-	gtk_widget_set_margin_start (info_box, LARGE_SPACING);
-	gtk_widget_set_margin_top (info_box, LARGE_SPACING);
+	gtk_widget_set_margin_bottom (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_end (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_top (info_box, MEDIUM_SPACING);
 	gtk_widget_add_css_class(info_box, "info_box");
 	
 	GtkWidget *title_lab = gtk_label_new (APP_NAME_VERSION);
@@ -63,6 +64,7 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	
 	GtkWidget *np_github_link_btn = gtk_link_button_new_with_label (NP_GITHUB, "Neural Pixel source");
 	gtk_widget_set_hexpand (np_github_link_btn, FALSE);
+	gtk_widget_set_halign(np_github_link_btn, GTK_ALIGN_CENTER);
 	gtk_box_append (GTK_BOX (info_box), np_github_link_btn);
 	
 	GtkWidget *credits_lab = gtk_label_new ("Credits:");
@@ -76,6 +78,7 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	
 	GtkWidget *sdcpp_github_link_btn = gtk_link_button_new_with_label (SDCPP_GITHUB, "sd.cpp source");
 	gtk_widget_set_hexpand (sdcpp_github_link_btn, FALSE);
+	gtk_widget_set_halign(sdcpp_github_link_btn, GTK_ALIGN_CENTER);
 	gtk_box_append (GTK_BOX (info_box), sdcpp_github_link_btn);
 
 	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
@@ -298,6 +301,14 @@ void free_preview_data (gpointer data)
 {
 	PreviewImageData *preview_d = (PreviewImageData *)data;
 	g_free(preview_d);
+}
+
+guint get_dd_item_count(GtkDropDown *dropdown)
+{
+	GListModel *model = gtk_drop_down_get_model(dropdown);
+
+	if (model == NULL) return 0;
+	return g_list_model_get_n_items(model);
 }
 
 void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
@@ -796,6 +807,67 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 			}
 		}
 	}
+}
+
+void show_no_models_message(GtkWidget *main_win)
+{
+	GtkWidget *info_win = gtk_window_new ();
+	gtk_widget_add_css_class (info_win, "info_box");
+	gtk_window_set_transient_for (GTK_WINDOW(info_win), GTK_WINDOW(main_win));
+	gtk_window_set_title (GTK_WINDOW(info_win), "No Models Found");
+	gtk_window_set_default_size (GTK_WINDOW(info_win), 500, 100);
+	gtk_window_set_resizable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_deletable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_decorated (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_destroy_with_parent (GTK_WINDOW(info_win), TRUE);
+	
+	GtkWidget *info_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
+	gtk_widget_set_margin_bottom (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_end (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_top (info_box, MEDIUM_SPACING);
+	gtk_widget_add_css_class(info_box, "info_box");
+	
+	GtkWidget *message_01_lab = gtk_label_new (APP_MSG_01);
+	gtk_widget_add_css_class(message_01_lab, "info_label");
+	gtk_label_set_justify(GTK_LABEL(message_01_lab), GTK_JUSTIFY_CENTER);
+	gtk_widget_set_margin_top (message_01_lab, LARGE_SPACING);
+	gtk_box_append (GTK_BOX (info_box), message_01_lab);
+
+	GtkWidget *links_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (links_box), TRUE);
+	gtk_box_append (GTK_BOX (info_box), links_box);
+
+	GtkWidget *civarchive_link_btn = gtk_link_button_new_with_label (CIVARCHIVE_URL, "CivArchive");
+	gtk_widget_set_hexpand (civarchive_link_btn, FALSE);
+	gtk_widget_set_halign(civarchive_link_btn, GTK_ALIGN_END);
+	gtk_box_append (GTK_BOX (links_box), civarchive_link_btn);
+
+	GtkWidget *civitai_link_btn = gtk_link_button_new_with_label (CIVITAI_URL, "CivitAI");
+	gtk_widget_set_hexpand (civitai_link_btn, FALSE);
+	gtk_widget_set_halign(civitai_link_btn, GTK_ALIGN_CENTER);
+	gtk_box_append (GTK_BOX (links_box), civitai_link_btn);
+	
+	GtkWidget *huggingface_link_btn = gtk_link_button_new_with_label (HUGGINGFACE_URL, "Hugging Face");
+	gtk_widget_set_hexpand (huggingface_link_btn, FALSE);
+	gtk_widget_set_halign(huggingface_link_btn, GTK_ALIGN_START);
+	gtk_box_append (GTK_BOX (links_box), huggingface_link_btn);
+	
+	GtkWidget *message_02_lab = gtk_label_new (APP_MSG_02);
+	gtk_widget_add_css_class(message_02_lab, "info_label");
+	gtk_label_set_justify(GTK_LABEL(message_02_lab), GTK_JUSTIFY_CENTER);
+	gtk_widget_set_margin_top (message_02_lab, LARGE_SPACING);
+	gtk_widget_set_margin_bottom (message_02_lab, LARGE_SPACING);
+	gtk_box_append (GTK_BOX (info_box), message_02_lab);
+
+	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
+	gtk_widget_add_css_class(close_window_btn, "custom_btn");
+	gtk_widget_set_hexpand(close_window_btn, TRUE);
+	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), info_win);
+	gtk_box_append(GTK_BOX(info_box), close_window_btn);
+	
+	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
+	gtk_window_present (GTK_WINDOW(info_win));
 }
 
 void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable)

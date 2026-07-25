@@ -29,6 +29,8 @@ void free_cache_data(MyCacheData *s);
 
 void free_preview_data(gpointer data);
 
+guint get_dd_item_count(GtkDropDown *dropdown);
+
 void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
 
 void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data);
@@ -82,6 +84,8 @@ void send_to_trash(GtkWidget* btn, gpointer user_data);
 void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1);
 
 void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
+
+void show_no_models_message(GtkWidget *main_win);
 
 void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable);
 

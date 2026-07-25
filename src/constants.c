@@ -2,11 +2,16 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.8.2";
+const char* APP_NAME_VERSION = "Neural Pixel v0.8.3";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
+const char* APP_MSG_01 = "No model checkpoints were found. To generate images,\nadd at least one checkpoint model to:\n'.../models/checkpoints'\n\nYou can download compatible models from:";
+const char* APP_MSG_02 = "After copying the model files into the folder,\nclick the '↻' button in the toolbar to load them.";
+const char* CIVARCHIVE_URL = "https://civitaiarchive.com";
+const char* CIVITAI_URL = "https://civitai.com";
 const char* DONATE_URL = "https://ko-fi.com/luiz_alcantara";
+const char* HUGGINGFACE_URL = "https://huggingface.co";
 const char* NP_GITHUB = "https://github.com/Luiz-Alcantara/Neural-Pixel";
 const char* SDCPP_GITHUB = "https://github.com/leejet/stable-diffusion.cpp";
 
