@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
-#include <time.h>
 #include "constants.h"
 #include "file_utils.h"
 #include "structs.h"
@@ -21,7 +20,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 	#else
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("./sd"));
 	#endif
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
 
@@ -34,7 +33,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/checkpoints/%s", data->checkpoint_filename));
 		}
 	}
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--lora-model-dir"));
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("./models/loras"));
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--embd-dir"));
@@ -44,7 +43,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/vae/%s", data->vae_filename));
 	}
-	
+
 	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path, "None") != 0) {
 		if (data->cnet_filename != NULL && strcmp(data->cnet_filename, "None") != 0) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net"));
@@ -58,7 +57,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
 			if (data->inpaint_enabled == 1) {
 				int result = check_file_exists((char *)MASK_IMG_PATH, 0);
-				
+
 				if (result == 1) {
 					g_ptr_array_add(data->sd_cmd_array, g_strdup("--mask"));
 					g_ptr_array_add(data->sd_cmd_array, g_strdup(MASK_IMG_PATH));
@@ -69,19 +68,19 @@ void gen_sd_string(GenerationSnapshotData *data)
 			}
 		}
 	}
-	
+
 	if (data->hires_upscaler_index < LIST_HIRES_UPSCALERS_COUNT - 1 && data->hires_upscaler_index > 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires"));
-		
+
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-upscaler"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_HIRES_UPSCALERS[(data->hires_upscaler_index)]));
-		
+
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-scale"));
 		g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->hires_scale_value));
-		
+
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-steps"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%d", data->hires_steps_value));
-		
+
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--hires-denoising-strength"));
 		g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->hires_denoise_value));
 	}
@@ -92,17 +91,17 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--upscale-repeats"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%d", data->upscale_passes_value));
 	}
-	
+
 	if (data->clip_l_filename != NULL && strcmp(data->clip_l_filename, "None") != 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip_l"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/clips/%s", data->clip_l_filename));
 	}
-	
+
 	if (data->clip_g_filename != NULL && strcmp(data->clip_g_filename, "None") != 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip_g"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/clips/%s", data->clip_g_filename));
 	}
-	
+
 	if (data->text_enc_filename != NULL && strcmp(data->text_enc_filename, "None") != 0) {
 		if (data->llm_mode_enabled == 1) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--llm"));
@@ -115,11 +114,11 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
 	g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->denoise_strength_value));
-	
+
 	if (data->mmap_enabled == 1) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mmap"));
 	}
-	
+
 	if (data->taesd_enabled == 1) {
 		if (check_file_exists(".models/vae/taesd_decoder.safetensors", 0) == 1) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--taesd"));
@@ -131,7 +130,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--cfg-scale"));
 	g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.1f", data->cfg_scale_value));
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--clip-skip"));
 	g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%d", data->clip_skip_value));
 
@@ -139,18 +138,18 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--sampling-method"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_SAMPLES[(data->sampler_index)]));
 	}
-	
+
 	if (data->scheduler_index < LIST_SCHEDULES_COUNT - 1) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--scheduler"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_SCHEDULES[(data->scheduler_index)]));
 	}
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--seed"));
 	g_ptr_array_add(data->sd_cmd_array, data->seed_value ? g_strdup_printf("%lld", data->seed_value) : g_strdup_printf("%lld", DEFAULT_SEED));
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--steps"));
 	g_ptr_array_add(data->sd_cmd_array, data->step_count_value ? g_strdup_printf("%d", data->step_count_value) : g_strdup_printf("%d", DEFAULT_N_STEPS));
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--batch-count"));
 	g_ptr_array_add(data->sd_cmd_array, data->batch_count_value ? g_strdup_printf("%d", data->batch_count_value) : g_strdup_printf("%d", DEFAULT_BATCH_COUNT));
 
@@ -160,7 +159,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--height"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(LIST_RESOLUTIONS_STR[(data->height_index)]));
 	}
-	
+
 	if (data->vae_tiling_index < LIST_VAE_TILE_SIZES_COUNT - 1 && data->vae_tiling_index > 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-tiling"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--vae-tile-size"));
@@ -188,36 +187,52 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--negative-prompt"));
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->negative_prompt));
 	}
-	
+
 	char *runtime_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s",
 	LIST_BACKENDS[(data->model_runtime_backend_index)],
 	LIST_BACKENDS[(data->te_runtime_backend_index)],
 	LIST_BACKENDS[(data->vae_runtime_backend_index)],
 	LIST_BACKENDS[(data->cnet_runtime_backend_index)],
 	LIST_BACKENDS[(data->upscaler_runtime_backend_index)]);
-	
+
 	char *parameter_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s",
 	LIST_BACKENDS[(data->model_param_backend_index)],
 	LIST_BACKENDS[(data->te_param_backend_index)],
 	LIST_BACKENDS[(data->vae_param_backend_index)],
 	LIST_BACKENDS[(data->cnet_param_backend_index)],
 	LIST_BACKENDS[(data->upscaler_param_backend_index)]);
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--backend"));
 	g_ptr_array_add(data->sd_cmd_array, runtime_backend_str);
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--params-backend"));
 	g_ptr_array_add(data->sd_cmd_array, parameter_backend_str);
-	
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--output"));
+
+	char *output_str = NULL;
+	char *out_timestamp = get_time_str();
+
+	if (!out_timestamp) g_printerr("Failed to acquire timestamp. Using default value.\nTry restarting the app or deleting the '.cache' folder. If the issue persists, please report it.\n");
+
+	#ifdef G_OS_WIN32
+		output_str = out_timestamp ? g_strdup_printf(".\\outputs\\IMG_%s.png", out_timestamp) : g_strdup(".\\outputs\\IMG.png");
+	#else
+		output_str = out_timestamp ? g_strdup_printf("./outputs/IMG_%s.png", out_timestamp) : g_strdup("./outputs/IMG.png");
+	#endif
+
+	if (out_timestamp) free(out_timestamp);
+
+	data->output_path = get_unique_filepath(output_str);
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup(data->output_path));
-	
+
 	g_ptr_array_add(data->sd_cmd_array, NULL);
 
 	if (data->update_cache_enabled == 1) {
 		update_cache(data);
 	}
-	
+
 	if (data->verbose_enabled == 1 && data->sd_cmd_array != NULL) {
 		char *final_cmd = g_strjoinv(" ", (char **)data->sd_cmd_array->pdata);
 		g_print("Executing: %s\n", final_cmd);

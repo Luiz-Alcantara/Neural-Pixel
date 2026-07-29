@@ -630,29 +630,9 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->cnet_runtime_backend_index = app_data->cnet_runtime_backend_index;
 	snapshot_data->cnet_param_backend_index = app_data->cnet_param_backend_index;
 	snapshot_data->upscaler_runtime_backend_index = app_data->upscaler_runtime_backend_index;
-	snapshot_data->upscaler_param_backend_index = app_data->upscaler_param_backend_index;	
+	snapshot_data->upscaler_param_backend_index = app_data->upscaler_param_backend_index;
 	snapshot_data->total_time = 0;
 	snapshot_data->sdpid = &app_data->sdpid;
-	
-	char *out_timestamp = get_time_str();
-	
-	if (out_timestamp) {
-		#ifdef G_OS_WIN32
-			snapshot_data->output_path = g_strdup_printf(".\\outputs\\IMG_%s.png", out_timestamp);
-		#else
-			snapshot_data->output_path = g_strdup_printf("./outputs/IMG_%s.png", out_timestamp);
-		#endif
-		
-		free(out_timestamp);
-	} else {
-		g_printerr("Failed to acquire timestamp. Using default value, which may overwrite the generated image. Try restarting the app or deleting the '.cache' folder. If the issue persists, please report it.\n");
-		#ifdef G_OS_WIN32
-			snapshot_data->output_path = g_strdup(".\\outputs\\IMG_00001.png");
-		#else
-			snapshot_data->output_path = g_strdup("./outputs/IMG_00001.png");
-		#endif
-	}
-	
 	snapshot_data->preview_image_index = &app_data->preview_image_index;
 	snapshot_data->preview_label_string = app_data->preview_label_string;
 	snapshot_data->preview_image_files = app_data->preview_image_files;

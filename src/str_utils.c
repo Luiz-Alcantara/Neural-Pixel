@@ -223,7 +223,7 @@ char *get_time_str()
 	struct tm timeinfo;
 
 	time(&rt);
-	
+
 	#ifdef _WIN32
 		if (localtime_s(&timeinfo, &rt) != 0) {
 			return NULL;

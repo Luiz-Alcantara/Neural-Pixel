@@ -68,7 +68,7 @@ int count_output_files()
 		return 0;
 	}
 	int nf = 0;
-	
+
 	struct dirent* entry;
 	char full_path[FULL_PATH_MAX];
 	while ((entry = readdir(dir)) != NULL) {
@@ -141,7 +141,7 @@ DIR* check_create_dir(const char* path)
 				fprintf(stderr, "Error creating directory.\n");
 				return NULL;
 			}
-			
+
 			DIR* ndir = opendir(path);
 			return ndir;
 		#else
@@ -149,7 +149,7 @@ DIR* check_create_dir(const char* path)
 				fprintf(stderr, "Error creating directory.\n");
 				return NULL;
 			}
-			
+
 			DIR* ndir = opendir(path);
 			return ndir;
 		#endif
@@ -174,7 +174,7 @@ int check_create_base_dirs() {
 		#endif
 	}
 	closedir(cache_dir);
-	
+
 	DIR* models_dir = opendir(MODELS_PATH);
 	if (models_dir == NULL) {
 		#ifdef _WIN32
@@ -190,7 +190,7 @@ int check_create_base_dirs() {
 		#endif
 	}
 	closedir(models_dir);
-	
+
 	DIR* outputs_dir = opendir(OUTPUTS_PATH);
 	if (outputs_dir == NULL) {
 		#ifdef _WIN32
@@ -221,7 +221,7 @@ GtkStringList* get_files(const char* path, GError **error)
 	nf = count_files(dir, path, NULL) + 1;
 	GtkStringList *files = gtk_string_list_new(NULL);
 	char** sort_files = malloc(sizeof(char*) * (nf + 1));
-	
+
 	if (sort_files == NULL) {
 		closedir(dir);
 		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Memory allocation failed.", path);
@@ -247,7 +247,7 @@ GtkStringList* get_files(const char* path, GError **error)
 		gtk_string_list_append(files, sort_files[x]);
 		free(sort_files[x]);
 	}
-	
+
 	free(sort_files);
 	closedir(dir);
 
@@ -257,19 +257,19 @@ GtkStringList* get_files(const char* path, GError **error)
 void get_png_files(GPtrArray *image_files)
 {
 	g_ptr_array_set_size(image_files, 0);
-	
+
 	gchar *current_dir = g_get_current_dir();
 	gchar *full_path = g_build_filename(current_dir, "outputs", NULL);
 	g_free(current_dir);
-	
+
 	GDir *dir = g_dir_open(full_path, 0, NULL);
 	g_free(full_path);
-	
+
 	if (!dir) {
 		g_printerr("Could not open directory 'outputs'.");
 		return;
 	}
-	
+
 	const gchar *filename;
 	while ((filename = g_dir_read_name(dir))) {
 		if (g_str_has_suffix(filename, ".png") || g_str_has_suffix(filename, ".PNG")) {
@@ -277,18 +277,42 @@ void get_png_files(GPtrArray *image_files)
 			g_ptr_array_add(image_files, full_file_path);
 		}
 	}
-	
+
 	g_dir_close(dir);
-	
+
 	g_ptr_array_sort(image_files, (GCompareFunc)compare_strings);
-	
+
 	g_print("Found %u PNG files.\n", image_files->len);
+}
+
+char* get_unique_filepath(char *path)
+{
+	if (!path) return NULL;
+	if (!check_file_exists(path, 0)) return path;
+
+	const char *dot = g_strrstr(path, ".");
+	size_t base_len = dot ? (size_t)(dot - path) : strlen(path);
+	const char *extension = dot ? dot : "";
+	char *base_path = g_strndup(path, base_len);
+	char *new_path = NULL;
+	int suffix = 2;
+
+	while (1) {
+		new_path = g_strdup_printf("%s_%d%s", base_path, suffix, extension);
+		if (!check_file_exists(new_path, 0)) break;
+		g_free(new_path);
+		suffix++;
+	}
+
+	g_free(base_path);
+	g_free(path);
+	return new_path;
 }
 
 void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray *image_files, gint *current_image_index, int total_time)
 {
 	gsize img_count = image_files->len;
-	
+
 	if (img_count > 0) {
 		guint new_index;
 
