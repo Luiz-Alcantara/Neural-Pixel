@@ -108,6 +108,16 @@
 	background-color: @primary-color-dark;
 }
 
+.label_btn {
+	background-image: none;
+	background-color: @primary-color;
+	color: white;
+}
+
+.label_btn:hover {
+	color: grey;
+}
+
 .toggle_btn {
 	background-image: none;
 	background-color: @primary-color-dark;

@@ -1,7 +1,7 @@
 #ifndef WIDGETS_CB_H
 #define WIDGETS_CB_H
 
-void show_error_message (GtkWidget *win, char *err_title_text, char *err_text);
+void show_simple_message(GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
 
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
 
@@ -28,6 +28,10 @@ void dropdown_items_update(const char *path, GtkWidget *dd, GApplication *app);
 void free_cache_data(MyCacheData *s);
 
 void free_preview_data(gpointer data);
+
+static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
+
+void get_backend_info(GtkButton *btn, gpointer user_data);
 
 guint get_dd_item_count(GtkDropDown *dropdown);
 

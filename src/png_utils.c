@@ -51,7 +51,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	if (!fp) {
 		fprintf(stderr, "File opening failed.\n");
 		g_free(path);
-		show_error_message (data->win, "Error loading PNG info", "File opening failed");
+		show_simple_message(data->win, "Error loading PNG info", "File opening failed", 1);
 		return;
 	}
 
@@ -60,7 +60,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 		fprintf(stderr, "png_create_read_struct failed.\n");
 		fclose(fp);
 		g_free(path);
-		show_error_message (data->win, "Error loading PNG info", "png_create_read_struct failed");
+		show_simple_message(data->win, "Error loading PNG info", "png_create_read_struct failed", 1);
 		return;
 	}
 
@@ -70,7 +70,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 		png_destroy_read_struct(&png, NULL, NULL);
 		fclose(fp);
 		g_free(path);
-		show_error_message (data->win, "Error loading PNG info", "png_create_info_struct failed");
+		show_simple_message(data->win, "Error loading PNG info", "png_create_info_struct failed", 1);
 		return;
 	}
 
@@ -79,7 +79,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 		png_destroy_read_struct(&png, &info, NULL);
 		fclose(fp);
 		g_free(path);
-		show_error_message (data->win, "Error loading PNG info", "Error during PNG initialization");
+		show_simple_message(data->win, "Error loading PNG info", "Error during PNG initialization", 1);
 		return;
 	}
 
@@ -496,9 +496,9 @@ static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data
 					"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
 					path
 				);
-				show_error_message(data->win,
+				show_simple_message(data->win,
 					"Error loading image",
-					"Error loading image: The selected file is missing, corrupted, or invalid.\n"
+					"Error loading image: The selected file is missing, corrupted, or invalid.\n", 1
 				);
 				gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 			}
@@ -550,9 +550,9 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 						"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
 						path
 					);
-					show_error_message(data->win,
+					show_simple_message(data->win,
 						"Error loading image",
-						"Error loading image: The selected file is missing, corrupted, or invalid.\n"
+						"Error loading image: The selected file is missing, corrupted, or invalid.\n", 1
 					);
 					gtk_picture_set_filename(prev_img, DEFAULT_IMG_PATH);
 				}

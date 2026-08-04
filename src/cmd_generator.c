@@ -62,8 +62,8 @@ void gen_sd_string(GenerationSnapshotData *data)
 					g_ptr_array_add(data->sd_cmd_array, g_strdup("--mask"));
 					g_ptr_array_add(data->sd_cmd_array, g_strdup(MASK_IMG_PATH));
 				} else {
-					show_error_message(data->win, "Could not find mask image.",
-					"Please check that you’ve saved the mask image.");
+					show_simple_message(data->win, "Could not find mask image.",
+					"Please check that you’ve saved the mask image.", 1);
 				}
 			}
 		}

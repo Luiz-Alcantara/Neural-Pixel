@@ -127,8 +127,8 @@ void show_mask_area (GtkWidget *wgt, gpointer user_data)
 	LoadImg2ImgData *data = (LoadImg2ImgData *)user_data;
 	
 	if (strcmp(data->img2img_file_path->str, "None") == 0) {
-		show_error_message(data->win, "Error loading source image",
-		"Select an image first to use the inpainting tool.");
+		show_simple_message(data->win, "Error loading source image",
+		"Select an image first to use the inpainting tool.", 1);
 		return;
 	}
 	
@@ -136,8 +136,8 @@ void show_mask_area (GtkWidget *wgt, gpointer user_data)
 	uint32_t h = 0;
 	int success_png_size = get_png_dimensions(data->img2img_file_path->str, &w, &h);
 	if (success_png_size != 0) {
-		show_error_message(data->win, "Error retrieving reference image dimensions.",
-			"*Only PNGs supported.");
+		show_simple_message(data->win, "Error retrieving reference image dimensions.",
+			"*Only PNGs supported.", 1);
 		g_printerr("Error retrieving reference image dimensions. (Only PNGs supported.)\n");
 		return;
 	}

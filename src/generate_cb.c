@@ -44,19 +44,19 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 			char error_dialog_text[16 + strlen(file_name)];
 			strcpy(error_dialog_text, "Error loading: ");
 			strcat(error_dialog_text, file_name);
-			show_error_message(data->win, "Error loading file", error_dialog_text);
+			show_simple_message(data->win, "Error loading file", error_dialog_text, 1);
 		}
 		
 		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - load tensors from model loader failed",
 		&n_error2) == 1) {
-			show_error_message(data->win, "Error loading model", "Error loading tensors from model");
+			show_simple_message(data->win, "Error loading model", "Error loading tensors from model", 1);
 		}
 		
 		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - backend config failed: backend '%15[^']' was not found",
 		&n_error3, backend_str) == 2) {
 			char error_dialog_text[27 + strlen(backend_str)];
 			snprintf(error_dialog_text, sizeof(error_dialog_text), "Backend: '%s' was not found.", backend_str);
-			show_error_message(data->win, "Error starting backend", error_dialog_text);
+			show_simple_message(data->win, "Error starting backend", error_dialog_text, 1);
 		}
 		
 		g_free(err_string);
@@ -134,7 +134,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 							char error_dialog_text[60 + strlen(filename)];
 							snprintf(error_dialog_text, sizeof(error_dialog_text),
 							"LoRA: '%s' was not found.\nGeneration will proceed without it.", filename);
-							show_error_message(data->win, "LoRA not found", error_dialog_text);
+							show_simple_message(data->win, "LoRA not found", error_dialog_text, 1);
 						}
 					}
 				}
@@ -476,9 +476,9 @@ static void start_generation(gpointer user_data)
 	if (data == NULL) {
 		g_printerr("Error: Data used to generate the images is corrupted.\n");
 		
-		show_error_message(data->win,
+		show_simple_message(data->win,
 		"Error reading generation data",
-		"Error reading generation data;\ntry restarting the app or deleting the \".cache\" folder.");
+		"Error reading generation data;\ntry restarting the app or deleting the \".cache\" folder.", 1);
 		
 		on_subprocess_end(NULL, NULL, user_data);
 	}
@@ -496,9 +496,9 @@ static void start_generation(gpointer user_data)
 		g_print("Error spawning process: %s\n", error->message);
 		g_clear_error(&error);
 		
-		show_error_message(data->win,
+		show_simple_message(data->win,
 		"Error spawning process",
-		"Error spawning the sd.cpp process;\nlook at the terminal log for details.");
+		"Error spawning the sd.cpp process;\nlook at the terminal log for details.", 1);
 		
 		on_subprocess_end(NULL, NULL, user_data);
 	} else {

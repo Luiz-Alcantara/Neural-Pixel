@@ -9,87 +9,9 @@
 #include "str_utils.h"
 #include "structs.h"
 
-void show_error_message (GtkWidget *win, char *err_title_text, char *err_text)
-{
-	#if GTK_CHECK_VERSION(4, 10, 0)
-		GtkAlertDialog *error_dialog = gtk_alert_dialog_new ("%s", err_title_text);
-		gtk_alert_dialog_set_detail (error_dialog, err_text);
-		gtk_alert_dialog_show (error_dialog, GTK_WINDOW(win));
-		g_object_unref(error_dialog);
-	#else
-		GtkWidget *error_dialog = gtk_message_dialog_new(
-		GTK_WINDOW(win),
-		GTK_DIALOG_MODAL,
-		GTK_MESSAGE_ERROR,
-		GTK_BUTTONS_CLOSE,
-		"%s", err_title_text
-		);
-
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(error_dialog), "%s", err_text);
-		g_signal_connect (error_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
-		gtk_widget_show(error_dialog);
-	#endif
-}
-
-void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
-{
-	GtkWidget *info_win = gtk_window_new ();
-	gtk_widget_add_css_class(info_win, "info_box");
-	gtk_window_set_transient_for(GTK_WINDOW(info_win), GTK_WINDOW(main_win));
-	gtk_window_set_title (GTK_WINDOW(info_win), "About Neural Pixel");
-	gtk_window_set_default_size (GTK_WINDOW(info_win), 400, 100);
-	gtk_window_set_resizable (GTK_WINDOW(info_win), TRUE);
-	gtk_window_set_deletable (GTK_WINDOW(info_win), TRUE);
-	gtk_window_set_decorated (GTK_WINDOW(info_win), TRUE);
-	gtk_window_set_destroy_with_parent (GTK_WINDOW(info_win), TRUE);
-	
-	GtkWidget *info_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
-	gtk_widget_set_margin_bottom (info_box, MEDIUM_SPACING);
-	gtk_widget_set_margin_end (info_box, MEDIUM_SPACING);
-	gtk_widget_set_margin_start (info_box, MEDIUM_SPACING);
-	gtk_widget_set_margin_top (info_box, MEDIUM_SPACING);
-	gtk_widget_add_css_class(info_box, "info_box");
-	
-	GtkWidget *title_lab = gtk_label_new (APP_NAME_VERSION);
-	gtk_widget_add_css_class(title_lab, "info_title_label");
-	gtk_box_append (GTK_BOX (info_box), title_lab);
-	
-	GtkWidget *desc_lab = gtk_label_new (APP_DESC);
-	gtk_widget_add_css_class(desc_lab, "info_label");
-	gtk_box_append (GTK_BOX (info_box), desc_lab);
-	
-	GtkWidget *copyright_lab = gtk_label_new (APP_AUTHOR);
-	gtk_widget_add_css_class(copyright_lab, "info_label");
-	gtk_box_append (GTK_BOX (info_box), copyright_lab);
-	
-	GtkWidget *np_github_link_btn = gtk_link_button_new_with_label (NP_GITHUB, "Neural Pixel source");
-	gtk_widget_set_hexpand (np_github_link_btn, FALSE);
-	gtk_widget_set_halign(np_github_link_btn, GTK_ALIGN_CENTER);
-	gtk_box_append (GTK_BOX (info_box), np_github_link_btn);
-	
-	GtkWidget *credits_lab = gtk_label_new ("Credits:");
-	gtk_widget_add_css_class(credits_lab, "info_credits_label");
-	gtk_box_append (GTK_BOX (info_box), credits_lab);
-	
-	GtkWidget *sdcpp_lab = gtk_label_new (APP_DESC2);
-	gtk_widget_add_css_class(sdcpp_lab, "info_label");
-	gtk_label_set_justify(GTK_LABEL(sdcpp_lab), GTK_JUSTIFY_CENTER);
-	gtk_box_append (GTK_BOX (info_box), sdcpp_lab);
-	
-	GtkWidget *sdcpp_github_link_btn = gtk_link_button_new_with_label (SDCPP_GITHUB, "sd.cpp source");
-	gtk_widget_set_hexpand (sdcpp_github_link_btn, FALSE);
-	gtk_widget_set_halign(sdcpp_github_link_btn, GTK_ALIGN_CENTER);
-	gtk_box_append (GTK_BOX (info_box), sdcpp_github_link_btn);
-
-	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
-	gtk_widget_add_css_class(close_window_btn, "custom_btn");
-	gtk_widget_set_hexpand(close_window_btn, TRUE);
-	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), info_win);
-	gtk_box_append(GTK_BOX(info_box), close_window_btn);
-	
-	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
-	gtk_window_present (GTK_WINDOW(info_win));
-}
+static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
+void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
+void show_simple_message (GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
 
 void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
 {
@@ -296,11 +218,35 @@ void free_cache_data (MyCacheData *s)
 	free(s);
 }
 
-
 void free_preview_data (gpointer data)
 {
 	PreviewImageData *preview_d = (PreviewImageData *)data;
 	g_free(preview_d);
+}
+
+void get_backend_info(GtkButton *btn, gpointer user_data)
+{
+	gchar *sd_bin;
+
+	#ifdef G_OS_WIN32
+		gchar *current_dir = g_get_current_dir();
+		sd_bin = g_strdup_printf("%s\\sd", current_dir);
+		g_free(current_dir);
+	#else
+		sd_bin = g_strdup("./sd");
+	#endif
+
+	GError *error = NULL;
+	GSubprocess *info_process = g_subprocess_new(G_SUBPROCESS_FLAGS_STDOUT_PIPE, &error, sd_bin, "--list-devices", NULL);
+
+	g_free(sd_bin);
+
+	if (info_process == NULL) {
+		g_printerr("Failed to spawn: %s\n", error->message);
+		g_error_free(error);
+		return;
+	}
+	g_subprocess_communicate_async(info_process, NULL, NULL, on_get_backend_info_end, user_data);
 }
 
 guint get_dd_item_count(GtkDropDown *dropdown)
@@ -469,6 +415,57 @@ void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data)
 	GenerationData *data = user_data;
 	if (data == NULL) return;
 	g_free(data);
+}
+
+static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data)
+{
+	GtkWidget *main_win = (GtkWidget *) user_data;
+	GSubprocess *info_process = G_SUBPROCESS(source);
+	GError *error = NULL;
+	GBytes *stdout_buf = NULL;
+
+	if (!g_subprocess_communicate_finish(info_process, res, &stdout_buf, NULL, &error)) {
+		g_printerr("Error: %s\n", error->message);
+		g_error_free(error);
+		g_object_unref(info_process);
+		return;
+	}
+
+	gsize size;
+	const char *data = g_bytes_get_data(stdout_buf, &size);
+	
+
+	if (!data || size == 0) {
+		show_simple_message(main_win, "Device Detection Failed", "Failed to detect available compute backends.", 1);
+		g_bytes_unref(stdout_buf);
+		g_object_unref(info_process);
+		return;
+	}
+
+	GString *msg = g_string_new(NULL);
+	char **lines = g_strsplit(data, "\n", -1);	
+
+	for (int i = 0; lines[i] != NULL; i++) {
+		char prefix[32];
+		int index;
+		
+		if (strncmp(lines[i], "CPU", 3) == 0) {
+			char *cpu_name = lines[i] + 3;
+			g_string_append_printf(msg, "[ CPU ] -> %s\n", g_strstrip(cpu_name));
+		} else if (sscanf(lines[i], "%31[A-Za-z]%d", prefix, &index) == 2) {
+			int offset = 0;
+			sscanf(lines[i], "%*31[A-Za-z]%*d%n", &offset);
+			char *device_name = lines[i] + offset;
+			g_string_append_printf(msg, "[ %s%d ] -> %s\n", prefix, index, g_strstrip(device_name));
+		}
+	}
+	
+	show_simple_message(main_win, "Available Backend(s):", msg->str, 0);
+	
+	g_string_free(msg, TRUE);
+	g_strfreev(lines);
+	g_bytes_unref(stdout_buf);
+	g_object_unref(info_process);
 }
 
 void on_hide_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
@@ -690,9 +687,9 @@ void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, 
 	long long int potential_seed = strtoll(full_text, &endptr, 10);
 	
 	if (*endptr != '\0' || potential_seed < -1 || errno == ERANGE) {
-		show_error_message(data->win,
+		show_simple_message(data->win,
 			"Seed Input Error",
-			"The seed must be numeric only;\nits value must be from -1 to 9223372036854775807.");
+			"The seed must be numeric only;\nits value must be from -1 to 9223372036854775807.", 1);
 		
 		g_printerr("Invalid seed input, using default value.\n");
 		gtk_editable_set_text(editable, "-1");
@@ -809,6 +806,66 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 	}
 }
 
+void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
+{
+	GtkWidget *info_win = gtk_window_new ();
+	gtk_widget_add_css_class(info_win, "info_box");
+	gtk_window_set_transient_for(GTK_WINDOW(info_win), GTK_WINDOW(main_win));
+	gtk_window_set_title (GTK_WINDOW(info_win), "About Neural Pixel");
+	gtk_window_set_default_size (GTK_WINDOW(info_win), 400, 100);
+	gtk_window_set_resizable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_deletable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_decorated (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_destroy_with_parent (GTK_WINDOW(info_win), TRUE);
+	
+	GtkWidget *info_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
+	gtk_widget_set_margin_bottom (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_end (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_top (info_box, MEDIUM_SPACING);
+	gtk_widget_add_css_class(info_box, "info_box");
+	
+	GtkWidget *title_lab = gtk_label_new (APP_NAME_VERSION);
+	gtk_widget_add_css_class(title_lab, "info_title_label");
+	gtk_box_append (GTK_BOX (info_box), title_lab);
+	
+	GtkWidget *desc_lab = gtk_label_new (APP_DESC);
+	gtk_widget_add_css_class(desc_lab, "info_label");
+	gtk_box_append (GTK_BOX (info_box), desc_lab);
+	
+	GtkWidget *copyright_lab = gtk_label_new (APP_AUTHOR);
+	gtk_widget_add_css_class(copyright_lab, "info_label");
+	gtk_box_append (GTK_BOX (info_box), copyright_lab);
+	
+	GtkWidget *np_github_link_btn = gtk_link_button_new_with_label (NP_GITHUB, "Neural Pixel source");
+	gtk_widget_set_hexpand (np_github_link_btn, FALSE);
+	gtk_widget_set_halign(np_github_link_btn, GTK_ALIGN_CENTER);
+	gtk_box_append (GTK_BOX (info_box), np_github_link_btn);
+	
+	GtkWidget *credits_lab = gtk_label_new ("Credits:");
+	gtk_widget_add_css_class(credits_lab, "info_credits_label");
+	gtk_box_append (GTK_BOX (info_box), credits_lab);
+	
+	GtkWidget *sdcpp_lab = gtk_label_new (APP_DESC2);
+	gtk_widget_add_css_class(sdcpp_lab, "info_label");
+	gtk_label_set_justify(GTK_LABEL(sdcpp_lab), GTK_JUSTIFY_CENTER);
+	gtk_box_append (GTK_BOX (info_box), sdcpp_lab);
+	
+	GtkWidget *sdcpp_github_link_btn = gtk_link_button_new_with_label (SDCPP_GITHUB, "sd.cpp source");
+	gtk_widget_set_hexpand (sdcpp_github_link_btn, FALSE);
+	gtk_widget_set_halign(sdcpp_github_link_btn, GTK_ALIGN_CENTER);
+	gtk_box_append (GTK_BOX (info_box), sdcpp_github_link_btn);
+
+	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
+	gtk_widget_add_css_class(close_window_btn, "custom_btn");
+	gtk_widget_set_hexpand(close_window_btn, TRUE);
+	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), info_win);
+	gtk_box_append(GTK_BOX(info_box), close_window_btn);
+	
+	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
+	gtk_window_present (GTK_WINDOW(info_win));
+}
+
 void show_no_models_message(GtkWidget *main_win)
 {
 	GtkWidget *info_win = gtk_window_new ();
@@ -868,6 +925,28 @@ void show_no_models_message(GtkWidget *main_win)
 	
 	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
 	gtk_window_present (GTK_WINDOW(info_win));
+}
+
+void show_simple_message (GtkWidget *win, char *msg_title_text, char *msg_text, int is_error)
+{
+	#if GTK_CHECK_VERSION(4, 10, 0)
+		GtkAlertDialog *simple_dialog = gtk_alert_dialog_new ("%s", msg_title_text);
+		gtk_alert_dialog_set_detail (simple_dialog, msg_text);
+		gtk_alert_dialog_show (simple_dialog, GTK_WINDOW(win));
+		g_object_unref(simple_dialog);
+	#else
+		GtkWidget *simple_dialog = gtk_message_dialog_new(
+		GTK_WINDOW(win),
+		GTK_DIALOG_MODAL,
+		is_error ? GTK_MESSAGE_ERROR : GTK_MESSAGE_INFO,
+		GTK_BUTTONS_CLOSE,
+		"%s", msg_title_text
+		);
+
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(simple_dialog), "%s", msg_text);
+		g_signal_connect (simple_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+		gtk_widget_show(simple_dialog);
+	#endif
 }
 
 void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable)
