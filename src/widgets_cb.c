@@ -492,7 +492,6 @@ void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 static gboolean on_preview_box_scroll_timeout (gpointer user_data)
 {
 	PreviewBoxScrollData *data = user_data;
-	g_print ("Scrolling ended. Total steps: %d\n", data->scroll_steps);
 	navigate_images((PreviewImageData*)data->preview_d, data->scroll_steps);
 	data->scroll_steps = 0;
 	data->debounce_id = 0;
