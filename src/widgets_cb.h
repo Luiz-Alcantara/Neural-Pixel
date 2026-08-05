@@ -51,6 +51,8 @@ void navigate_10_img_next(GtkButton* btn, gpointer user_data);
 
 void on_mask_area_destroy (GtkWindow *win, gpointer user_data);
 
+void on_boxr_img_destroy (GtkWidget* wgt, gpointer user_data);
+
 void on_cancel_all_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data);
@@ -66,6 +68,8 @@ void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data);
 void on_hide_img_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data);
+
+gboolean on_preview_box_scroll (GtkEventControllerScroll *controller, gdouble dx, gdouble dy, gpointer user_data);
 
 void on_reload_btn_destroy(GtkWidget* wgt, gpointer user_data);
 

@@ -376,6 +376,13 @@ void on_mask_area_destroy (GtkWindow *win, gpointer user_data)
 	gtk_window_destroy(win);
 }
 
+void on_boxr_img_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	PreviewBoxScrollData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
 void on_cancel_all_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	CancelAllData *data = user_data;
@@ -480,6 +487,27 @@ void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 	LoadPNGData *data = user_data;
 	if (data == NULL) return;
 	g_free(data);
+}
+
+static gboolean on_preview_box_scroll_timeout (gpointer user_data)
+{
+	PreviewBoxScrollData *data = user_data;
+	g_print ("Scrolling ended. Total steps: %d\n", data->scroll_steps);
+	navigate_images((PreviewImageData*)data->preview_d, data->scroll_steps);
+	data->scroll_steps = 0;
+	data->debounce_id = 0;
+	return G_SOURCE_REMOVE;
+}
+
+gboolean on_preview_box_scroll (GtkEventControllerScroll *controller, gdouble dx, gdouble dy, gpointer user_data)
+{
+	PreviewBoxScrollData *data = user_data;
+	data->scroll_steps += (dy > 0) - (dy < 0);
+
+	if (data->debounce_id != 0) g_source_remove(data->debounce_id);
+	data->debounce_id = g_timeout_add(200, on_preview_box_scroll_timeout, data);
+	
+	return TRUE;
 }
 
 void on_reload_btn_destroy (GtkWidget* wgt, gpointer user_data)

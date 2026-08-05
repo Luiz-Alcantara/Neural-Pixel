@@ -247,6 +247,12 @@ typedef struct {
 } PreviewImageData;
 
 typedef struct {
+	int scroll_steps;
+	guint debounce_id;
+	PreviewImageData *preview_d;
+} PreviewBoxScrollData;
+
+typedef struct {
 	GApplication* app;
 	GtkWidget* checkpoint_dd;
 	GtkWidget* vae_dd;

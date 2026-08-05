@@ -123,7 +123,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *fa_toggle_lab;
 	GtkWidget *box_fa_toggle;
 	GtkWidget *fa_off_btn, *fa_diffusion_btn, *fa_full_btn;
-	GtkWidget *mmap_check, *taesd_check, *update_cache_check, *verbose_check;
+	GtkWidget *miscellaneous_lab, *mmap_check, *taesd_check, *update_cache_check, *verbose_check;
 	
 	GtkWidget *vae_tiling_separator;
 	GtkWidget *vae_tiling_lab;
@@ -170,6 +170,9 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *preview_img;
 	GtkWidget *prev_10_img_button, *prev_img_button, *img_index_label, *next_img_button, *next_10_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn, *to_trash_btn;
 
+	GtkEventController *preview_box_scroll;
+	
+	PreviewBoxScrollData *preview_box_scroll_d;
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
 	CancelAllData *cancel_all_d;
@@ -887,6 +890,14 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts), FALSE);
 	gtk_expander_set_child(GTK_EXPANDER(extra_opts_expander), box_extra_opts);
 	
+	// Miscellaneous Widgets
+	
+	miscellaneous_lab = gtk_label_new ("Miscellaneous");
+	gtk_widget_add_css_class(miscellaneous_lab, "param_label");
+	gtk_widget_set_margin_bottom(miscellaneous_lab, MEDIUM_SPACING);
+	gtk_widget_set_halign(miscellaneous_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_extra_opts), miscellaneous_lab);
+	
 	box_extra_opts_row1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_row1), TRUE);
 	gtk_box_append (GTK_BOX (box_extra_opts), box_extra_opts_row1);
@@ -898,6 +909,42 @@ app_activate (GApplication *app, gpointer user_data)
 	box_extra_opts_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_col2), TRUE);
 	gtk_box_append (GTK_BOX (box_extra_opts_row1), box_extra_opts_col2);
+	
+	mmap_check = gtk_check_button_new_with_label("Enable MMap");
+	gtk_widget_add_css_class(mmap_check, "custom_check");
+	gtk_widget_set_halign(mmap_check, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(mmap_check, GTK_ALIGN_CENTER);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(mmap_check), app_data->mmap_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(mmap_check), "Speeds up model loading and reduces system RAM usage by\nreading files directly from your disk");
+	g_signal_connect(mmap_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->mmap_bool);
+	gtk_box_append (GTK_BOX (box_extra_opts_col1), mmap_check);
+	
+	taesd_check = gtk_check_button_new_with_label("Enable TAESD");
+	gtk_widget_add_css_class(taesd_check, "custom_check");
+	gtk_widget_set_halign(taesd_check, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(taesd_check, GTK_ALIGN_CENTER);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), app_data->taesd_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(taesd_check), "Use Tiny AutoEncoder for fast decoding\n(low quality).");
+	g_signal_connect(taesd_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->taesd_bool);
+	gtk_box_append (GTK_BOX (box_extra_opts_col1), taesd_check);
+	
+	update_cache_check = gtk_check_button_new_with_label("Update Cache");
+	gtk_widget_add_css_class(update_cache_check, "custom_check");
+	gtk_widget_set_halign(update_cache_check, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(update_cache_check, GTK_ALIGN_CENTER);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), app_data->update_cache_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(update_cache_check), "Uncheck to prevent settings from saving in cache; resets on restart.");
+	g_signal_connect(update_cache_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->update_cache_bool);
+	gtk_box_append (GTK_BOX (box_extra_opts_col2), update_cache_check);
+	
+	verbose_check = gtk_check_button_new_with_label("Terminal Verbose");
+	gtk_widget_add_css_class(verbose_check, "custom_check");
+	gtk_widget_set_halign(verbose_check, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(verbose_check, GTK_ALIGN_CENTER);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), app_data->verbose_bool == 1 ? TRUE : FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(verbose_check), "Print verbose on terminal.");
+	g_signal_connect(verbose_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->verbose_bool);
+	gtk_box_append (GTK_BOX (box_extra_opts_col2), verbose_check);
 
 	// Set Model-specific Args Widgets
 	
@@ -907,6 +954,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	model_args_lab = gtk_label_new ("Model-specific Args");
 	gtk_widget_add_css_class(model_args_lab, "param_label");
+	gtk_widget_set_margin_bottom(model_args_lab, MEDIUM_SPACING);
 	gtk_widget_set_halign(model_args_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_extra_opts), model_args_lab);
 
@@ -936,6 +984,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	fa_toggle_lab = gtk_label_new ("Flash Attention ⓘ");
 	gtk_widget_add_css_class(fa_toggle_lab, "param_label");
+	gtk_widget_set_margin_bottom(fa_toggle_lab, MEDIUM_SPACING);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(fa_toggle_lab), "Enables a faster, more memory-efficient attention method that\nreduces VRAM usage and can speed up image generation.");
 	gtk_widget_set_halign(fa_toggle_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_extra_opts), fa_toggle_lab);
@@ -980,42 +1029,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append(GTK_BOX(box_fa_toggle), fa_diffusion_btn);
 	gtk_box_append(GTK_BOX(box_fa_toggle), fa_full_btn);
 	
-	mmap_check = gtk_check_button_new_with_label("Enable MMap");
-	gtk_widget_add_css_class(mmap_check, "custom_check");
-	gtk_widget_set_halign(mmap_check, GTK_ALIGN_CENTER);
-	gtk_widget_set_valign(mmap_check, GTK_ALIGN_CENTER);
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(mmap_check), app_data->mmap_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(mmap_check), "Speeds up model loading and reduces system RAM usage by\nreading files directly from your disk");
-	g_signal_connect(mmap_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->mmap_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col1), mmap_check);
-	
-	taesd_check = gtk_check_button_new_with_label("Enable TAESD");
-	gtk_widget_add_css_class(taesd_check, "custom_check");
-	gtk_widget_set_halign(taesd_check, GTK_ALIGN_CENTER);
-	gtk_widget_set_valign(taesd_check, GTK_ALIGN_CENTER);
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), app_data->taesd_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(taesd_check), "Use Tiny AutoEncoder for fast decoding\n(low quality).");
-	g_signal_connect(taesd_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->taesd_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col1), taesd_check);
-	
-	update_cache_check = gtk_check_button_new_with_label("Update Cache");
-	gtk_widget_add_css_class(update_cache_check, "custom_check");
-	gtk_widget_set_halign(update_cache_check, GTK_ALIGN_CENTER);
-	gtk_widget_set_valign(update_cache_check, GTK_ALIGN_CENTER);
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), app_data->update_cache_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(update_cache_check), "Uncheck to prevent settings from saving in cache; resets on restart.");
-	g_signal_connect(update_cache_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->update_cache_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col2), update_cache_check);
-	
-	verbose_check = gtk_check_button_new_with_label("Terminal Verbose");
-	gtk_widget_add_css_class(verbose_check, "custom_check");
-	gtk_widget_set_halign(verbose_check, GTK_ALIGN_CENTER);
-	gtk_widget_set_valign(verbose_check, GTK_ALIGN_CENTER);
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), app_data->verbose_bool == 1 ? TRUE : FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(verbose_check), "Print verbose on terminal.");
-	g_signal_connect(verbose_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->verbose_bool);
-	gtk_box_append (GTK_BOX (box_extra_opts_col2), verbose_check);
-	
 	// VAE Tiling Widgets
 	
 	vae_tiling_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1025,6 +1038,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	vae_tiling_lab = gtk_label_new ("VAE Tiling ⓘ");
 	gtk_widget_add_css_class(vae_tiling_lab, "param_label");
+	gtk_widget_set_margin_bottom(vae_tiling_lab, MEDIUM_SPACING);
 	gtk_widget_set_halign(vae_tiling_lab, LABEL_ALIGNMENT);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(vae_tiling_lab), "Process VAE in tiles to reduce memory usage.");
 	gtk_box_append (GTK_BOX (box_extra_opts), vae_tiling_lab);
@@ -1294,13 +1308,22 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_sensitive(GTK_WIDGET(cancel_all_btn), FALSE);
 	gtk_box_append (GTK_BOX (box_stop_buttons), cancel_all_btn);
 
-	//Set Box Right Image
+	//Set Preview Image Box
 	boxr_img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (boxr_img), TRUE);
 	gtk_widget_set_hexpand (boxr_img, TRUE);
 	gtk_widget_set_vexpand (boxr_img, TRUE);
+	
+	preview_box_scroll_d = g_new0(PreviewBoxScrollData, 1);
+	preview_box_scroll_d->preview_d = preview_d;
+	
+	preview_box_scroll = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_VERTICAL | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
+	g_signal_connect (preview_box_scroll, "scroll", G_CALLBACK (on_preview_box_scroll), preview_box_scroll_d);
+	g_signal_connect (boxr_img, "destroy", G_CALLBACK (on_boxr_img_destroy), preview_box_scroll_d);
+	gtk_widget_add_controller (boxr_img, preview_box_scroll);
+	
 	gtk_box_append (GTK_BOX (box_right), boxr_img);
-
+	
 	if (app_data->preview_image_files->len > 0) {
 		preview_img = gtk_picture_new_for_filename
 		(g_ptr_array_index(app_data->preview_image_files, app_data->preview_image_index));
