@@ -363,8 +363,8 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	
 	if (data->batch_count_value > 1) {
 		size_t result_img_len = strlen(data->output_path);
-		char *bn = g_strndup(data->output_path, result_img_len - 4);
-		result_img_path = g_strdup_printf("%s_%d.png", bn, data->batch_count_value - 1);
+		char *bn = g_strndup(data->output_path, result_img_len - 9);
+		result_img_path = g_strdup_printf("%s_%02d.png", bn, data->batch_count_value - 1);
 		g_free(bn);
 	} else {
 		result_img_path = g_strdup(data->output_path);

@@ -331,7 +331,7 @@ void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray
 		}
 		g_string_erase(img_index_string, 0, -1);
 		if (total_time < 0) {
-			g_string_append_printf(img_index_string, "(%d / %d) File: '%s'", *current_image_index + 1, img_count, img_str + 8);
+			g_string_append_printf(img_index_string, "(%d / %d) %s", *current_image_index + 1, img_count, img_str + 8);
 		} else {
 			int minutes = total_time / 60;
 			int seconds = total_time % 60;

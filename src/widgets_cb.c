@@ -335,7 +335,7 @@ static void navigate_images(PreviewImageData *data, int offset)
 	const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
 
 	g_string_erase(data->img_index_string, 0, -1);
-	g_string_append_printf(data->img_index_string, "(%d / %d) File: '%s'", *data->current_image_index + 1, (int)img_count, current_image_path + 8);
+	g_string_append_printf(data->img_index_string, "(%d / %d) %s", *data->current_image_index + 1, (int)img_count, current_image_path + 8);
 
 	gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
 	gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);

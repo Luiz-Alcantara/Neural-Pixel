@@ -627,8 +627,8 @@ void update_cache(GenerationSnapshotData *data)
 
 	if (data->batch_count_value > 1) {
 		size_t result_img_len = strlen(data->output_path);
-		char *bn = g_strndup(data->output_path, result_img_len - 4);
-		fprintf(cf, "last_image_path=%s_%d.png\n", bn, data->batch_count_value - 1);
+		char *bn = g_strndup(data->output_path, result_img_len - 9);
+		fprintf(cf, "last_image_path=%s_%02d.png\n", bn, data->batch_count_value - 1);
 		g_free(bn);
 	} else {
 		fprintf(cf, "last_image_path=%s\n", data->output_path);

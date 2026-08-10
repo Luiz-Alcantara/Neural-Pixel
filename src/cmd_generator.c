@@ -212,13 +212,22 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	char *output_str = NULL;
 	char *out_timestamp = get_time_str();
+	char *batch_suf = (data->batch_count_value > 1) ? "_%02d" : "";
 
 	if (!out_timestamp) g_printerr("Failed to acquire timestamp. Using default value.\nTry restarting the app or deleting the '.cache' folder. If the issue persists, please report it.\n");
 
 	#ifdef G_OS_WIN32
-		output_str = out_timestamp ? g_strdup_printf(".\\outputs\\IMG_%s.png", out_timestamp) : g_strdup(".\\outputs\\IMG.png");
+		if (out_timestamp) {
+			output_str = g_strdup_printf(".\\outputs\\IMG_%s%s.png", out_timestamp, batch_suf);
+		} else {
+			output_str = g_strdup_printf(".\\outputs\\IMG_%s.png", batch_suf);
+		}
 	#else
-		output_str = out_timestamp ? g_strdup_printf("./outputs/IMG_%s.png", out_timestamp) : g_strdup("./outputs/IMG.png");
+		if (out_timestamp) {
+			output_str = g_strdup_printf("./outputs/IMG_%s%s.png", out_timestamp, batch_suf);
+		} else {
+			output_str = g_strdup_printf("./outputs/IMG_%s.png", batch_suf);
+		}
 	#endif
 
 	if (out_timestamp) free(out_timestamp);
