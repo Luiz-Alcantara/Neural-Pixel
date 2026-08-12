@@ -25,6 +25,7 @@
 |--------|-------|
 | txt2img | Generate images from text prompts |
 | img2img / Flux Kontext | Transform existing images using prompts |
+| ADetailer | Automatically detects and refines specific areas of an image |
 | Mask-based Inpainting | Modify specific areas of an image using a mask |
 | Hires Fix | Upscales and refines images with added detail |
 
