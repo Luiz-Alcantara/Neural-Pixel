@@ -103,6 +103,8 @@ void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position,
 
 void hide_img_btn_cb(GtkButton *btn, gpointer user_data);
 
+void toggle_img2img_mode(GtkWidget *wgt, gpointer user_data);
+
 void toggle_extra_options(GtkCheckButton *btn, gpointer user_data);
 
 void toggle_fa_options(GtkToggleButton *btn, gpointer user_data);

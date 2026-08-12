@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.8.5";
+const char* APP_NAME_VERSION = "Neural Pixel v0.8.6";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -20,6 +20,7 @@ const char* MODELS_PATH = "./models";
 const char* CHECKPOINTS_PATH = "./models/checkpoints";
 const char* CLIPS_PATH = "./models/clips";
 const char* CONTROLNET_PATH = "./models/controlnet";
+const char* DETECTOR_PATH = "./models/detectors";
 const char* EMBEDDINGS_PATH = "./models/embeddings";
 const char* LORAS_PATH = "./models/loras";
 const char* TEXT_ENCODERS_PATH = "./models/text_encoders";
@@ -64,6 +65,7 @@ const int DEFAULT_CLIP_SKIP = 0;
 const int DEFAULT_RP_UPSCALE = 1;
 const int DEFAULT_N_STEPS = 20;
 const int DEFAULT_HIRES_STEPS = 12;
+const int DEFAULT_DETECTOR_INPAINT_PADDING = 32;
 const int DEFAULT_BATCH_COUNT = 1;
 const int DEFAULT_SIZE = 7;
 const int ENABLED_OPT = 1;
@@ -80,5 +82,6 @@ const long long int DEFAULT_SEED = -1;
 const double DEFAULT_CFG = 6.0;
 const double DEFAULT_CNET_STRENGTH = 0.90;
 const double DEFAULT_DENOISE = 0.75;
+const double DEFAULT_DETECTOR_CONFIDENCE = 0.30;
 const double DEFAULT_HIRES_SCALE = 1.50;
 const double DEFAULT_HIRES_DENOISE_STR = 0.4;

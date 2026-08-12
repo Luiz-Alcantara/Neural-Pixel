@@ -54,6 +54,7 @@ void app_start_data_free (gpointer user_data)
 		g_free(left_jobs->positive_prompt);
 		g_free(left_jobs->negative_prompt);
 		g_free(left_jobs->checkpoint_filename);
+		g_free(left_jobs->detector_filename);
 		g_free(left_jobs->vae_filename);
 		g_free(left_jobs->cnet_filename);
 		g_free(left_jobs->upscaler_filename);
@@ -67,6 +68,11 @@ void app_start_data_free (gpointer user_data)
 	if (data->checkpoint_string != NULL) {
 		g_string_free(data->checkpoint_string, TRUE);
 		data->checkpoint_string = NULL;
+	}
+	
+	if (data->detector_string != NULL) {
+		g_string_free(data->detector_string, TRUE);
+		data->detector_string = NULL;
 	}
 	
 	if (data->vae_string != NULL) {
@@ -157,6 +163,7 @@ void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
 	g_string_assign(gstr, "None");
 	GtkPicture *preview_img = GTK_PICTURE(data->image_wgt);
 	gtk_picture_set_filename(preview_img, EMPTY_IMG_PATH);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(data->detector_check), FALSE);
 	clear_mask_btn_cb(NULL, user_data);
 }
 
@@ -299,6 +306,7 @@ void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data)
 		g_free(left_jobs->positive_prompt);
 		g_free(left_jobs->negative_prompt);
 		g_free(left_jobs->checkpoint_filename);
+		g_free(left_jobs->detector_filename);
 		g_free(left_jobs->vae_filename);
 		g_free(left_jobs->cnet_filename);
 		g_free(left_jobs->upscaler_filename);
@@ -561,6 +569,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 
 	GtkWidget *checkpoint_dd = data->checkpoint_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(checkpoint_dd), DEFAULT_MODELS);
+	
+	GtkWidget *detector_dd = data->detector_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(detector_dd), DEFAULT_MODELS);
 
 	GtkWidget *vae_dd = data->vae_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(vae_dd), DEFAULT_MODELS);
@@ -618,6 +629,12 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *hires_upscaler_dd = data->hires_upscaler_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(hires_upscaler_dd), DISABLED_OPT);
 	
+	GtkWidget *detector_confidence_spin = data->detector_confidence_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_confidence_spin), DEFAULT_DETECTOR_CONFIDENCE);
+	
+	GtkWidget *detector_inpaint_padding_spin = data->detector_inpaint_padding_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_inpaint_padding_spin), DEFAULT_DETECTOR_INPAINT_PADDING);
+	
 	GtkWidget *hires_scale_spin = data->hires_scale_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), DEFAULT_HIRES_SCALE);
 	
@@ -635,6 +652,12 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *kontext_check = data->kontext_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(kontext_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
+	GtkWidget *detector_check = data->detector_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(detector_check), DISABLED_OPT == 1 ? TRUE : FALSE);
+	
+	GtkWidget *inpaint_check = data->inpaint_check;
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(inpaint_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *sd_based_check = data->sd_based_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), ENABLED_OPT == 1 ? TRUE : FALSE);
@@ -695,6 +718,12 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *upscaler_parameter_backend_dd = data->upscaler_parameter_backend_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(upscaler_parameter_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *detector_runtime_backend_dd = data->detector_runtime_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(detector_runtime_backend_dd), DEFAULT_BACKEND);
+	
+	GtkWidget *detector_parameter_backend_dd = data->detector_parameter_backend_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(detector_parameter_backend_dd), DEFAULT_BACKEND);
 }
 
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)
@@ -1016,6 +1045,16 @@ void hide_img_btn_cb (GtkButton *btn, gpointer user_data)
 		} else {
 			gtk_picture_set_filename(img, DEFAULT_IMG_PATH);
 		}
+	}
+}
+
+void toggle_img2img_mode(GtkWidget *btn, gpointer user_data)
+{
+	gboolean pressed_btn_state = gtk_check_button_get_active(GTK_CHECK_BUTTON(btn));
+	gboolean alt_btn_state = gtk_check_button_get_active(GTK_CHECK_BUTTON(user_data));
+	
+	if (pressed_btn_state == TRUE && alt_btn_state == TRUE) {
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(user_data), FALSE);
 	}
 }
 

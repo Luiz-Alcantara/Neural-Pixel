@@ -53,6 +53,15 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_img2img, *box_img2img_top_buttons, *box_preview_img2img, *box_img2img_bottom_buttons;
 	GtkWidget *load_img2img_btn, *kontext_check, *clear_img2img_btn;
 	GtkWidget *overlay_img2img, *preview_img2img;
+	GtkWidget *detector_separator;
+	GtkWidget *detector_lab;
+	GtkWidget *box_detector_widgets;
+	GtkWidget *detector_model_lab, *detector_dd, *detector_check;
+	GtkWidget *box_detector_buttons, *box_detector_buttons_col1, *box_detector_buttons_col2;
+	GtkWidget *detector_confidence_lab, *detector_inpaint_padding_lab;
+	GtkWidget *detector_confidence_spin, *detector_inpaint_padding_spin;
+	GtkWidget *mask_inpainting_separator;
+	GtkWidget *mask_inpainting_lab;
 	GtkWidget *mask_img2img_btn, *clear_mask_btn, *inpaint_check;
 
 	GtkWidget *box_prompts ,*box_pos_prompt, *box_neg_prompt;
@@ -161,6 +170,12 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_upscaler_backend, *box_upscaler_backend_col1, *box_upscaler_backend_col2;
 	GtkWidget *upscaler_runtime_backend_lab, *upscaler_parameter_backend_lab;
 	GtkWidget *upscaler_runtime_backend_dd, *upscaler_parameter_backend_dd;
+	
+	GtkWidget *detector_backend_separator;
+	GtkWidget *detector_backend_lab;
+	GtkWidget *box_detector_backend, *box_detector_backend_col1, *box_detector_backend_col2;
+	GtkWidget *detector_runtime_backend_lab, *detector_parameter_backend_lab;
+	GtkWidget *detector_runtime_backend_dd, *detector_parameter_backend_dd;
 
 	GtkWidget *box_generation;
 	GtkWidget *box_status, *generation_label, *queue_size_label;
@@ -325,29 +340,107 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_overlay_set_child(GTK_OVERLAY(overlay_img2img), preview_img2img);
 	gtk_box_append (GTK_BOX (box_preview_img2img), overlay_img2img);
 	
+	// Set ADetailer/Detector Widgets
+
+	detector_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(detector_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_img2img), detector_separator);
+
+	detector_lab = gtk_label_new ("ADetailer ⓘ");
+	gtk_widget_add_css_class(detector_lab, "param_label");
+	gtk_widget_set_margin_bottom(detector_lab, MEDIUM_SPACING);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_lab), "Automatically detects and refines faces, eyes, hands,\nand other areas using inpainting.");
+	gtk_widget_set_halign(detector_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_img2img), detector_lab);
+
+	box_detector_widgets = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_img2img), box_detector_widgets);
+
+	detector_dd = gen_path_dd(DETECTOR_PATH, NULL, 0, app_data->detector_string, NULL, app, 0);
+	gtk_widget_set_hexpand (detector_dd, TRUE);
+	gtk_box_append (GTK_BOX (box_detector_widgets), detector_dd);
+
+	detector_check = gtk_check_button_new_with_label("Enable ADetailer");
+	gtk_widget_add_css_class(detector_check, "custom_check");
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(detector_check), FALSE);
+	gtk_box_append (GTK_BOX (box_detector_widgets), detector_check);
+
+	box_detector_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_detector_buttons), TRUE);
+	gtk_widget_set_hexpand (box_detector_buttons, TRUE);
+	gtk_box_append (GTK_BOX (box_img2img), box_detector_buttons);
+
+	box_detector_buttons_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_detector_buttons), box_detector_buttons_col1);
+
+	box_detector_buttons_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_detector_buttons), box_detector_buttons_col2);
+
+	detector_confidence_lab = gtk_label_new ("Confidence");
+	gtk_widget_add_css_class(detector_confidence_lab, "param_label");
+	gtk_widget_set_halign(detector_confidence_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_confidence_lab);
+
+	detector_confidence_spin = gtk_spin_button_new_with_range (0.05, 1.00, 0.05);
+	gtk_widget_add_css_class(detector_confidence_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_confidence_spin), TRUE);
+	gtk_spin_button_set_snap_to_ticks (GTK_SPIN_BUTTON(detector_confidence_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_confidence_spin), app_data->detector_confidence_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_confidence_spin), "Detection confidence threshold.");
+	stop_spinbutton_scroll(detector_confidence_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_confidence_spin);
+
+	detector_inpaint_padding_lab = gtk_label_new ("Inpaint Padding");
+	gtk_widget_add_css_class(detector_inpaint_padding_lab, "param_label");
+	gtk_widget_set_halign(detector_inpaint_padding_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_inpaint_padding_lab);
+
+	detector_inpaint_padding_spin = gtk_spin_button_new_with_range (16, 128, 16);
+	gtk_widget_add_css_class(detector_inpaint_padding_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_inpaint_padding_spin), TRUE);
+	gtk_spin_button_set_snap_to_ticks (GTK_SPIN_BUTTON(detector_inpaint_padding_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_inpaint_padding_spin), app_data->detector_inpaint_padding_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_inpaint_padding_spin), "Padding around the detected region.");
+	stop_spinbutton_scroll(detector_inpaint_padding_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_inpaint_padding_spin);
+
+	// Set Mask Inpaint Widgets
+
+	mask_inpainting_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(mask_inpainting_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_img2img), mask_inpainting_separator);
+
+	mask_inpainting_lab = gtk_label_new ("Mask Inpainting ⓘ");
+	gtk_widget_add_css_class(mask_inpainting_lab, "param_label");
+	gtk_widget_set_margin_bottom(mask_inpainting_lab, MEDIUM_SPACING);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(mask_inpainting_lab), "Regenerates selected areas of an image while preserving the rest.\nFor optimal results try using a inpainting-specific model.");
+	gtk_widget_set_halign(mask_inpainting_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_img2img), mask_inpainting_lab);
+
 	box_img2img_bottom_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_img2img_bottom_buttons), FALSE);
 	gtk_box_append (GTK_BOX (box_img2img), box_img2img_bottom_buttons);
-	
+
 	mask_img2img_btn = gtk_button_new_with_label ("Draw Mask");
 	gtk_widget_set_hexpand (mask_img2img_btn, TRUE);
 	gtk_widget_add_css_class(mask_img2img_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(mask_img2img_btn),
 	"Create an inpaint mask to modify specific areas.");
 	gtk_box_append (GTK_BOX (box_img2img_bottom_buttons), mask_img2img_btn);
-	
+
 	clear_mask_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
 	gtk_widget_add_css_class(clear_mask_btn, "custom_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(clear_mask_btn),
 	"Delete mask image.");
 	gtk_box_append (GTK_BOX (box_img2img_bottom_buttons), clear_mask_btn);
-	
+
 	inpaint_check = gtk_check_button_new_with_label("Enable Inpaint");
 	gtk_widget_add_css_class(inpaint_check, "custom_check");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(inpaint_check), FALSE);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(inpaint_check), "Enables Inpainting for precise modification of masked regions within your image.\nFor optimal results try using a inpainting-specific model.");
-	g_signal_connect(inpaint_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->inpaint_bool);
 	gtk_box_append (GTK_BOX (box_img2img_bottom_buttons), inpaint_check);
+
+	g_signal_connect(detector_check, "toggled", G_CALLBACK(toggle_img2img_mode), inpaint_check);
+	g_signal_connect(inpaint_check, "toggled", G_CALLBACK(toggle_img2img_mode), detector_check);
 
 	//Set Prompts Box
 	box_prompts = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
@@ -1259,6 +1352,45 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	upscaler_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->upscaler_param_backend_index);
 	gtk_box_append (GTK_BOX (box_upscaler_backend_col2), upscaler_parameter_backend_dd);
+	
+	// Detector Backend Widgets
+	
+	detector_backend_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(detector_backend_separator, "horiz_separator");
+	gtk_box_append (GTK_BOX (box_backends), detector_backend_separator);
+	
+	detector_backend_lab = gtk_label_new ("Detector Backend");
+	gtk_widget_add_css_class(detector_backend_lab, "param_label");
+	gtk_widget_set_halign(detector_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_backends), detector_backend_lab);
+	
+	box_detector_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_detector_backend), TRUE);
+	gtk_widget_set_hexpand (box_detector_backend, TRUE);
+	gtk_widget_set_margin_bottom(box_detector_backend, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_backends), box_detector_backend);
+	
+	box_detector_backend_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_detector_backend), box_detector_backend_col1);
+	
+	box_detector_backend_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_detector_backend), box_detector_backend_col2);
+	
+	detector_runtime_backend_lab = gtk_label_new ("Execution Device");
+	gtk_widget_add_css_class(detector_runtime_backend_lab, "param_label");
+	gtk_widget_set_halign(detector_runtime_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_detector_backend_col1), detector_runtime_backend_lab);
+	
+	detector_runtime_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->detector_runtime_backend_index);
+	gtk_box_append (GTK_BOX (box_detector_backend_col1), detector_runtime_backend_dd);
+
+	detector_parameter_backend_lab = gtk_label_new ("Offload Device");
+	gtk_widget_add_css_class(detector_parameter_backend_lab, "param_label");
+	gtk_widget_set_halign(detector_parameter_backend_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_detector_backend_col2), detector_parameter_backend_lab);
+	
+	detector_parameter_backend_dd = gen_const_dd(LIST_BACKENDS, &app_data->detector_param_backend_index);
+	gtk_box_append (GTK_BOX (box_detector_backend_col2), detector_parameter_backend_dd);
 
 	//Set Generation Box
 	box_generation = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
@@ -1447,6 +1579,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->pos_tb = pos_tb;
 	reset_d->neg_tb = neg_tb;
 	reset_d->checkpoint_dd = checkpoint_dd;
+	reset_d->detector_dd = detector_dd;
 	reset_d->vae_dd = vae_dd;
 	reset_d->cnet_dd = cnet_dd;
 	reset_d->upscaler_dd = upscaler_dd;
@@ -1465,12 +1598,16 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->width_dd = width_dd;
 	reset_d->height_dd = height_dd;
 	reset_d->hires_upscaler_dd = hires_upscaler_dd;
+	reset_d->detector_confidence_spin = detector_confidence_spin;
+	reset_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
 	reset_d->hires_scale_spin = hires_scale_spin;
 	reset_d->hires_steps_spin = hires_steps_spin;
 	reset_d->hires_denoise_spin = hires_denoise_spin;
 	reset_d->steps_spin = steps_spin;
 	reset_d->batch_count_spin = batch_count_spin;
 	reset_d->kontext_check = kontext_check;
+	reset_d->detector_check = detector_check;
+	reset_d->inpaint_check = inpaint_check;
 	reset_d->sd_based_check = sd_based_check;
 	reset_d->llm_check = llm_check;
 	reset_d->mmap_check = mmap_check;
@@ -1491,6 +1628,8 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->cnet_parameter_backend_dd = cnet_parameter_backend_dd;
 	reset_d->upscaler_runtime_backend_dd = upscaler_runtime_backend_dd;
 	reset_d->upscaler_parameter_backend_dd = upscaler_parameter_backend_dd;
+	reset_d->detector_runtime_backend_dd = detector_runtime_backend_dd;
+	reset_d->detector_parameter_backend_dd = detector_parameter_backend_dd;
 	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_default_btn_cb), reset_d);
 	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 
@@ -1534,6 +1673,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_img2img_file_d->win = win;
 	load_img2img_file_d->img2img_expander = img2img_expander;
 	load_img2img_file_d->overlay_img2img = overlay_img2img;
+	load_img2img_file_d->detector_check = detector_check;
 	load_img2img_file_d->inpaint_check = inpaint_check;
 	load_img2img_file_d->image_wgt = preview_img2img;
 	load_img2img_file_d->img2img_file_path = app_data->img2img_file_path;
@@ -1563,15 +1703,19 @@ app_activate (GApplication *app, gpointer user_data)
 
 	gen_d = g_new0 (GenerationData, 1);
 	gen_d->app_data = app_data;
-	gen_d->pos_p = pos_tb;
 	gen_d->neg_p = neg_tb;
+	gen_d->pos_p = pos_tb;
+	gen_d->cancel_all_btn = cancel_all_btn;
+	gen_d->detector_check = detector_check;
+	gen_d->detector_confidence_spin = detector_confidence_spin;
+	gen_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
+	gen_d->generation_label = generation_label;
+	gen_d->halt_btn = sd_halt_btn;
+	gen_d->inpaint_check = inpaint_check;
 	gen_d->preview_image_widget = preview_img;
 	gen_d->preview_label = img_index_label;
 	gen_d->preview_image_toggle_visibility_btn = hide_img_btn;
-	gen_d->generation_label = generation_label;
 	gen_d->queue_size_label = queue_size_label;
-	gen_d->cancel_all_btn = cancel_all_btn;
-	gen_d->halt_btn = sd_halt_btn;
 	gen_d->win = win;
 	g_signal_connect (generate_btn, "clicked", G_CALLBACK (prepare_gen_data), gen_d);
 	g_signal_connect (generate_btn, "destroy", G_CALLBACK (on_generate_btn_destroy), gen_d);
@@ -1597,6 +1741,7 @@ main (int argc, char **argv)
 	GtkApplication *app;
 	AppStartData *data = g_new0 (AppStartData, 1);
 	data->checkpoint_string = NULL;
+	data->detector_string = NULL;
 	data->vae_string = NULL;
 	data->cnet_string = NULL;
 	data->upscaler_string = NULL;
@@ -1607,6 +1752,12 @@ main (int argc, char **argv)
 	
 	data->checkpoint_string = g_string_new("None");
 	if (data->checkpoint_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->detector_string = g_string_new("None");
+	if (data->detector_string == NULL) {
 		g_error("Failed to allocate GString.");
 		return 1;
 	}

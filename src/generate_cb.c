@@ -411,6 +411,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	g_free(data->positive_prompt);
 	g_free(data->negative_prompt);
 	g_free(data->checkpoint_filename);
+	g_free(data->detector_filename);
 	g_free(data->vae_filename);
 	g_free(data->cnet_filename);
 	g_free(data->upscaler_filename);
@@ -569,7 +570,8 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	
 	snapshot_data->img2img_file_path = g_strdup(app_data->img2img_file_path->str);
 	snapshot_data->kontext_enabled = app_data->kontext_bool;
-	snapshot_data->inpaint_enabled = app_data->inpaint_bool;
+	snapshot_data->detector_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->detector_check));
+	snapshot_data->inpaint_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->inpaint_check));
 	
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;
@@ -588,6 +590,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	
 	snapshot_data->sd_based_enabled = app_data->sd_based_bool;
 	
+	snapshot_data->detector_filename = g_strdup(app_data->detector_string->str);
 	snapshot_data->vae_filename = g_strdup(app_data->vae_string->str);
 	snapshot_data->cnet_filename = g_strdup(app_data->cnet_string->str);
 	snapshot_data->upscaler_filename = g_strdup(app_data->upscaler_string->str);
@@ -598,6 +601,8 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->llm_mode_enabled = app_data->llm_bool;
 	
 	snapshot_data->hires_upscaler_index = app_data->hires_upscaler_index;
+	snapshot_data->detector_confidence_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_confidence_spin));
+	snapshot_data->detector_inpaint_padding_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->detector_inpaint_padding_spin));
 	snapshot_data->hires_scale_value = app_data->hires_scale_value;
 	snapshot_data->hires_steps_value = (int)app_data->hires_steps_value;
 	snapshot_data->hires_denoise_value = app_data->hires_denoise_value;
@@ -631,6 +636,8 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->cnet_param_backend_index = app_data->cnet_param_backend_index;
 	snapshot_data->upscaler_runtime_backend_index = app_data->upscaler_runtime_backend_index;
 	snapshot_data->upscaler_param_backend_index = app_data->upscaler_param_backend_index;
+	snapshot_data->detector_runtime_backend_index = app_data->detector_runtime_backend_index;
+	snapshot_data->detector_param_backend_index = app_data->detector_param_backend_index;
 	snapshot_data->total_time = 0;
 	snapshot_data->sdpid = &app_data->sdpid;
 	snapshot_data->preview_image_index = &app_data->preview_image_index;

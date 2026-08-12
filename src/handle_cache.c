@@ -47,6 +47,7 @@ void create_cache(char *n, GError **error)
 		}
 		fprintf(cf, "last_image_path=%s\n", DEFAULT_IMG_PATH);
 		fprintf(cf, "checkpoint=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "detector=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "vae=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "cnet=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "upscaler=%s\n", OPTIONAL_ITEMS);
@@ -60,10 +61,13 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "n_steps=%d.0\n", DEFAULT_N_STEPS);
 		fprintf(cf, "batch_count=%d.0\n", DEFAULT_BATCH_COUNT);
 		fprintf(cf, "kontext_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "detector_bool%d\n", DISABLED_OPT);
 		fprintf(cf, "inpaint_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "hires_upscaler_index=%d\n", DISABLED_OPT);
+		fprintf(cf, "detector_confidence_value=%.2f\n", DEFAULT_DETECTOR_CONFIDENCE);
+		fprintf(cf, "detector_inpaint_padding_value=%d.0\n", DEFAULT_DETECTOR_INPAINT_PADDING);
 		fprintf(cf, "hires_scale_value=%.2f\n", DEFAULT_HIRES_SCALE);
 		fprintf(cf, "hires_steps_value=%d.0\n", DEFAULT_HIRES_STEPS);
 		fprintf(cf, "hires_denoise_value=%.1f\n", DEFAULT_HIRES_DENOISE_STR);
@@ -85,6 +89,8 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "cnet_param_backend_index=%d\n", DEFAULT_BACKEND);
 		fprintf(cf, "upscaler_runtime_backend_index=%d\n", DEFAULT_BACKEND);
 		fprintf(cf, "upscaler_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "detector_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "detector_param_backend_index=%d\n", DEFAULT_BACKEND);
 		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
 		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "cnet_strength=%.2f\n", DEFAULT_CNET_STRENGTH);
@@ -222,6 +228,7 @@ void load_cache_fallback(gpointer user_data)
 	AppStartData *data = user_data;
 	
 	g_string_assign(data->checkpoint_string, OPTIONAL_ITEMS);
+	g_string_assign(data->detector_string, OPTIONAL_ITEMS);
 	g_string_assign(data->vae_string, OPTIONAL_ITEMS);
 	g_string_assign(data->cnet_string, OPTIONAL_ITEMS);
 	g_string_assign(data->upscaler_string, OPTIONAL_ITEMS);
@@ -236,6 +243,7 @@ void load_cache_fallback(gpointer user_data)
 	data->steps_value = DEFAULT_N_STEPS;
 	data->batch_count_value = DEFAULT_BATCH_COUNT;
 	data->kontext_bool = DISABLED_OPT;
+	data->detector_bool = DISABLED_OPT;
 	data->inpaint_bool = DISABLED_OPT;
 	data->sd_based_bool = ENABLED_OPT;
 	data->llm_bool = DISABLED_OPT;
@@ -255,6 +263,8 @@ void load_cache_fallback(gpointer user_data)
 	data->denoise_value = DEFAULT_DENOISE;
 	data->clip_skip_value = DEFAULT_CLIP_SKIP;
 	data->up_repeat_value = DEFAULT_RP_UPSCALE;
+	data->detector_confidence_value = DEFAULT_DETECTOR_CONFIDENCE;
+	data->detector_inpaint_padding_value = DEFAULT_DETECTOR_INPAINT_PADDING;
 	data->hires_scale_value = DEFAULT_HIRES_SCALE;
 	data->hires_steps_value = DEFAULT_HIRES_STEPS;
 	data->hires_denoise_value = DEFAULT_HIRES_DENOISE_STR;
@@ -282,6 +292,13 @@ void load_cache(gpointer user_data)
 			g_string_assign(data->checkpoint_string, checkpoint_str);
 		} else {
 			g_string_assign(data->checkpoint_string, OPTIONAL_ITEMS);
+		}
+		
+		char *detector_str = ini_file_get_value(cache_filename, "detector");
+		if (detector_str) {
+			g_string_assign(data->detector_string, detector_str);
+		} else {
+			g_string_assign(data->detector_string, OPTIONAL_ITEMS);
 		}
 		
 		char *vae_str = ini_file_get_value(cache_filename, "vae");
@@ -377,6 +394,13 @@ void load_cache(gpointer user_data)
 			data->kontext_bool = DISABLED_OPT;
 		}
 		
+		char *detector_bool_str = ini_file_get_value(cache_filename, "detector_bool");
+		if (detector_bool_str) {
+			//Keep it disabled at startup for now.
+			data->detector_bool = DISABLED_OPT;
+		} else {
+			data->detector_bool = DISABLED_OPT;
+		}
 		
 		char *inpaint_bool_str = ini_file_get_value(cache_filename, "inpaint_bool");
 		if (inpaint_bool_str) {
@@ -405,6 +429,22 @@ void load_cache(gpointer user_data)
 			sscanf(hires_upscaler_index_str, "%d", &data->hires_upscaler_index);
 		} else {
 			data->hires_upscaler_index = DISABLED_OPT;
+		}
+		
+		char *detector_confidence_value_str = ini_file_get_value(cache_filename, "detector_confidence_value");
+		if (detector_confidence_value_str) {
+			char *endptr;
+			data->detector_confidence_value = g_ascii_strtod(detector_confidence_value_str, &endptr);
+		} else {
+			data->detector_confidence_value = DEFAULT_DETECTOR_CONFIDENCE;
+		}
+		
+		char *detector_inpaint_padding_value_str = ini_file_get_value(cache_filename, "detector_inpaint_padding_value");
+		if (detector_inpaint_padding_value_str) {
+			char *endptr;
+			data->detector_inpaint_padding_value = g_ascii_strtod(detector_inpaint_padding_value_str, &endptr);
+		} else {
+			data->detector_inpaint_padding_value = DEFAULT_DETECTOR_INPAINT_PADDING;
 		}
 		
 		char *hires_scale_value_str = ini_file_get_value(cache_filename, "hires_scale_value");
@@ -556,6 +596,20 @@ void load_cache(gpointer user_data)
 		} else {
 			data->upscaler_param_backend_index = DEFAULT_BACKEND;
 		}
+		
+		char *detector_runtime_backend_index_str = ini_file_get_value(cache_filename, "detector_runtime_backend_index");
+		if (detector_runtime_backend_index_str) {
+			sscanf(detector_runtime_backend_index_str, "%d", &data->detector_runtime_backend_index);
+		} else {
+			data->detector_runtime_backend_index = DEFAULT_BACKEND;
+		}
+		
+		char *detector_param_backend_index_str = ini_file_get_value(cache_filename, "detector_param_backend_index");
+		if (detector_param_backend_index_str) {
+			sscanf(detector_param_backend_index_str, "%d", &data->detector_param_backend_index);
+		} else {
+			data->detector_param_backend_index = DEFAULT_BACKEND;
+		}
 
 		char *seed_str = ini_file_get_value(cache_filename, "seed");
 		if (seed_str) {
@@ -635,6 +689,7 @@ void update_cache(GenerationSnapshotData *data)
 	}
 	
 	fprintf(cf, "checkpoint=%s\n", data->checkpoint_filename);
+	fprintf(cf, "detector=%s\n", data->detector_filename);
 	fprintf(cf, "vae=%s\n", data->vae_filename);
 	fprintf(cf, "cnet=%s\n", data->cnet_filename);
 	fprintf(cf, "upscaler=%s\n", data->upscaler_filename);
@@ -648,10 +703,13 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "n_steps=%.1f\n", (float)data->step_count_value);
 	fprintf(cf, "batch_count=%.1f\n", (float)data->batch_count_value);
 	fprintf(cf, "kontext_bool=%d\n", data->kontext_enabled);
+	fprintf(cf, "detector_bool=%d\n", data->detector_enabled);
 	fprintf(cf, "inpaint_bool=%d\n", data->inpaint_enabled);
 	fprintf(cf, "sd_based_bool=%d\n", data->sd_based_enabled);
 	fprintf(cf, "llm_bool=%d\n", data->llm_mode_enabled);
 	fprintf(cf, "hires_upscaler_index=%d\n", data->hires_upscaler_index);
+	fprintf(cf, "detector_confidence_value=%.2f\n", data->detector_confidence_value);
+	fprintf(cf, "detector_inpaint_padding_value=%.1f\n", (float)data->detector_inpaint_padding_value);
 	fprintf(cf, "hires_scale_value=%.2f\n", data->hires_scale_value);
 	fprintf(cf, "hires_steps_value=%.1f\n", (float)data->hires_steps_value);
 	fprintf(cf, "hires_denoise_value=%.2f\n", data->hires_denoise_value);
@@ -673,6 +731,8 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "cnet_param_backend_index=%d\n", data->cnet_param_backend_index);
 	fprintf(cf, "upscaler_runtime_backend_index=%d\n", data->upscaler_runtime_backend_index);
 	fprintf(cf, "upscaler_param_backend_index=%d\n", data->upscaler_param_backend_index);
+	fprintf(cf, "detector_runtime_backend_index=%d\n", data->detector_runtime_backend_index);
+	fprintf(cf, "detector_param_backend_index=%d\n", data->detector_param_backend_index);
 	fprintf(cf, "seed=%lld\n", data->seed_value);
 	fprintf(cf, "cfg_scale=%.1f\n", data->cfg_scale_value);
 	fprintf(cf, "cnet_strength=%.2f\n", data->cnet_strength_value);

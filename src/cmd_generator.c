@@ -22,7 +22,12 @@ void gen_sd_string(GenerationSnapshotData *data)
 	#endif
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
-	g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
+	
+	if (data->detector_enabled && data->img2img_file_path != NULL && strcmp(data->img2img_file_path, "None") != 0) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("adetailer"));
+	} else {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
+	}
 
 	if (data->checkpoint_filename != NULL) {
 		if (data->sd_based_enabled == 1) {
@@ -55,7 +60,18 @@ void gen_sd_string(GenerationSnapshotData *data)
 		} else {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled == 1 ? "--ref-image" : "--init-img"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
-			if (data->inpaint_enabled == 1) {
+			
+			if (data->detector_enabled && data->detector_filename != NULL && strcmp(data->detector_filename, "None") != 0) {
+				g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-model"));
+				g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/detectors/%s", data->detector_filename));
+				
+				g_ptr_array_add(data->sd_cmd_array, g_strdup("--extra-ad-args"));
+				g_ptr_array_add(
+					data->sd_cmd_array,
+					g_strdup_printf("confidence=%.1f,inpaint_padding=%d",
+					data->detector_confidence_value, data->detector_inpaint_padding_value)
+				);
+			} else if (data->inpaint_enabled) {
 				int result = check_file_exists((char *)MASK_IMG_PATH, 0);
 
 				if (result == 1) {
@@ -188,19 +204,21 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->negative_prompt));
 	}
 
-	char *runtime_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s",
+	char *runtime_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s,detector=%s",
 	LIST_BACKENDS[(data->model_runtime_backend_index)],
 	LIST_BACKENDS[(data->te_runtime_backend_index)],
 	LIST_BACKENDS[(data->vae_runtime_backend_index)],
 	LIST_BACKENDS[(data->cnet_runtime_backend_index)],
-	LIST_BACKENDS[(data->upscaler_runtime_backend_index)]);
+	LIST_BACKENDS[(data->upscaler_runtime_backend_index)],
+	LIST_BACKENDS[(data->detector_runtime_backend_index)]);
 
-	char *parameter_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s",
+	char *parameter_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s,detector=%s",
 	LIST_BACKENDS[(data->model_param_backend_index)],
 	LIST_BACKENDS[(data->te_param_backend_index)],
 	LIST_BACKENDS[(data->vae_param_backend_index)],
 	LIST_BACKENDS[(data->cnet_param_backend_index)],
-	LIST_BACKENDS[(data->upscaler_param_backend_index)]);
+	LIST_BACKENDS[(data->upscaler_param_backend_index)],
+	LIST_BACKENDS[(data->detector_param_backend_index)]);
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--backend"));
 	g_ptr_array_add(data->sd_cmd_array, runtime_backend_str);
