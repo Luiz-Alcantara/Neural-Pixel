@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.8.6";
+const char* APP_NAME_VERSION = "Neural Pixel v0.8.7";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
 const char* APP_MSG_01 = "No model checkpoints were found. To generate images,\nadd at least one checkpoint model to:\n'.../models/checkpoints'\n\nYou can download compatible models from:";
 const char* APP_MSG_02 = "After copying the model files into the folder,\nclick the '↻' button in the toolbar to load them.";
+const char* ADETAILER_DESC_01 = "ADetailer automatically detects and refines faces, eyes, hands, and other areas using inpainting.\n\nThe detail pass reuses your standard image-generation settings, including prompt, CFG scale,\ndenoise strength, dimensions, sampling settings, seed, steps, and model configuration.\n\nCurrently, only YOLOv8 detection models are supported, and models must be converted\nto .safetensors format before use. For more info, click the link below.";
+const char* ADETAILER_DESC_02 = "Detection models (.safetensors) should be placed in the 'models/detector' directory,\nrelative to the app folder.";
+const char* ADETAILER_INFO_URL = "https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/adetailer.md";
 const char* CIVARCHIVE_URL = "https://civitaiarchive.com";
 const char* CIVITAI_URL = "https://civitai.com";
 const char* DONATE_URL = "https://ko-fi.com/luiz_alcantara";
@@ -66,6 +69,8 @@ const int DEFAULT_RP_UPSCALE = 1;
 const int DEFAULT_N_STEPS = 20;
 const int DEFAULT_HIRES_STEPS = 12;
 const int DEFAULT_DETECTOR_INPAINT_PADDING = 32;
+const int DEFAULT_DETECTOR_INPUT_SIZE = 640;
+const int DEFAULT_DETECTOR_MASK_BLUR = 4;
 const int DEFAULT_BATCH_COUNT = 1;
 const int DEFAULT_SIZE = 7;
 const int ENABLED_OPT = 1;

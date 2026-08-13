@@ -68,6 +68,8 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "hires_upscaler_index=%d\n", DISABLED_OPT);
 		fprintf(cf, "detector_confidence_value=%.2f\n", DEFAULT_DETECTOR_CONFIDENCE);
 		fprintf(cf, "detector_inpaint_padding_value=%d.0\n", DEFAULT_DETECTOR_INPAINT_PADDING);
+		fprintf(cf, "detector_input_size_value=%d.0\n", DEFAULT_DETECTOR_INPUT_SIZE);
+		fprintf(cf, "detector_mask_blur_value=%d.0\n", DEFAULT_DETECTOR_MASK_BLUR);
 		fprintf(cf, "hires_scale_value=%.2f\n", DEFAULT_HIRES_SCALE);
 		fprintf(cf, "hires_steps_value=%d.0\n", DEFAULT_HIRES_STEPS);
 		fprintf(cf, "hires_denoise_value=%.1f\n", DEFAULT_HIRES_DENOISE_STR);
@@ -265,6 +267,8 @@ void load_cache_fallback(gpointer user_data)
 	data->up_repeat_value = DEFAULT_RP_UPSCALE;
 	data->detector_confidence_value = DEFAULT_DETECTOR_CONFIDENCE;
 	data->detector_inpaint_padding_value = DEFAULT_DETECTOR_INPAINT_PADDING;
+	data->detector_input_size_value = DEFAULT_DETECTOR_INPUT_SIZE;
+	data->detector_mask_blur_value = DEFAULT_DETECTOR_MASK_BLUR;
 	data->hires_scale_value = DEFAULT_HIRES_SCALE;
 	data->hires_steps_value = DEFAULT_HIRES_STEPS;
 	data->hires_denoise_value = DEFAULT_HIRES_DENOISE_STR;
@@ -445,6 +449,22 @@ void load_cache(gpointer user_data)
 			data->detector_inpaint_padding_value = g_ascii_strtod(detector_inpaint_padding_value_str, &endptr);
 		} else {
 			data->detector_inpaint_padding_value = DEFAULT_DETECTOR_INPAINT_PADDING;
+		}
+		
+		char *detector_input_size_value_str = ini_file_get_value(cache_filename, "detector_input_size_value");
+		if (detector_input_size_value_str) {
+			char *endptr;
+			data->detector_input_size_value = g_ascii_strtod(detector_input_size_value_str, &endptr);
+		} else {
+			data->detector_input_size_value = DEFAULT_DETECTOR_INPUT_SIZE;
+		}
+		
+		char *detector_mask_blur_value_str = ini_file_get_value(cache_filename, "detector_mask_blur_value");
+		if (detector_mask_blur_value_str) {
+			char *endptr;
+			data->detector_mask_blur_value = g_ascii_strtod(detector_mask_blur_value_str, &endptr);
+		} else {
+			data->detector_mask_blur_value = DEFAULT_DETECTOR_MASK_BLUR;
 		}
 		
 		char *hires_scale_value_str = ini_file_get_value(cache_filename, "hires_scale_value");
@@ -710,6 +730,8 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "hires_upscaler_index=%d\n", data->hires_upscaler_index);
 	fprintf(cf, "detector_confidence_value=%.2f\n", data->detector_confidence_value);
 	fprintf(cf, "detector_inpaint_padding_value=%.1f\n", (float)data->detector_inpaint_padding_value);
+	fprintf(cf, "detector_input_size_value=%.1f\n", (float)data->detector_input_size_value);
+	fprintf(cf, "detector_mask_blur_value=%.1f\n", (float)data->detector_mask_blur_value);
 	fprintf(cf, "hires_scale_value=%.2f\n", data->hires_scale_value);
 	fprintf(cf, "hires_steps_value=%.1f\n", (float)data->hires_steps_value);
 	fprintf(cf, "hires_denoise_value=%.2f\n", data->hires_denoise_value);

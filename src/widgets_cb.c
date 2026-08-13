@@ -635,6 +635,12 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *detector_inpaint_padding_spin = data->detector_inpaint_padding_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_inpaint_padding_spin), DEFAULT_DETECTOR_INPAINT_PADDING);
 	
+	GtkWidget *detector_input_size_spin = data->detector_input_size_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_input_size_spin), DEFAULT_DETECTOR_INPUT_SIZE);
+	
+	GtkWidget *detector_mask_blur_spin = data->detector_mask_blur_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_mask_blur_spin), DEFAULT_DETECTOR_MASK_BLUR);
+	
 	GtkWidget *hires_scale_spin = data->hires_scale_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), DEFAULT_HIRES_SCALE);
 	
@@ -860,6 +866,55 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 			}
 		}
 	}
+}
+
+void show_detector_message(GtkWidget *btn, gpointer user_data)
+{
+	GtkWidget *main_win = (GtkWidget *) user_data;
+
+	GtkWidget *info_win = gtk_window_new ();
+	gtk_widget_add_css_class (info_win, "info_box");
+	gtk_window_set_transient_for (GTK_WINDOW(info_win), GTK_WINDOW(main_win));
+	gtk_window_set_title (GTK_WINDOW(info_win), "About ADetailer");
+	gtk_window_set_default_size (GTK_WINDOW(info_win), 500, 100);
+	gtk_window_set_resizable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_deletable (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_decorated (GTK_WINDOW(info_win), TRUE);
+	gtk_window_set_destroy_with_parent (GTK_WINDOW(info_win), TRUE);
+	
+	GtkWidget *info_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
+	gtk_widget_set_margin_bottom (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_end (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (info_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_top (info_box, MEDIUM_SPACING);
+	gtk_widget_add_css_class(info_box, "info_box");
+	
+	GtkWidget *message_01_lab = gtk_label_new (ADETAILER_DESC_01);
+	gtk_widget_add_css_class(message_01_lab, "info_label");
+	gtk_label_set_justify(GTK_LABEL(message_01_lab), GTK_JUSTIFY_CENTER);
+	gtk_widget_set_margin_top (message_01_lab, LARGE_SPACING);
+	gtk_box_append (GTK_BOX (info_box), message_01_lab);
+	
+	GtkWidget *adetailer_info_link_btn = gtk_link_button_new_with_label (ADETAILER_INFO_URL, "ADetailer Documentation");
+	gtk_widget_set_hexpand (adetailer_info_link_btn, FALSE);
+	gtk_widget_set_halign(adetailer_info_link_btn, GTK_ALIGN_CENTER);
+	gtk_box_append (GTK_BOX (info_box), adetailer_info_link_btn);
+	
+	GtkWidget *message_02_lab = gtk_label_new (ADETAILER_DESC_02);
+	gtk_widget_add_css_class(message_02_lab, "info_label");
+	gtk_label_set_justify(GTK_LABEL(message_02_lab), GTK_JUSTIFY_CENTER);
+	gtk_widget_set_margin_top (message_02_lab, LARGE_SPACING);
+	gtk_widget_set_margin_bottom (message_02_lab, LARGE_SPACING);
+	gtk_box_append (GTK_BOX (info_box), message_02_lab);
+
+	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
+	gtk_widget_add_css_class(close_window_btn, "custom_btn");
+	gtk_widget_set_hexpand(close_window_btn, TRUE);
+	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), info_win);
+	gtk_box_append(GTK_BOX(info_box), close_window_btn);
+	
+	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
+	gtk_window_present (GTK_WINDOW(info_win));
 }
 
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win)

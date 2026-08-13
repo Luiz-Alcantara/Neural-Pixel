@@ -68,8 +68,9 @@ void gen_sd_string(GenerationSnapshotData *data)
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--extra-ad-args"));
 				g_ptr_array_add(
 					data->sd_cmd_array,
-					g_strdup_printf("confidence=%.2f,inpaint_padding=%d",
-					data->detector_confidence_value, data->detector_inpaint_padding_value)
+					g_strdup_printf("confidence=%.2f,inpaint_padding=%d,mask_blur=%d,input_size=%d",
+					data->detector_confidence_value, data->detector_inpaint_padding_value,
+					data->detector_mask_blur_value, data->detector_input_size_value)
 				);
 			} else if (data->inpaint_enabled) {
 				int result = check_file_exists((char *)MASK_IMG_PATH, 0);

@@ -49,17 +49,18 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_properties, *boxl_topbar;
 	GtkWidget *info_btn, *donate_btn, *reload_btn, *reset_default_btn, *load_from_img_btn;
 	
-	GtkWidget *img2img_expander;
+	GtkWidget *img2img_expander_lab, *img2img_expander;
 	GtkWidget *box_img2img, *box_img2img_top_buttons, *box_preview_img2img, *box_img2img_bottom_buttons;
 	GtkWidget *load_img2img_btn, *kontext_check, *clear_img2img_btn;
 	GtkWidget *overlay_img2img, *preview_img2img;
 	GtkWidget *detector_separator;
-	GtkWidget *detector_lab;
+	GtkWidget *detector_info_btn;
 	GtkWidget *box_detector_widgets;
 	GtkWidget *detector_model_lab, *detector_dd, *detector_check;
 	GtkWidget *box_detector_buttons, *box_detector_buttons_col1, *box_detector_buttons_col2;
-	GtkWidget *detector_confidence_lab, *detector_inpaint_padding_lab;
-	GtkWidget *detector_confidence_spin, *detector_inpaint_padding_spin;
+	GtkWidget *detector_confidence_lab, *detector_mask_blur_lab, *detector_inpaint_padding_lab, *detector_input_size_lab;
+	GtkWidget *detector_confidence_spin, *detector_mask_blur_spin, *detector_inpaint_padding_spin, *detector_input_size_spin;
+
 	GtkWidget *mask_inpainting_separator;
 	GtkWidget *mask_inpainting_lab;
 	GtkWidget *mask_img2img_btn, *clear_mask_btn, *inpaint_check;
@@ -285,12 +286,15 @@ app_activate (GApplication *app, gpointer user_data)
 	if (GTK_IS_VIEWPORT(prop_scroll_vp)) {
 		gtk_viewport_set_scroll_to_focus(GTK_VIEWPORT(prop_scroll_vp), FALSE);
 	}
-	
+
 	//Set IMG2IMG Widgets
-	img2img_expander = gtk_expander_new ("Input Image");
+	img2img_expander_lab = gtk_label_new ("Image to Image");
+	gtk_widget_add_css_class(img2img_expander_lab, "param_label");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(img2img_expander_lab), "Configure image-to-image processing: ADetailer, ControlNet, Flux Kontext or Masked Inpaint.\nThe arrow on the side will be colored whenever an image is loaded.");
+	
+	img2img_expander = gtk_expander_new (NULL);
 	gtk_widget_add_css_class(img2img_expander, "param_label");
-	gtk_widget_set_tooltip_text(GTK_WIDGET(img2img_expander),
-	"Expand the area to configure img2img, Flux Kontext, or ControlNet processing.\nThe arrow on the side will be colored whenever an image is loaded.");
+	gtk_expander_set_label_widget (GTK_EXPANDER(img2img_expander), img2img_expander_lab);
 	gtk_box_append (GTK_BOX (box_properties), img2img_expander);
 	
 	box_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
@@ -345,13 +349,14 @@ app_activate (GApplication *app, gpointer user_data)
 	detector_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(detector_separator, "horiz_separator");
 	gtk_box_append (GTK_BOX (box_img2img), detector_separator);
-
-	detector_lab = gtk_label_new ("ADetailer ⓘ");
-	gtk_widget_add_css_class(detector_lab, "param_label");
-	gtk_widget_set_margin_bottom(detector_lab, MEDIUM_SPACING);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_lab), "Automatically detects and refines faces, eyes, hands,\nand other areas using inpainting.");
-	gtk_widget_set_halign(detector_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_img2img), detector_lab);
+	
+	detector_info_btn = gtk_button_new_with_label ("ADetailer ⓘ");
+	gtk_widget_add_css_class(detector_info_btn, "label_btn");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_info_btn), "Click for more info about ADetailer.");
+	gtk_widget_set_hexpand (detector_info_btn, FALSE);
+	gtk_widget_set_halign(detector_info_btn, GTK_ALIGN_CENTER);
+	g_signal_connect (detector_info_btn, "clicked", G_CALLBACK (show_detector_message), win);
+	gtk_box_append (GTK_BOX (box_img2img), detector_info_btn);
 
 	box_detector_widgets = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_img2img), box_detector_widgets);
@@ -390,6 +395,20 @@ app_activate (GApplication *app, gpointer user_data)
 	stop_spinbutton_scroll(detector_confidence_spin, properties_scrollable);
 	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_confidence_spin);
 
+	detector_mask_blur_lab = gtk_label_new ("Mask Blur");
+	gtk_widget_add_css_class(detector_mask_blur_lab, "param_label");
+	gtk_widget_set_halign(detector_mask_blur_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_mask_blur_lab);
+
+	detector_mask_blur_spin = gtk_spin_button_new_with_range (1, 64, 1);
+	gtk_widget_add_css_class(detector_mask_blur_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_mask_blur_spin), TRUE);
+	gtk_spin_button_set_snap_to_ticks (GTK_SPIN_BUTTON(detector_mask_blur_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_mask_blur_spin), app_data->detector_mask_blur_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_mask_blur_spin), "Final composite feather radius.");
+	stop_spinbutton_scroll(detector_mask_blur_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_mask_blur_spin);
+
 	detector_inpaint_padding_lab = gtk_label_new ("Inpaint Padding");
 	gtk_widget_add_css_class(detector_inpaint_padding_lab, "param_label");
 	gtk_widget_set_halign(detector_inpaint_padding_lab, LABEL_ALIGNMENT);
@@ -403,6 +422,20 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_inpaint_padding_spin), "Padding around the detected region.");
 	stop_spinbutton_scroll(detector_inpaint_padding_spin, properties_scrollable);
 	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_inpaint_padding_spin);
+	
+	detector_input_size_lab = gtk_label_new ("Input Size");
+	gtk_widget_add_css_class(detector_input_size_lab, "param_label");
+	gtk_widget_set_halign(detector_input_size_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_input_size_lab);
+
+	detector_input_size_spin = gtk_spin_button_new_with_range (384, 1024, 32);
+	gtk_widget_add_css_class(detector_input_size_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_input_size_spin), TRUE);
+	gtk_spin_button_set_snap_to_ticks (GTK_SPIN_BUTTON(detector_input_size_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_input_size_spin), app_data->detector_input_size_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_input_size_spin), "Square YOLO input size.");
+	stop_spinbutton_scroll(detector_input_size_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_input_size_spin);
 
 	// Set Mask Inpaint Widgets
 
@@ -1600,6 +1633,8 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->hires_upscaler_dd = hires_upscaler_dd;
 	reset_d->detector_confidence_spin = detector_confidence_spin;
 	reset_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
+	reset_d->detector_input_size_spin = detector_input_size_spin;
+	reset_d->detector_mask_blur_spin = detector_mask_blur_spin;
 	reset_d->hires_scale_spin = hires_scale_spin;
 	reset_d->hires_steps_spin = hires_steps_spin;
 	reset_d->hires_denoise_spin = hires_denoise_spin;
@@ -1709,6 +1744,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->detector_check = detector_check;
 	gen_d->detector_confidence_spin = detector_confidence_spin;
 	gen_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
+	gen_d->detector_input_size_spin = detector_input_size_spin;
+	gen_d->detector_mask_blur_spin = detector_mask_blur_spin;
 	gen_d->generation_label = generation_label;
 	gen_d->halt_btn = sd_halt_btn;
 	gen_d->inpaint_check = inpaint_check;

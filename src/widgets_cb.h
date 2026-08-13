@@ -93,6 +93,8 @@ void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1
 
 void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
 
+void show_detector_message(GtkWidget *btn, gpointer user_data);
+
 void show_no_models_message(GtkWidget *main_win);
 
 void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable);

@@ -138,8 +138,17 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						}
 					}
 				}
+
+				if (strstr(line, "- ADetailer detected") !=NULL) {
+					int n_detected_obj;
 				
-				if (strstr(line, "target") != NULL) {
+					if (sscanf(line,
+					"[INFO ] detailer.cpp:%*d - ADetailer detected %d object(s), taking %*lfs",
+					&n_detected_obj) == 1) {
+						gtk_label_set_text(GTK_LABEL(data->generation_label), "Encoding...");
+						data->is_img2img_encoding = 1;
+					}
+				} else if (strstr(line, "target") != NULL) {
 					int x;
 					int n_img2img_tiles;
 		
@@ -195,6 +204,9 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						if (y < data->n_total_images) data->n_current_latent = y + 1;
 					}
 				} else if (strstr(line, "generate_image completed in") != NULL && data->is_decoding_latents) {
+					data->n_current_latent = 0;
+					data->n_current_hires = 0;
+					data->n_current_upscale = 0;
 					data->is_decoding_latents = 0;
 					data->dec_latents_completed = 1;
 					
@@ -603,6 +615,8 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->hires_upscaler_index = app_data->hires_upscaler_index;
 	snapshot_data->detector_confidence_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_confidence_spin));
 	snapshot_data->detector_inpaint_padding_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->detector_inpaint_padding_spin));
+	snapshot_data->detector_input_size_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->detector_input_size_spin));
+	snapshot_data->detector_mask_blur_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->detector_mask_blur_spin));
 	snapshot_data->hires_scale_value = app_data->hires_scale_value;
 	snapshot_data->hires_steps_value = (int)app_data->hires_steps_value;
 	snapshot_data->hires_denoise_value = app_data->hires_denoise_value;

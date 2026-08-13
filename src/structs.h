@@ -56,6 +56,8 @@ typedef struct {
 	double denoise_value;
 	double detector_confidence_value;
 	double detector_inpaint_padding_value;
+	double detector_input_size_value;
+	double detector_mask_blur_value;
 	double clip_skip_value;
 	double up_repeat_value;
 	double steps_value;
@@ -101,6 +103,8 @@ typedef struct {
 	GtkWidget *detector_check;
 	GtkWidget *detector_confidence_spin;
 	GtkWidget *detector_inpaint_padding_spin;
+	GtkWidget *detector_input_size_spin;
+	GtkWidget *detector_mask_blur_spin;
 	GtkWidget *generation_label;
 	GtkWidget *halt_btn;
 	GtkWidget *inpaint_check;
@@ -154,6 +158,8 @@ typedef struct {
 	int cnet_param_backend_index;
 	int cnet_runtime_backend_index;
 	int detector_inpaint_padding_value;
+	int detector_input_size_value;
+	int detector_mask_blur_value;
 	int detector_param_backend_index;
 	int detector_runtime_backend_index;
 	int flash_attn_value;
@@ -310,6 +316,8 @@ typedef struct {
 	GtkWidget *batch_count_spin;
 	GtkWidget *detector_confidence_spin;
 	GtkWidget *detector_inpaint_padding_spin;
+	GtkWidget *detector_input_size_spin;
+	GtkWidget *detector_mask_blur_spin;
 	GtkWidget *hires_scale_spin;
 	GtkWidget *hires_steps_spin;
 	GtkWidget *hires_denoise_spin;
