@@ -67,6 +67,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "hires_upscaler_index=%d\n", DISABLED_OPT);
 		fprintf(cf, "detector_confidence_value=%.2f\n", DEFAULT_DETECTOR_CONFIDENCE);
+		fprintf(cf, "detector_denoise_value=%.2f\n", DEFAULT_DETECTOR_DENOISE);
 		fprintf(cf, "detector_inpaint_padding_value=%d.0\n", DEFAULT_DETECTOR_INPAINT_PADDING);
 		fprintf(cf, "detector_input_size_value=%d.0\n", DEFAULT_DETECTOR_INPUT_SIZE);
 		fprintf(cf, "detector_mask_blur_value=%d.0\n", DEFAULT_DETECTOR_MASK_BLUR);
@@ -266,6 +267,7 @@ void load_cache_fallback(gpointer user_data)
 	data->clip_skip_value = DEFAULT_CLIP_SKIP;
 	data->up_repeat_value = DEFAULT_RP_UPSCALE;
 	data->detector_confidence_value = DEFAULT_DETECTOR_CONFIDENCE;
+	data->detector_denoise_value = DEFAULT_DETECTOR_DENOISE;
 	data->detector_inpaint_padding_value = DEFAULT_DETECTOR_INPAINT_PADDING;
 	data->detector_input_size_value = DEFAULT_DETECTOR_INPUT_SIZE;
 	data->detector_mask_blur_value = DEFAULT_DETECTOR_MASK_BLUR;
@@ -442,7 +444,15 @@ void load_cache(gpointer user_data)
 		} else {
 			data->detector_confidence_value = DEFAULT_DETECTOR_CONFIDENCE;
 		}
-		
+
+		char *detector_denoise_value_str = ini_file_get_value(cache_filename, "detector_denoise_value");
+		if (detector_denoise_value_str) {
+			char *endptr;
+			data->detector_denoise_value = g_ascii_strtod(detector_denoise_value_str, &endptr);
+		} else {
+			data->detector_denoise_value = DEFAULT_DETECTOR_DENOISE;
+		}
+
 		char *detector_inpaint_padding_value_str = ini_file_get_value(cache_filename, "detector_inpaint_padding_value");
 		if (detector_inpaint_padding_value_str) {
 			char *endptr;
@@ -729,6 +739,7 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "llm_bool=%d\n", data->llm_mode_enabled);
 	fprintf(cf, "hires_upscaler_index=%d\n", data->hires_upscaler_index);
 	fprintf(cf, "detector_confidence_value=%.2f\n", data->detector_confidence_value);
+	fprintf(cf, "detector_denoise_value=%.2f\n", data->detector_denoise_value);
 	fprintf(cf, "detector_inpaint_padding_value=%.1f\n", (float)data->detector_inpaint_padding_value);
 	fprintf(cf, "detector_input_size_value=%.1f\n", (float)data->detector_input_size_value);
 	fprintf(cf, "detector_mask_blur_value=%.1f\n", (float)data->detector_mask_blur_value);

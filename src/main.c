@@ -60,6 +60,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_detector_buttons, *box_detector_buttons_col1, *box_detector_buttons_col2;
 	GtkWidget *detector_confidence_lab, *detector_mask_blur_lab, *detector_inpaint_padding_lab, *detector_input_size_lab;
 	GtkWidget *detector_confidence_spin, *detector_mask_blur_spin, *detector_inpaint_padding_spin, *detector_input_size_spin;
+	GtkWidget *detector_denoise_lab, *detector_denoise_spin;
 
 	GtkWidget *mask_inpainting_separator;
 	GtkWidget *mask_inpainting_lab;
@@ -187,8 +188,11 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *prev_10_img_button, *prev_img_button, *img_index_label, *next_img_button, *next_10_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn, *to_trash_btn;
 
 	GtkEventController *preview_box_scroll;
+	GtkEventController *main_win_key_press;
+	GtkEventController *preview_box_hover;
 	
 	PreviewBoxScrollData *preview_box_scroll_d;
+	PreviewBoxHoverData *preview_box_hover_d;
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
 	CancelAllData *cancel_all_d;
@@ -436,6 +440,20 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_input_size_spin), "Square YOLO input size.");
 	stop_spinbutton_scroll(detector_input_size_spin, properties_scrollable);
 	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_input_size_spin);
+	
+	detector_denoise_lab = gtk_label_new ("ADetailer Denoise Strength");
+	gtk_widget_set_halign(detector_denoise_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(detector_denoise_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_img2img), detector_denoise_lab);
+	
+	detector_denoise_spin = gtk_spin_button_new_with_range (0.05, 1.0, 0.05);
+	gtk_widget_add_css_class(detector_denoise_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_denoise_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_denoise_spin), app_data->detector_denoise_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_denoise_spin),
+	"Controls how much the detected area is changed.\nThe higher the value, the stronger the changes.\nTakes precedence over 'Denoise Str'.");
+	stop_spinbutton_scroll(detector_denoise_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_img2img), detector_denoise_spin);
 
 	// Set Mask Inpaint Widgets
 
@@ -1479,12 +1497,26 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_hexpand (boxr_img, TRUE);
 	gtk_widget_set_vexpand (boxr_img, TRUE);
 	
+	preview_box_hover_d = g_new0(PreviewBoxHoverData, 1);
+	preview_box_hover_d->preview_d = preview_d;
+	
+	preview_box_hover = gtk_event_controller_motion_new ();
+	g_signal_connect (preview_box_hover, "enter", G_CALLBACK (on_preview_widget_enter), preview_box_hover_d);
+	g_signal_connect (preview_box_hover, "leave", G_CALLBACK (on_preview_widget_leave), preview_box_hover_d);
+	gtk_widget_add_controller (boxr_img, preview_box_hover);
+
+	main_win_key_press = gtk_event_controller_key_new ();
+	gtk_event_controller_set_propagation_phase(main_win_key_press, GTK_PHASE_CAPTURE);
+	g_signal_connect (main_win_key_press, "key-pressed", G_CALLBACK (on_main_win_key_pressed), preview_box_hover_d);
+	gtk_widget_add_controller (win, main_win_key_press);
+	
 	preview_box_scroll_d = g_new0(PreviewBoxScrollData, 1);
 	preview_box_scroll_d->preview_d = preview_d;
 	
 	preview_box_scroll = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_VERTICAL | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
 	g_signal_connect (preview_box_scroll, "scroll", G_CALLBACK (on_preview_box_scroll), preview_box_scroll_d);
 	g_signal_connect (boxr_img, "destroy", G_CALLBACK (on_boxr_img_destroy), preview_box_scroll_d);
+	g_signal_connect (boxr_img, "destroy", G_CALLBACK (on_boxr_img_hover_destroy), preview_box_hover_d);
 	gtk_widget_add_controller (boxr_img, preview_box_scroll);
 	
 	gtk_box_append (GTK_BOX (box_right), boxr_img);
@@ -1632,6 +1664,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->height_dd = height_dd;
 	reset_d->hires_upscaler_dd = hires_upscaler_dd;
 	reset_d->detector_confidence_spin = detector_confidence_spin;
+	reset_d->detector_denoise_spin = detector_denoise_spin;
 	reset_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
 	reset_d->detector_input_size_spin = detector_input_size_spin;
 	reset_d->detector_mask_blur_spin = detector_mask_blur_spin;
@@ -1743,6 +1776,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->cancel_all_btn = cancel_all_btn;
 	gen_d->detector_check = detector_check;
 	gen_d->detector_confidence_spin = detector_confidence_spin;
+	gen_d->detector_denoise_spin = detector_denoise_spin;
 	gen_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
 	gen_d->detector_input_size_spin = detector_input_size_spin;
 	gen_d->detector_mask_blur_spin = detector_mask_blur_spin;

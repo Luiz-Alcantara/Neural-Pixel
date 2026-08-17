@@ -55,6 +55,7 @@ typedef struct {
 	double cnet_value;
 	double denoise_value;
 	double detector_confidence_value;
+	double detector_denoise_value;
 	double detector_inpaint_padding_value;
 	double detector_input_size_value;
 	double detector_mask_blur_value;
@@ -102,6 +103,7 @@ typedef struct {
 	GtkWidget *cancel_all_btn;
 	GtkWidget *detector_check;
 	GtkWidget *detector_confidence_spin;
+	GtkWidget *detector_denoise_spin;
 	GtkWidget *detector_inpaint_padding_spin;
 	GtkWidget *detector_input_size_spin;
 	GtkWidget *detector_mask_blur_spin;
@@ -133,6 +135,7 @@ typedef struct {
 	double cnet_strength_value;
 	double denoise_strength_value;
 	double detector_confidence_value;
+	double detector_denoise_value;
 	double hires_denoise_value;
 	double hires_scale_value;
 	gboolean detector_enabled;
@@ -272,6 +275,11 @@ typedef struct {
 } PreviewImageData;
 
 typedef struct {
+	int is_hovering_preview;
+	PreviewImageData *preview_d;
+} PreviewBoxHoverData;
+
+typedef struct {
 	int scroll_steps;
 	guint debounce_id;
 	PreviewImageData *preview_d;
@@ -315,6 +323,7 @@ typedef struct {
 	GtkWidget *hires_upscaler_dd;
 	GtkWidget *batch_count_spin;
 	GtkWidget *detector_confidence_spin;
+	GtkWidget *detector_denoise_spin;
 	GtkWidget *detector_inpaint_padding_spin;
 	GtkWidget *detector_input_size_spin;
 	GtkWidget *detector_mask_blur_spin;

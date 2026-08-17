@@ -614,6 +614,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	
 	snapshot_data->hires_upscaler_index = app_data->hires_upscaler_index;
 	snapshot_data->detector_confidence_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_confidence_spin));
+	snapshot_data->detector_denoise_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_denoise_spin));
 	snapshot_data->detector_inpaint_padding_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->detector_inpaint_padding_spin));
 	snapshot_data->detector_input_size_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->detector_input_size_spin));
 	snapshot_data->detector_mask_blur_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->detector_mask_blur_spin));

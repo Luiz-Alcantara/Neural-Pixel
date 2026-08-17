@@ -391,6 +391,13 @@ void on_boxr_img_destroy (GtkWidget* wgt, gpointer user_data)
 	g_free(data);
 }
 
+void on_boxr_img_hover_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	PreviewBoxHoverData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
 void on_cancel_all_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	CancelAllData *data = user_data;
@@ -517,6 +524,38 @@ gboolean on_preview_box_scroll (GtkEventControllerScroll *controller, gdouble dx
 	return TRUE;
 }
 
+gboolean on_main_win_key_pressed (GtkEventControllerKey *controller, guint keyv, guint keycode, GdkModifierType state, gpointer user_data)
+{
+	PreviewBoxHoverData *data = user_data;
+	if (!data->is_hovering_preview) return FALSE;
+
+	switch (keyv)
+	{
+		case GDK_KEY_Left:
+			navigate_images((PreviewImageData*)data->preview_d, -1);
+			break;
+		case GDK_KEY_Right:
+			navigate_images((PreviewImageData*)data->preview_d, 1);
+			break;
+		default:
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+gboolean on_preview_widget_enter(GtkEventControllerMotion *controller, double x, double y, gpointer user_data)
+{
+	PreviewBoxHoverData *data = user_data;
+	data->is_hovering_preview = TRUE;
+}
+
+gboolean on_preview_widget_leave(GtkEventControllerMotion *controller, gpointer user_data)
+{
+	PreviewBoxHoverData *data = user_data;
+	data->is_hovering_preview = FALSE;
+}
+
 void on_reload_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	ReloadDropDownData *data = user_data;
@@ -631,6 +670,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *detector_confidence_spin = data->detector_confidence_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_confidence_spin), DEFAULT_DETECTOR_CONFIDENCE);
+	
+	GtkWidget *detector_denoise_spin = data->detector_denoise_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_denoise_spin), DEFAULT_DETECTOR_DENOISE);
 	
 	GtkWidget *detector_inpaint_padding_spin = data->detector_inpaint_padding_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_inpaint_padding_spin), DEFAULT_DETECTOR_INPAINT_PADDING);
