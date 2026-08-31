@@ -107,8 +107,6 @@ void show_no_models_message(GtkWidget *main_win);
 
 void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable);
 
-void set_spin_value_to_var(GtkWidget *w, double *v);
-
 void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position, GdkEvent *event, gpointer user_data);
 
 void hide_img_btn_cb(GtkButton *btn, gpointer user_data);

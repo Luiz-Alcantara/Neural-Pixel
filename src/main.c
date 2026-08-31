@@ -114,7 +114,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *denoise_lab, *denoise_spin;
 	GtkWidget *seed_lab, *seed_entry;
 	GtkWidget *clip_skip_lab, *clip_skip_spin;
-	GtkWidget *upscale_str_lab, *upscale_spin;
+	GtkWidget *upscale_passes_str_lab, *upscale_passes_spin;
 	GtkWidget *cnet_strength_lab, *cnet_strength_spin;
 	
 	GtkWidget *box_hires;
@@ -751,7 +751,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(steps_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(steps_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), app_data->steps_value);
-	g_signal_connect (steps_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->steps_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(steps_spin),
 	"Number of refinement steps. More steps = higher detail but slower.\n20–40 is usually best.");
 	stop_spinbutton_scroll(steps_spin, properties_scrollable);
@@ -768,7 +767,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(batch_count_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(batch_count_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(batch_count_spin), app_data->batch_count_value);
-	g_signal_connect (batch_count_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->batch_count_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(batch_count_spin),
 	"How many images to generate one after another.\nDoesn’t use extra VRAM.");
 	stop_spinbutton_scroll(batch_count_spin, properties_scrollable);
@@ -831,7 +829,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(cfg_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(cfg_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), app_data->cfg_value);
-	g_signal_connect (cfg_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->cfg_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(cfg_spin),
 	"Controls how strongly the prompt influences the generated image.\nHigher values make the output more closely follow the prompt.\nTypical range: 6-12.");
 	stop_spinbutton_scroll(cfg_spin, properties_scrollable);
@@ -848,7 +845,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(denoise_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(denoise_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), app_data->denoise_value);
-	g_signal_connect (denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->denoise_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(denoise_spin),
 	"Controls how much the original image is changed.\nValues near 1.0 heavily modify or replace the image.\nValues near 0 preserve the original image with minimal changes.");
 	stop_spinbutton_scroll(denoise_spin, properties_scrollable);
@@ -901,7 +897,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(clip_skip_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(clip_skip_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(clip_skip_spin), app_data->clip_skip_value);
-	g_signal_connect (clip_skip_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->clip_skip_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(clip_skip_spin),
 	"Skips the last N layers of the text encoder output, reducing the influence of later CLIP layers.\nIf set to 0, the optimal value is automatically selected based on the checkpoint model.");
 	stop_spinbutton_scroll(clip_skip_spin, properties_scrollable);
@@ -909,20 +904,19 @@ app_activate (GApplication *app, gpointer user_data)
 
 	//Set Repeat Upscale Widgets
 
-	upscale_str_lab = gtk_label_new ("Upscale Runs");
-	gtk_widget_set_halign(upscale_str_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(upscale_str_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_str_lab);
+	upscale_passes_str_lab = gtk_label_new ("Upscale Runs");
+	gtk_widget_set_halign(upscale_passes_str_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(upscale_passes_str_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_passes_str_lab);
 	
-	upscale_spin = gtk_spin_button_new_with_range (1.0, 8.0, 1.0);
-	gtk_widget_add_css_class(upscale_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(upscale_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_spin), app_data->up_repeat_value);
-	g_signal_connect (upscale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->up_repeat_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(upscale_spin),
+	upscale_passes_spin = gtk_spin_button_new_with_range (1.0, 8.0, 1.0);
+	gtk_widget_add_css_class(upscale_passes_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(upscale_passes_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_passes_spin), app_data->up_repeat_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(upscale_passes_spin),
 	"Number of times to run the upscaler sequentially.\nEach run applies the upscale process to the previous result,\nfurther increasing the image dimensions.");
-	stop_spinbutton_scroll(upscale_spin, properties_scrollable);
-	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_spin);
+	stop_spinbutton_scroll(upscale_passes_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_passes_spin);
 	
 	//Set Parameters Seventh Row Widgets
 	
@@ -940,7 +934,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(cnet_strength_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(cnet_strength_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cnet_strength_spin), app_data->cnet_value);
-	g_signal_connect (cnet_strength_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->cnet_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(cnet_strength_spin),
 	"Adjusts how strongly the ControlNet influences the image.\nValues near '1' force the output to match the control map strictly.\nValues near '0' allow the prompt more creative freedom.");
 	stop_spinbutton_scroll(cnet_strength_spin, properties_scrollable);
@@ -982,7 +975,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(hires_scale_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(hires_scale_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), app_data->hires_scale_value);
-	g_signal_connect (hires_scale_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->hires_scale_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hires_scale_spin),
 	"Controls how much the image is enlarged during the Hires fix step.\nA value of 1.2 increases the image size by 20%, 2.0 doubles it,\nand 1.0 keeps the original size.");
 	stop_spinbutton_scroll(hires_scale_spin, properties_scrollable);
@@ -999,7 +991,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(hires_steps_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(hires_steps_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_steps_spin), app_data->hires_steps_value);
-	g_signal_connect (hires_steps_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->hires_steps_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hires_steps_spin),
 	"Number of refinement steps used during Hires processing.\nMore steps = better detail, longer generation time.");
 	stop_spinbutton_scroll(hires_steps_spin, properties_scrollable);
@@ -1016,7 +1007,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(hires_denoise_spin, "custom_spin");
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(hires_denoise_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_denoise_spin), app_data->hires_denoise_value);
-	g_signal_connect (hires_denoise_spin, "value-changed", G_CALLBACK (set_spin_value_to_var), &app_data->hires_denoise_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hires_denoise_spin),
 	"Controls how much the image is altered during Hires processing.\nHigher values allow greater changes and new details.");
 	stop_spinbutton_scroll(hires_denoise_spin, properties_scrollable);
@@ -1655,7 +1645,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->cnet_strength_spin = cnet_strength_spin;
 	reset_d->denoise_spin = denoise_spin;
 	reset_d->seed_entry = seed_entry;
-	reset_d->upscale_spin = upscale_spin;
+	reset_d->upscale_passes_spin = upscale_passes_spin;
 	reset_d->lora_dd = lora_dd;
 	reset_d->embedding_dd = embedding_dd;
 	reset_d->sampler_dd = sampler_dd;
@@ -1781,6 +1771,16 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->detector_input_size_spin = detector_input_size_spin;
 	gen_d->detector_mask_blur_spin = detector_mask_blur_spin;
 	gen_d->generation_label = generation_label;
+	gen_d->steps_spin = steps_spin;
+	gen_d->batch_count_spin = batch_count_spin;
+	gen_d->cfg_spin = cfg_spin;
+	gen_d->denoise_spin = denoise_spin;
+	gen_d->clip_skip_spin = clip_skip_spin;
+	gen_d->upscale_passes_spin = upscale_passes_spin;
+	gen_d->cnet_strength_spin = cnet_strength_spin;
+	gen_d->hires_scale_spin = hires_scale_spin;
+	gen_d->hires_steps_spin = hires_steps_spin;
+	gen_d->hires_denoise_spin = hires_denoise_spin;
 	gen_d->halt_btn = sd_halt_btn;
 	gen_d->inpaint_check = inpaint_check;
 	gen_d->preview_image_widget = preview_img;

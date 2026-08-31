@@ -644,8 +644,8 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	snprintf(seed_str, sizeof(seed_str), "%lld", DEFAULT_SEED);
 	gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
 
-	GtkWidget *upscale_spin = data->upscale_spin;
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_spin), DEFAULT_RP_UPSCALE);
+	GtkWidget *upscale_passes_spin = data->upscale_passes_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(upscale_passes_spin), DEFAULT_RP_UPSCALE);
 
 	GtkWidget *lora_dd = data->lora_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(lora_dd), DEFAULT_MODELS);
@@ -1111,12 +1111,6 @@ void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable)
 
 	g_signal_connect(sc, "scroll", G_CALLBACK (steal_scroll_cb), GTK_SCROLLED_WINDOW(properties_scrollable));
 	gtk_widget_add_controller (btn, sc);
-}
-
-void set_spin_value_to_var (GtkWidget *w, double *v)
-{
-	double value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
-	*v = value;
 }
 
 void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position, GdkEvent *event, gpointer user_data)

@@ -108,6 +108,16 @@ typedef struct {
 	GtkWidget *detector_input_size_spin;
 	GtkWidget *detector_mask_blur_spin;
 	GtkWidget *generation_label;
+	GtkWidget *steps_spin;
+	GtkWidget *batch_count_spin;
+	GtkWidget *cfg_spin;
+	GtkWidget *denoise_spin;
+	GtkWidget *clip_skip_spin;
+	GtkWidget *upscale_passes_spin;
+	GtkWidget *cnet_strength_spin;
+	GtkWidget *hires_scale_spin;
+	GtkWidget *hires_steps_spin;
+	GtkWidget *hires_denoise_spin;
 	GtkWidget *halt_btn;
 	GtkWidget *inpaint_check;
 	GtkWidget *preview_image_widget;
@@ -313,7 +323,7 @@ typedef struct {
 	GtkWidget *cnet_strength_spin;
 	GtkWidget *denoise_spin;
 	GtkWidget *seed_entry;
-	GtkWidget *upscale_spin;
+	GtkWidget *upscale_passes_spin;
 	GtkWidget *lora_dd;
 	GtkWidget *embedding_dd;
 	GtkWidget *sampler_dd;
