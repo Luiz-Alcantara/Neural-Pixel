@@ -29,7 +29,7 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		g_printerr("Error reading line: %s\n", error->message);
 		g_error_free(error);
 	} else if (err_string) {
-		if (data->verbose_bool) {
+		if (data->verbose_enabled) {
 			printf("%s\n", err_string);
 		}
 		
@@ -123,7 +123,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				char *line = g_strndup(buf, end_index);
 				
 				// Avoid "unused lora tensor" span
-				if (data->verbose_bool && strstr(line, "[WARN ] lora.hpp:") == NULL) printf("%s\n", line);
+				if (data->verbose_enabled && strstr(line, "[WARN ] lora.hpp:") == NULL) printf("%s\n", line);
 
 				if (strstr(line, "- can not found lora")) {
 					char lora_path[512];
@@ -277,7 +277,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				char *final_string = raw_string;
 				
 				if (final_string) {
-					if (data->verbose_bool)
+					if (data->verbose_enabled)
 					printf("%s\n", final_string);
 					
 					const char *last_pipe = strrchr(final_string, '|');
@@ -549,7 +549,7 @@ static void start_generation(gpointer user_data)
 		output_d->is_hires_fix = 0;
 		output_d->is_upscaling = 0;
 		output_d->n_current_upscale = 0;
-		output_d->verbose_bool = data->verbose_enabled;
+		output_d->verbose_enabled = data->verbose_enabled;
 		output_d->total_time = &data->total_time;
 		output_d->sdpid = data->sdpid;
 		output_d->generation_label = data->generation_label;
@@ -559,7 +559,7 @@ static void start_generation(gpointer user_data)
 		output_d->stdout_string = g_string_new("");
 		
 		SDProcessErrorData *error_d = g_new0 (SDProcessErrorData, 1);
-		error_d->verbose_bool = data->verbose_enabled;
+		error_d->verbose_enabled = data->verbose_enabled;
 		error_d->win = data->win;
 		error_d->sdpid = data->sdpid;
 		error_d->err_pipe_stream = data_err_stream;
@@ -581,9 +581,18 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	GenerationSnapshotData *snapshot_data = g_new0 (GenerationSnapshotData, 1);
 	
 	snapshot_data->img2img_file_path = g_strdup(app_data->img2img_file_path->str);
-	snapshot_data->kontext_enabled = app_data->kontext_bool;
+
+	snapshot_data->chroma_dit_mask_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->chroma_dit_mask_check));
 	snapshot_data->detector_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->detector_check));
 	snapshot_data->inpaint_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->inpaint_check));
+	snapshot_data->kontext_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->kontext_check));
+	snapshot_data->llm_mode_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->llm_check));
+	snapshot_data->mmap_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->mmap_check));
+	snapshot_data->qwen_zero_cond_t_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->qwen_zero_cond_t_check));
+	snapshot_data->sd_based_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->sd_based_check));
+	snapshot_data->taesd_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->taesd_check));
+	snapshot_data->update_cache_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->update_cache_check));
+	snapshot_data->verbose_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->verbose_check));
 	
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;
@@ -600,8 +609,6 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->checkpoint_filename = g_strdup(app_data->checkpoint_string->str);
 	snapshot_data->checkpoint_string = app_data->checkpoint_string;
 	
-	snapshot_data->sd_based_enabled = app_data->sd_based_bool;
-	
 	snapshot_data->detector_filename = g_strdup(app_data->detector_string->str);
 	snapshot_data->vae_filename = g_strdup(app_data->vae_string->str);
 	snapshot_data->cnet_filename = g_strdup(app_data->cnet_string->str);
@@ -609,8 +616,6 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->clip_l_filename = g_strdup(app_data->clip_l_string->str);
 	snapshot_data->clip_g_filename  = g_strdup(app_data->clip_g_string->str);
 	snapshot_data->text_enc_filename  = g_strdup(app_data->text_enc_string->str);
-	
-	snapshot_data->llm_mode_enabled = app_data->llm_bool;
 	
 	snapshot_data->hires_upscaler_index = app_data->hires_upscaler_index;
 	snapshot_data->detector_confidence_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_confidence_spin));
@@ -635,12 +640,6 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->cnet_strength_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->cnet_strength_spin));
 	snapshot_data->vae_tiling_index = app_data->vae_tiling_index;
 	snapshot_data->flash_attn_value = app_data->flash_attn_value;
-	snapshot_data->mmap_enabled = app_data->mmap_bool;
-	snapshot_data->taesd_enabled = app_data->taesd_bool;
-	snapshot_data->update_cache_enabled = app_data->update_cache_bool;
-	snapshot_data->verbose_enabled = app_data->verbose_bool;
-	snapshot_data->chroma_dit_mask_enabled = app_data->chroma_dit_mask_bool;
-	snapshot_data->qwen_zero_cond_t_enabled = app_data->qwen_zero_cond_t_bool;
 	snapshot_data->model_runtime_backend_index = app_data->model_runtime_backend_index;
 	snapshot_data->model_param_backend_index = app_data->model_param_backend_index;
 	snapshot_data->te_runtime_backend_index = app_data->te_runtime_backend_index;

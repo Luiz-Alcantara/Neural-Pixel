@@ -329,7 +329,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(kontext_check, "custom_check");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(kontext_check), app_data->kontext_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(kontext_check), "Enables Flux-Kontext for superior structural adherence to your reference image.\nEnsure you are using a compatible Kontext checkpoint.");
-	g_signal_connect(kontext_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->kontext_bool);
 	gtk_box_append (GTK_BOX (box_img2img_top_buttons), kontext_check);
 	
 	box_preview_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
@@ -576,7 +575,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(sd_based_check, "custom_check");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), app_data->sd_based_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_based_check), "Uncheck for non Stable Diffusion based checkpoints\n(e.g., Flux, Chroma, Qwen).");
-	g_signal_connect(sd_based_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->sd_based_bool);
 	gtk_box_append (GTK_BOX (box_checkpoint_buttons), sd_based_check);
 	
 	//Set add-ons Widgets
@@ -661,7 +659,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(llm_check, "custom_check");
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(llm_check), app_data->llm_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(llm_check), "Enables LLM-based text encoding instead of the default diffusion-model text encoder.");
-	g_signal_connect(llm_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->llm_bool);
 	gtk_box_append (GTK_BOX (box_text_encoder_buttons), llm_check);
 	
 	//Set Model adapters Widgets
@@ -1052,7 +1049,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_valign(mmap_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(mmap_check), app_data->mmap_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(mmap_check), "Speeds up model loading and reduces system RAM usage by\nreading files directly from your disk");
-	g_signal_connect(mmap_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->mmap_bool);
 	gtk_box_append (GTK_BOX (box_extra_opts_col1), mmap_check);
 	
 	taesd_check = gtk_check_button_new_with_label("Enable TAESD");
@@ -1061,7 +1057,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_valign(taesd_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), app_data->taesd_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(taesd_check), "Use Tiny AutoEncoder for fast decoding\n(low quality).");
-	g_signal_connect(taesd_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->taesd_bool);
 	gtk_box_append (GTK_BOX (box_extra_opts_col1), taesd_check);
 	
 	update_cache_check = gtk_check_button_new_with_label("Update Cache");
@@ -1070,7 +1065,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_valign(update_cache_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(update_cache_check), app_data->update_cache_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(update_cache_check), "Uncheck to prevent settings from saving in cache; resets on restart.");
-	g_signal_connect(update_cache_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->update_cache_bool);
 	gtk_box_append (GTK_BOX (box_extra_opts_col2), update_cache_check);
 	
 	verbose_check = gtk_check_button_new_with_label("Terminal Verbose");
@@ -1079,7 +1073,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_valign(verbose_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(verbose_check), app_data->verbose_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(verbose_check), "Print verbose on terminal.");
-	g_signal_connect(verbose_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->verbose_bool);
 	gtk_box_append (GTK_BOX (box_extra_opts_col2), verbose_check);
 
 	// Set Model-specific Args Widgets
@@ -1100,7 +1093,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_valign(chroma_dit_mask_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(chroma_dit_mask_check), app_data->chroma_dit_mask_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(chroma_dit_mask_check), "Uses a DiT mask to isolate and protect color channels.\nOn by default. Won't affect other checkpoint types.");
-	g_signal_connect(chroma_dit_mask_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->chroma_dit_mask_bool);
 	gtk_box_append (GTK_BOX (box_extra_opts), chroma_dit_mask_check);
 
 	qwen_zero_cond_t_check = gtk_check_button_new_with_label("Enable Qwen Image Zero Cond T");
@@ -1109,7 +1101,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_valign(qwen_zero_cond_t_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(qwen_zero_cond_t_check), app_data->qwen_zero_cond_t_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(qwen_zero_cond_t_check), "Enhances image edit fidelity and detail resolution.");
-	g_signal_connect(qwen_zero_cond_t_check, "toggled", G_CALLBACK(toggle_extra_options), &app_data->qwen_zero_cond_t_bool);
 	gtk_box_append (GTK_BOX (box_extra_opts), qwen_zero_cond_t_check);
 	
 	//Set Extra Options Widgets
@@ -1766,7 +1757,17 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->neg_p = neg_tb;
 	gen_d->pos_p = pos_tb;
 	gen_d->cancel_all_btn = cancel_all_btn;
+	gen_d->chroma_dit_mask_check = chroma_dit_mask_check;
 	gen_d->detector_check = detector_check;
+	gen_d->inpaint_check = inpaint_check;
+	gen_d->kontext_check = kontext_check;
+	gen_d->llm_check = llm_check;
+	gen_d->mmap_check = mmap_check;
+	gen_d->qwen_zero_cond_t_check = qwen_zero_cond_t_check;
+	gen_d->taesd_check = taesd_check;
+	gen_d->update_cache_check = update_cache_check;
+	gen_d->verbose_check = verbose_check;
+	gen_d->sd_based_check = sd_based_check;
 	gen_d->detector_confidence_spin = detector_confidence_spin;
 	gen_d->detector_denoise_spin = detector_denoise_spin;
 	gen_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
@@ -1784,7 +1785,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->hires_steps_spin = hires_steps_spin;
 	gen_d->hires_denoise_spin = hires_denoise_spin;
 	gen_d->halt_btn = sd_halt_btn;
-	gen_d->inpaint_check = inpaint_check;
 	gen_d->preview_image_widget = preview_img;
 	gen_d->preview_label = img_index_label;
 	gen_d->preview_image_toggle_visibility_btn = hide_img_btn;

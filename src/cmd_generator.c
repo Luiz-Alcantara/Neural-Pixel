@@ -30,7 +30,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	if (data->checkpoint_filename != NULL) {
-		if (data->sd_based_enabled == 1) {
+		if (data->sd_based_enabled) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--model"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/checkpoints/%s", data->checkpoint_filename));
 		} else {
@@ -58,7 +58,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-strength"));
 			g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->cnet_strength_value));
 		} else {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled == 1 ? "--ref-image" : "--init-img"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled ? "--ref-image" : "--init-img"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
 			
 			if (data->detector_enabled && data->detector_filename != NULL && strcmp(data->detector_filename, "None") != 0) {
@@ -123,7 +123,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	if (data->text_enc_filename != NULL && strcmp(data->text_enc_filename, "None") != 0) {
-		if (data->llm_mode_enabled == 1) {
+		if (data->llm_mode_enabled) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--llm"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/text_encoders/%s", data->text_enc_filename));
 		} else {
@@ -135,11 +135,11 @@ void gen_sd_string(GenerationSnapshotData *data)
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
 	g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->denoise_strength_value));
 
-	if (data->mmap_enabled == 1) {
+	if (data->mmap_enabled) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mmap"));
 	}
 
-	if (data->taesd_enabled == 1) {
+	if (data->taesd_enabled) {
 		if (check_file_exists(".models/vae/taesd_decoder.safetensors", 0) == 1) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--taesd"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(".models/vae/taesd_decoder.safetensors"));
@@ -192,10 +192,10 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--diffusion-fa"));
 	}
 
-	if (data->chroma_dit_mask_enabled == 0 || data->qwen_zero_cond_t_enabled == 1) {
+	if (!data->chroma_dit_mask_enabled || data->qwen_zero_cond_t_enabled) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--model-args"));
-		if (data->chroma_dit_mask_enabled == 0) g_ptr_array_add(data->sd_cmd_array, g_strdup("chroma_use_dit_mask=false"));
-		if (data->qwen_zero_cond_t_enabled == 1) g_ptr_array_add(data->sd_cmd_array, g_strdup("qwen_image_zero_cond_t=true"));
+		if (!data->chroma_dit_mask_enabled) g_ptr_array_add(data->sd_cmd_array, g_strdup("chroma_use_dit_mask=false"));
+		if (data->qwen_zero_cond_t_enabled) g_ptr_array_add(data->sd_cmd_array, g_strdup("qwen_image_zero_cond_t=true"));
 	}
 
 	if (data->positive_prompt != NULL) {
@@ -260,11 +260,11 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	g_ptr_array_add(data->sd_cmd_array, NULL);
 
-	if (data->update_cache_enabled == 1) {
+	if (data->update_cache_enabled) {
 		update_cache(data);
 	}
 
-	if (data->verbose_enabled == 1 && data->sd_cmd_array != NULL) {
+	if (data->verbose_enabled && data->sd_cmd_array != NULL) {
 		char *final_cmd = g_strjoinv(" ", (char **)data->sd_cmd_array->pdata);
 		g_print("Executing: %s\n", final_cmd);
 		g_free(final_cmd);
