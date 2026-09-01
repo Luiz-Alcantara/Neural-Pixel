@@ -190,6 +190,12 @@
 }
 
 
+/* Paned */
+.custom_paned > .wide {
+	background-color: @separator;
+}
+
+
 /* Seed Button */
 .custom_seed_entry {
 	background-image: none;
@@ -272,6 +278,24 @@
 	background-color: @primary-color-darker;
 }
 
+/* Scrollbar */
+scrollbar {
+	background-color: @primary-color-darker;
+}
+
+scrollbar slider {
+	background-color: @separator;
+}
+
+scrollbar slider:active {
+	background-color: @separator;
+}
+
+scrollbar slider:hover {
+	background-color: @primary-color-accent;
+}
+
+
 /* Status Box */
 .status_box {
 	border: 1px solid @primary-color-accent;
@@ -317,4 +341,3 @@
 	font-size: 12pt;
 	font-weight: bold;
 }
-
