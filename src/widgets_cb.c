@@ -426,12 +426,6 @@ void on_dd_path_destroy (GtkWidget* wgt, gpointer user_data)
 	g_free(data);
 }
 
-void on_dropdown_destroy (GtkWidget* wgt, gpointer user_data)
-{
-	const char** di = (const char**)user_data;
-	array_strings_free(di);
-}
-
 void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	GenerationData *data = user_data;
@@ -876,13 +870,6 @@ void send_to_trash(GtkWidget* btn, gpointer user_data)
 	} else {
 		g_printerr("Error: There are no images in the 'output' directory.\n");
 	}
-}
-
-void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1)
-{
-	GtkDropDown *dd = GTK_DROP_DOWN(wgt);
-	guint s = gtk_drop_down_get_selected(dd);
-	*i1 = (int)s;
 }
 
 void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)

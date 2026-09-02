@@ -27,8 +27,6 @@ GtkWidget* gen_const_dd(const char** items, int *def_item)
 	GtkWidget* dd = gtk_drop_down_new_from_strings(items);
 	gtk_widget_add_css_class(dd, "custom_dd");
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), *def_item);
-	g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_const_item), def_item);
-	g_signal_connect(dd, "destroy", G_CALLBACK(on_dropdown_destroy), NULL);
 	return dd;
 }
 

@@ -63,8 +63,6 @@ void on_dd_const_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_dd_path_destroy (GtkWidget* wgt, gpointer user_data);
 
-void on_dropdown_destroy(GtkWidget* wgt, gpointer user_data);
-
 void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_hide_img_btn_destroy (GtkWidget* wgt, gpointer user_data);
@@ -96,8 +94,6 @@ gboolean seed_entry_int_filter(GtkEditable *editable, gpointer user_data);
 static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, gpointer user_data);
 
 void send_to_trash(GtkWidget* btn, gpointer user_data);
-
-void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1);
 
 void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
 
