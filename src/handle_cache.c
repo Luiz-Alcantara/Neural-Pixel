@@ -61,7 +61,7 @@ void create_cache(char *n, GError **error)
 		fprintf(cf, "n_steps=%d.0\n", DEFAULT_N_STEPS);
 		fprintf(cf, "batch_count=%d.0\n", DEFAULT_BATCH_COUNT);
 		fprintf(cf, "kontext_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "detector_bool%d\n", DISABLED_OPT);
+		fprintf(cf, "detector_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "inpaint_bool=%d\n", DISABLED_OPT);
 		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
 		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);

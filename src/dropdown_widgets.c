@@ -81,19 +81,18 @@ GtkWidget* gen_path_dd(const char* path, GtkTextBuffer *tb, int tb_type, GString
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), 0);
 		} else {
 			DropDownModelsNameData *dd_const_data = g_new0 (DropDownModelsNameData, 1);
-			dd_const_data->dd_item_str = dd_item_str;
 			dd_const_data->req_int = is_req;
 			dd_const_data->g_btn = gen_btn;
 			g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_item), dd_const_data);
-			if (is_req == 1) {
-				if (g_strcmp0(dd_item_str->str, "None") == 0) {
-					gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a checkpoint first.");
-					gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
-				} else {
-					gtk_button_set_label (GTK_BUTTON(gen_btn), "Add to Queue");
-					gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
-				}
+			
+			if (is_req == 1 && start_pos == 0) {
+				gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a checkpoint first.");
+				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
+			} else if (is_req == 1) {
+				gtk_button_set_label (GTK_BUTTON(gen_btn), "Add to Queue");
+				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
 			}
+
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), start_pos);
 			g_signal_connect(dd, "destroy", G_CALLBACK(on_dd_const_destroy), dd_const_data);
 		}

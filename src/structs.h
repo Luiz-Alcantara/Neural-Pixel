@@ -146,6 +146,14 @@ typedef struct {
 	GtkWidget *hires_scale_spin;
 	GtkWidget *hires_steps_spin;
 	GtkWidget *hires_denoise_spin;
+	GtkWidget *checkpoint_dd;
+	GtkWidget *clip_g_dd;
+	GtkWidget *clip_l_dd;
+	GtkWidget *cnet_dd;
+	GtkWidget *detector_dd;
+	GtkWidget *text_enc_dd;
+	GtkWidget *upscaler_dd;
+	GtkWidget *vae_dd;
 	GtkWidget *halt_btn;
 	GtkWidget *preview_image_widget;
 	GtkWidget *preview_label;
@@ -189,9 +197,9 @@ typedef struct {
 	gint *preview_image_index;
 	GPtrArray *preview_image_files;
 	GPtrArray *sd_cmd_array;
-	GString *checkpoint_string;
 	GString *preview_label_string;
 	GtkWidget *cancel_all_btn;
+	GtkWidget *checkpoint_dd;
 	GtkWidget *generation_label;
 	GtkWidget *gen_btn;
 	GtkWidget *halt_btn;

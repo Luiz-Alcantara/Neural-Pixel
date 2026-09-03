@@ -409,7 +409,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 		gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
 	}
 	
-	if (g_strcmp0(data->checkpoint_string->str, "None") == 0) {
+	if (gtk_drop_down_get_selected(GTK_DROP_DOWN(data->checkpoint_dd)) == 0) {
 		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Select a checkpoint first.");
 	} else {
 		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Add to Queue");
@@ -606,16 +606,39 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	gtk_text_buffer_get_bounds (neg_tb, &nsi, &nei);
 	snapshot_data->negative_prompt = gtk_text_buffer_get_text(neg_tb, &nsi, &nei, FALSE);
 	
-	snapshot_data->checkpoint_filename = g_strdup(app_data->checkpoint_string->str);
-	snapshot_data->checkpoint_string = app_data->checkpoint_string;
+	snapshot_data->checkpoint_dd = data->checkpoint_dd;
 	
-	snapshot_data->detector_filename = g_strdup(app_data->detector_string->str);
-	snapshot_data->vae_filename = g_strdup(app_data->vae_string->str);
-	snapshot_data->cnet_filename = g_strdup(app_data->cnet_string->str);
-	snapshot_data->upscaler_filename = g_strdup(app_data->upscaler_string->str);
-	snapshot_data->clip_l_filename = g_strdup(app_data->clip_l_string->str);
-	snapshot_data->clip_g_filename  = g_strdup(app_data->clip_g_string->str);
-	snapshot_data->text_enc_filename  = g_strdup(app_data->text_enc_string->str);
+	snapshot_data->checkpoint_filename = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->checkpoint_dd))))
+	);
+	
+	snapshot_data->detector_filename = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->detector_dd))))
+	);
+	
+	snapshot_data->vae_filename = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->vae_dd))))
+	);
+	
+	snapshot_data->cnet_filename = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->cnet_dd))))
+	);
+	
+	snapshot_data->upscaler_filename = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->upscaler_dd))))
+	);
+	
+	snapshot_data->clip_l_filename = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->clip_l_dd))))
+	);
+	
+	snapshot_data->clip_g_filename  = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->clip_g_dd))))
+	);
+	
+	snapshot_data->text_enc_filename  = g_strdup(
+		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->text_enc_dd))))
+	);
 	
 	snapshot_data->hires_upscaler_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->hires_upscaler_dd));
 	snapshot_data->detector_confidence_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_confidence_spin));

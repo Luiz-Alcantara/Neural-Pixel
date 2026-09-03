@@ -876,23 +876,13 @@ void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer use
 {
 	if (GTK_IS_DROP_DOWN(wgt)) {
 		DropDownModelsNameData *data = user_data;
-		GString *var_string = data->dd_item_str;
-		int is_req = data->req_int;
-		GtkDropDown *dd = GTK_DROP_DOWN(wgt);
-		guint s = gtk_drop_down_get_selected(dd);
-		GtkStringObject *dd_string_obj = gtk_drop_down_get_selected_item(dd);
-		const char *dd_string = gtk_string_object_get_string(dd_string_obj);
-		g_string_assign(var_string, dd_string);
-		if (is_req == 1 &&
+		guint sel = gtk_drop_down_get_selected(GTK_DROP_DOWN(wgt));
+		if (data->req_int == 1 &&
 		(g_strcmp0(gtk_button_get_label(GTK_BUTTON(data->g_btn)), "Add to Queue") == 0 ||
 		g_strcmp0(gtk_button_get_label(GTK_BUTTON(data->g_btn)), "Select a checkpoint first.") == 0)) {
-			if (g_strcmp0(var_string->str, "None") == 0) {
-				gtk_button_set_label(GTK_BUTTON(data->g_btn), "Select a checkpoint first.");
-				gtk_widget_set_sensitive(GTK_WIDGET(data->g_btn), FALSE);
-			} else {
-				gtk_button_set_label(GTK_BUTTON(data->g_btn), "Add to Queue");
-				gtk_widget_set_sensitive(GTK_WIDGET(data->g_btn), TRUE);
-			}
+			gboolean none_selected = (sel == 0);
+			gtk_button_set_label(GTK_BUTTON(data->g_btn), none_selected ? "Select a checkpoint first." : "Add to Queue");
+			gtk_widget_set_sensitive(GTK_WIDGET(data->g_btn), !none_selected);
 		}
 	}
 }

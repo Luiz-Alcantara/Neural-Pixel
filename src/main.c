@@ -1802,6 +1802,14 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->hires_scale_spin = hires_scale_spin;
 	gen_d->hires_steps_spin = hires_steps_spin;
 	gen_d->hires_denoise_spin = hires_denoise_spin;
+	gen_d->checkpoint_dd = checkpoint_dd;
+	gen_d->clip_g_dd = clip_g_dd;
+	gen_d->clip_l_dd = clip_l_dd;
+	gen_d->cnet_dd = cnet_dd;
+	gen_d->detector_dd = detector_dd;
+	gen_d->text_enc_dd = text_enc_dd;
+	gen_d->upscaler_dd = upscaler_dd;
+	gen_d->vae_dd = vae_dd;
 	gen_d->halt_btn = sd_halt_btn;
 	gen_d->preview_image_widget = preview_img;
 	gen_d->preview_label = img_index_label;
