@@ -23,6 +23,8 @@ char* generate_sd_seed();
 
 char *get_time_str();
 
+gchar *load_lora_triggers(const char *triggers_file_path);
+
 gboolean string_equal(gconstpointer a, gconstpointer b);
 
 #endif // STR_UTILS_H

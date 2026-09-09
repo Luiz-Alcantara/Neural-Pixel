@@ -101,7 +101,10 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_params_row7;
 	
 	GtkWidget *box_model_adapters;
-	GtkWidget *lora_lab, *lora_dd;
+	GtkWidget *lora_lab;
+	GtkWidget *box_lora_widgets;
+	GtkWidget *lora_dd;
+	GtkWidget *lora_triggers_btn;
 	GtkWidget *embedding_lab, *embedding_dd;
 
 	GtkWidget *width_lab, *width_dd;
@@ -197,6 +200,7 @@ app_activate (GApplication *app, gpointer user_data)
 	ResetCbData *reset_d;
 	CancelAllData *cancel_all_d;
 	GenerationData *gen_d;
+	ManageTriggersData *manage_triggers_d;
 	LoadPNGData *load_png_info_d;
 	LoadImg2ImgData *load_img2img_file_d;
 	LoadImg2ImgFromPreviewData *load_img2img_from_preview_d;
@@ -674,9 +678,19 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_halign(lora_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(lora_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_model_adapters), lora_lab);
+
+	box_lora_widgets = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_lora_widgets), FALSE);
+	gtk_box_append (GTK_BOX (box_model_adapters), box_lora_widgets);
 	
 	lora_dd = gen_path_dd(LORAS_PATH, pos_tb, 1, NULL, NULL, app, 0);
-	gtk_box_append (GTK_BOX (box_model_adapters), lora_dd);
+	gtk_widget_set_hexpand(lora_dd, TRUE);
+	gtk_box_append (GTK_BOX (box_lora_widgets), lora_dd);
+
+	lora_triggers_btn = gtk_button_new_from_icon_name("document-properties-symbolic");
+	gtk_widget_add_css_class(lora_triggers_btn, "custom_btn");
+	gtk_widget_set_tooltip_text(lora_triggers_btn, "Manage trigger words for the selected LoRA.");
+	gtk_box_append (GTK_BOX (box_lora_widgets), lora_triggers_btn);
 
 	//Set Embeddings Widgets
 
@@ -1694,6 +1708,12 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
 	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
 	g_signal_connect (to_trash_btn, "clicked", G_CALLBACK (send_to_trash), preview_d);
+
+	manage_triggers_d = g_new0 (ManageTriggersData, 1);
+	manage_triggers_d->lora_dd = lora_dd;
+	manage_triggers_d->win = win;
+	g_signal_connect(lora_triggers_btn, "clicked", G_CALLBACK(manage_lora_triggers), manage_triggers_d);
+	g_signal_connect(lora_triggers_btn, "destroy", G_CALLBACK(on_lora_triggers_btn_destroy), manage_triggers_d);
 
 	load_png_info_d = g_new0 (LoadPNGData, 1);
 	load_png_info_d->image_files = app_data->preview_image_files;

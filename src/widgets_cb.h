@@ -39,6 +39,8 @@ void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
 
 void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data);
 
+void manage_lora_triggers (GtkButton *btn, gpointer user_data);
+
 static void navigate_images(PreviewImageData *data, int offset);
 
 void navigate_10_img_prev(GtkButton* btn, gpointer user_data);
@@ -68,6 +70,8 @@ void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data);
 void on_hide_img_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data);
+
+void on_lora_triggers_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 gboolean on_preview_box_scroll (GtkEventControllerScroll *controller, gdouble dx, gdouble dy, gpointer user_data);
 

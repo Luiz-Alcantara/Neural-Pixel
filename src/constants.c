@@ -19,6 +19,7 @@ const char* NP_GITHUB = "https://github.com/Luiz-Alcantara/Neural-Pixel";
 const char* SDCPP_GITHUB = "https://github.com/leejet/stable-diffusion.cpp";
 
 const char* CACHE_PATH = "./.cache";
+const char* LORA_TRIGGERS_PATH = "./.lora_triggers";
 const char* MODELS_PATH = "./models";
 const char* CHECKPOINTS_PATH = "./models/checkpoints";
 const char* CLIPS_PATH = "./models/clips";

@@ -247,6 +247,27 @@ char *get_time_str()
 	return t;
 }
 
+gchar *load_lora_triggers(char *triggers_file_path)
+{
+	gchar *file_cont = NULL;
+	gsize cont_len = 0;
+	GError *error = NULL;
+
+	if (!g_file_get_contents(triggers_file_path, &file_cont, &cont_len, &error)) {
+		g_printerr("Failed to load '%s': %s.\n", triggers_file_path, error->message);
+		g_error_free(error);
+		return g_strdup("");
+	}
+
+	if (!g_utf8_validate(file_cont, cont_len, NULL)) {
+		g_printerr("File '%s' is not valid UTF-8.\n", triggers_file_path);
+		g_free(file_cont);
+		return g_strdup("");
+	}
+
+	return file_cont;
+}
+
 gboolean string_equal(gconstpointer a, gconstpointer b)
 {
 	return g_strcmp0(a, b) == 0;

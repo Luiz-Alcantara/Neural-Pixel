@@ -288,6 +288,11 @@ typedef struct {
 } LoadPNGData;
 
 typedef struct {
+	GtkWidget *lora_dd;
+	GtkWidget *win;
+} ManageTriggersData;
+
+typedef struct {
 	GtkWidget *main_win;
 	GString *img2img_file_path;
 } MaskWinData;
@@ -402,6 +407,11 @@ typedef struct {
 	GtkWidget *detector_runtime_backend_dd;
 	GtkWidget *detector_parameter_backend_dd;
 } ResetCbData;
+
+typedef struct {
+	char *path;
+	GtkTextBuffer *text_buffer;
+} SaveTriggersData;
 
 typedef struct {
 	char read_buffer[4096];

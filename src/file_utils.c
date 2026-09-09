@@ -13,6 +13,121 @@
 
 #define FULL_PATH_MAX 512
 
+static void create_default_files(char *file_path, GError **error)
+{
+	DIR* cd = opendir(".cache");
+	if (cd == NULL) {
+		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '.cache' does not exist or cannot be accessed.");
+		return;
+	}
+	closedir(cd);
+
+	if (strcmp(file_path, ".cache/pp_cache") == 0) {
+		FILE *pcf = fopen(".cache/pp_cache", "wb");
+		if (pcf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/pp_cache' does not exist or cannot be accessed.");
+			return;
+		}
+		fprintf(pcf, "%s", POSITIVE_PROMPT);
+		fclose(pcf);
+		return;
+	}
+
+	if (strcmp(file_path, ".cache/np_cache") == 0) {
+		FILE *ncf = fopen(".cache/np_cache", "wb");
+		if (ncf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache' does not exist or cannot be accessed.");
+			return;
+		}
+		fprintf(ncf, "%s", NEGATIVE_PROMPT);
+		fclose(ncf);
+		return;
+	}
+
+	if (strcmp(file_path, ".cache/np_cache.ini") == 0) {
+		FILE *cf = fopen(".cache/np_cache.ini", "wb");
+		if (cf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache.ini' does not exist or cannot be accessed.");
+			return;
+		}
+		fprintf(cf, "last_image_path=%s\n", DEFAULT_IMG_PATH);
+		fprintf(cf, "checkpoint=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "detector=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "vae=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "cnet=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "upscaler=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "clip_l=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "clip_g=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "text_enc=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "sampler_index=%d\n", DEFAULT_SAMPLER);
+		fprintf(cf, "scheduler_index=%d\n", DEFAULT_SCHEDULER);
+		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);
+		fprintf(cf, "img_height_index=%d\n", DEFAULT_SIZE);
+		fprintf(cf, "n_steps=%d.0\n", DEFAULT_N_STEPS);
+		fprintf(cf, "batch_count=%d.0\n", DEFAULT_BATCH_COUNT);
+		fprintf(cf, "kontext_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "detector_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "inpaint_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
+		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "hires_upscaler_index=%d\n", DISABLED_OPT);
+		fprintf(cf, "detector_confidence_value=%.2f\n", DEFAULT_DETECTOR_CONFIDENCE);
+		fprintf(cf, "detector_denoise_value=%.2f\n", DEFAULT_DETECTOR_DENOISE);
+		fprintf(cf, "detector_inpaint_padding_value=%d.0\n", DEFAULT_DETECTOR_INPAINT_PADDING);
+		fprintf(cf, "detector_input_size_value=%d.0\n", DEFAULT_DETECTOR_INPUT_SIZE);
+		fprintf(cf, "detector_mask_blur_value=%d.0\n", DEFAULT_DETECTOR_MASK_BLUR);
+		fprintf(cf, "hires_scale_value=%.2f\n", DEFAULT_HIRES_SCALE);
+		fprintf(cf, "hires_steps_value=%d.0\n", DEFAULT_HIRES_STEPS);
+		fprintf(cf, "hires_denoise_value=%.1f\n", DEFAULT_HIRES_DENOISE_STR);
+		fprintf(cf, "flash_attn_value=%d\n", DISABLED_OPT);
+		fprintf(cf, "vae_tiling_index=%d\n", DEFAULT_MODELS);
+		fprintf(cf, "mmap_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "taesd_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
+		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "chroma_dit_mask_bool=%d\n", ENABLED_OPT);
+		fprintf(cf, "qwen_zero_cond_t_bool=%d\n", DISABLED_OPT);
+		fprintf(cf, "model_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "model_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "te_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "te_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "vae_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "vae_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "cnet_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "cnet_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "upscaler_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "upscaler_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "detector_runtime_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "detector_param_backend_index=%d\n", DEFAULT_BACKEND);
+		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
+		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
+		fprintf(cf, "cnet_strength=%.2f\n", DEFAULT_CNET_STRENGTH);
+		fprintf(cf, "denoise_strength=%.2f\n", DEFAULT_DENOISE);
+		fprintf(cf, "clip_skip=%d\n", DEFAULT_CLIP_SKIP);
+		fprintf(cf, "repeat_upscale=%d.0\n", DEFAULT_RP_UPSCALE);
+		fclose(cf);
+		return;
+	}
+
+	if (strncmp(file_path, "./.lora_triggers/", 17) == 0) {
+		DIR* ltd = opendir("./.lora_triggers");
+		if (ltd == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '.lora_triggers' does not exist or cannot be accessed.");
+			return;
+		}
+		closedir(ltd);
+
+		FILE *ltf = fopen(file_path, "wb");
+		if (ltf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "The lora trigger file cannot be created or open.");
+			return;
+		}
+		fprintf(ltf, "");
+		fclose(ltf);
+		return;
+	}
+}
+
 int is_file_empty(const char *fn)
 {
 	FILE *f = fopen(fn, "r");
@@ -89,7 +204,7 @@ int check_file_exists(char *filename, int is_text_file)
 		if (is_text_file == 1) {
 			if (is_file_empty(filename) == 1 && strcmp(filename, ".cache/np_cache") != 0) {
 				GError *err = NULL;
-				create_cache(filename, &err);
+				create_default_files(filename, &err);
 				if (err != NULL) {
 					g_printerr("Error: %s\n", err->message);
 					g_error_free(err);
@@ -102,7 +217,7 @@ int check_file_exists(char *filename, int is_text_file)
 		/* If file doesn't exist but should be a text file, create it */
 		if (is_text_file == 1) {
 			GError *err = NULL;
-			create_cache(filename, &err);
+			create_default_files(filename, &err);
 			if (err != NULL) {
 				g_printerr("Error: %s\n", err->message);
 				g_error_free(err);
@@ -174,6 +289,22 @@ int check_create_base_dirs() {
 		#endif
 	}
 	closedir(cache_dir);
+
+	DIR* lora_triggers_dir = opendir(LORA_TRIGGERS_PATH);
+	if (lora_triggers_dir == NULL) {
+		#ifdef _WIN32
+			if (mkdir(LORA_TRIGGERS_PATH) != 0) {
+				fprintf(stderr, "Error creating required \".lora_triggers\" directory.\n");
+				return 1;
+			}
+		#else
+			if (mkdir(LORA_TRIGGERS_PATH, 0777) != 0) {
+				fprintf(stderr, "Error creating required \".lora_triggers\" directory.\n");
+				return 1;
+			}
+		#endif
+	}
+	closedir(lora_triggers_dir);
 
 	DIR* models_dir = opendir(MODELS_PATH);
 	if (models_dir == NULL) {

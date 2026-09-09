@@ -18,6 +18,7 @@ extern const char* NP_GITHUB;
 extern const char* SDCPP_GITHUB;
 
 extern const char* CACHE_PATH;
+extern const char* LORA_TRIGGERS_PATH;
 extern const char* MODELS_PATH;
 extern const char* CHECKPOINTS_PATH;
 extern const char* CLIPS_PATH;

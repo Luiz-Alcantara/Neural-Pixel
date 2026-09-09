@@ -3,8 +3,6 @@
 
 #include "structs.h"
 
-void create_cache(char *n, GError **error);
-
 char* ini_file_get_value(const char *filename, const char *search_key);
 
 void load_pp_cache(GtkTextBuffer *pos_tb);

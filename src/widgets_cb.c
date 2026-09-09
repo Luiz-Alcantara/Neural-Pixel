@@ -10,6 +10,7 @@
 #include "structs.h"
 
 static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
+static void show_lora_triggers(GtkWidget *main_win, char *path);
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
 void show_simple_message (GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
 
@@ -319,6 +320,36 @@ void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data)
 	kill_stable_diffusion_process(GTK_BUTTON(data->halt_btn), data->sdpid);
 }
 
+void manage_lora_triggers (GtkButton *btn, gpointer user_data)
+{
+	ManageTriggersData *data = user_data;
+
+	GtkStringObject *selected_item = gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->lora_dd));
+
+	if (selected_item == NULL) { show_simple_message(data->win, "Error with selected item", "The selected LoRA is not a valid one.", 1); return; }
+
+	const char* item_string = gtk_string_object_get_string(selected_item);
+
+	if (item_string == NULL) { show_simple_message(data->win, "Error with selected item", "Failed to get the item string.", 1); return; }
+
+	char *last_dot = g_strrstr(item_string, ".");
+
+	if (last_dot != NULL) {
+		gsize len = last_dot - item_string;
+		char *fp = g_strdup_printf("%s/%.*s.txt", LORA_TRIGGERS_PATH, (int)len, item_string);
+		if (check_file_exists(fp, 1) == 1){
+			show_lora_triggers(data->win, fp);
+		} else {
+			g_printerr("Failed to open or create the file: '%s'\n", fp);
+			g_free(fp);
+		}
+	} else {
+		show_simple_message(data->win, "Error checking file extension", "The selected LoRA does not have a valid extension.", 1);
+		return;
+	}
+
+}
+
 static void navigate_images(PreviewImageData *data, int offset)
 {
 	gsize img_count = data->image_files->len;
@@ -498,6 +529,13 @@ void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 	g_free(data);
 }
 
+void on_lora_triggers_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	ManageTriggersData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
 static gboolean on_preview_box_scroll_timeout (gpointer user_data)
 {
 	PreviewBoxScrollData *data = user_data;
@@ -561,6 +599,14 @@ void on_reset_default_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	ResetCbData *data = user_data;
 	if (data == NULL) return;
+	g_free(data);
+}
+
+static void on_save_triggers_btn_destroy (GtkWidget *wgt, gpointer user_data)
+{
+	SaveTriggersData *data = user_data;
+	if (data == NULL) return;
+	g_free(data->path);
 	g_free(data);
 }
 
@@ -766,6 +812,26 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *detector_parameter_backend_dd = data->detector_parameter_backend_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(detector_parameter_backend_dd), DEFAULT_BACKEND);
+}
+
+static void *save_lora_triggers(GtkWidget *btn, gpointer user_data)
+{
+	SaveTriggersData *data = user_data;
+
+	FILE *triggers_file = fopen(data->path, "wb");
+	if (triggers_file) {
+		GtkTextIter tsi;
+		GtkTextIter tei;
+		gtk_text_buffer_get_bounds (data->text_buffer, &tsi, &tei);
+		char *tb_cont = gtk_text_buffer_get_text(data->text_buffer, &tsi, &tei, FALSE);
+
+		fprintf(triggers_file, "%s", tb_cont);
+		fclose(triggers_file);
+
+		g_free(tb_cont);
+	} else {
+		g_printerr("Error saving LoRA triggers data. Try restarting the app.\n");
+	}
 }
 
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)
@@ -994,6 +1060,64 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	
 	gtk_window_set_child (GTK_WINDOW(info_win), info_box);
 	gtk_window_present (GTK_WINDOW(info_win));
+}
+
+static void show_lora_triggers(GtkWidget *main_win, char *path)
+{
+	GtkWidget *triggers_win = gtk_window_new ();
+	gtk_widget_add_css_class(triggers_win, "info_box");
+	gtk_window_set_transient_for(GTK_WINDOW(triggers_win), GTK_WINDOW(main_win));
+	gtk_window_set_title (GTK_WINDOW(triggers_win), "LoRA Triggers");
+	gtk_window_set_default_size (GTK_WINDOW(triggers_win), 800, 500);
+	gtk_window_set_resizable (GTK_WINDOW(triggers_win), TRUE);
+	gtk_window_set_deletable (GTK_WINDOW(triggers_win), TRUE);
+	gtk_window_set_decorated (GTK_WINDOW(triggers_win), TRUE);
+	gtk_window_set_destroy_with_parent (GTK_WINDOW(triggers_win), TRUE);
+	
+	GtkWidget *triggers_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
+	gtk_widget_set_margin_bottom (triggers_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_end (triggers_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (triggers_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_top (triggers_box, MEDIUM_SPACING);
+	gtk_widget_add_css_class(triggers_box, "info_box");
+	gtk_window_set_child (GTK_WINDOW(triggers_win), triggers_box);
+
+	gchar *triggers_text = load_lora_triggers(path);
+
+	GtkWidget *lora_trigger_scr = gtk_scrolled_window_new ();
+	GtkWidget *lora_trigger_tv = gtk_text_view_new ();
+	gtk_widget_add_css_class(lora_trigger_tv, "custom_entry");
+	GtkTextBuffer *lora_trigger_tb = gtk_text_view_get_buffer (GTK_TEXT_VIEW(lora_trigger_tv));
+	gtk_widget_set_hexpand (lora_trigger_tv, TRUE);
+	gtk_widget_set_vexpand (lora_trigger_tv, TRUE);
+	gtk_text_buffer_set_text (lora_trigger_tb, triggers_text, -1);
+	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (lora_trigger_tv), GTK_WRAP_WORD_CHAR);
+	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (lora_trigger_scr), lora_trigger_tv);
+	gtk_box_append (GTK_BOX (triggers_box), lora_trigger_scr);
+	g_free(triggers_text);
+
+	GtkWidget *buttons_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (buttons_box), TRUE);
+	gtk_box_append (GTK_BOX (triggers_box), buttons_box);
+
+	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
+	gtk_widget_add_css_class(close_window_btn, "custom_btn");
+	gtk_widget_set_hexpand (close_window_btn, TRUE);
+	gtk_box_append (GTK_BOX (buttons_box), close_window_btn);
+
+	GtkWidget *save_btn = gtk_button_new_with_label ("Save");
+	gtk_widget_add_css_class(save_btn, "custom_btn");
+	gtk_widget_set_hexpand (save_btn, TRUE);
+	gtk_box_append (GTK_BOX (buttons_box), save_btn);
+
+	SaveTriggersData *save_triggers_d = g_new0 (SaveTriggersData, 1);
+	save_triggers_d->path = path;
+	save_triggers_d->text_buffer = lora_trigger_tb;
+	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), triggers_win);
+	g_signal_connect (save_btn, "clicked", G_CALLBACK (save_lora_triggers), save_triggers_d);
+	g_signal_connect (save_btn, "destroy", G_CALLBACK (on_save_triggers_btn_destroy), save_triggers_d);
+		
+	gtk_window_present (GTK_WINDOW(triggers_win));
 }
 
 void show_no_models_message(GtkWidget *main_win)

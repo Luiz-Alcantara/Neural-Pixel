@@ -10,101 +10,6 @@
 #include "str_utils.h"
 #include "widgets_cb.h"
 
-void create_cache(char *n, GError **error)
-{
-	DIR* cd = opendir(".cache");
-	if (cd == NULL) {
-		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '.cache' does not exist or cannot be accessed.");
-		return;
-	}
-	closedir(cd);
-
-	if (strcmp(n, ".cache/pp_cache") == 0) {
-		FILE *pcf = fopen(".cache/pp_cache", "wb");
-		if (pcf == NULL) {
-			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/pp_cache' does not exist or cannot be accessed.");
-			return;
-		}
-		fprintf(pcf, "%s", POSITIVE_PROMPT);
-		fclose(pcf);
-	}
-
-	if (strcmp(n, ".cache/np_cache") == 0) {
-		FILE *ncf = fopen(".cache/np_cache", "wb");
-		if (ncf == NULL) {
-			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache' does not exist or cannot be accessed.");
-			return;
-		}
-		fprintf(ncf, "%s", NEGATIVE_PROMPT);
-		fclose(ncf);
-	}
-
-	if (strcmp(n, ".cache/np_cache.ini") == 0) {
-		FILE *cf = fopen(".cache/np_cache.ini", "wb");
-		if (cf == NULL) {
-			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache.ini' does not exist or cannot be accessed.");
-			return;
-		}
-		fprintf(cf, "last_image_path=%s\n", DEFAULT_IMG_PATH);
-		fprintf(cf, "checkpoint=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "detector=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "vae=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "cnet=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "upscaler=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "clip_l=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "clip_g=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "text_enc=%s\n", OPTIONAL_ITEMS);
-		fprintf(cf, "sampler_index=%d\n", DEFAULT_SAMPLER);
-		fprintf(cf, "scheduler_index=%d\n", DEFAULT_SCHEDULER);
-		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);
-		fprintf(cf, "img_height_index=%d\n", DEFAULT_SIZE);
-		fprintf(cf, "n_steps=%d.0\n", DEFAULT_N_STEPS);
-		fprintf(cf, "batch_count=%d.0\n", DEFAULT_BATCH_COUNT);
-		fprintf(cf, "kontext_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "detector_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "inpaint_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "sd_based_bool=%d\n", ENABLED_OPT);
-		fprintf(cf, "llm_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "hires_upscaler_index=%d\n", DISABLED_OPT);
-		fprintf(cf, "detector_confidence_value=%.2f\n", DEFAULT_DETECTOR_CONFIDENCE);
-		fprintf(cf, "detector_denoise_value=%.2f\n", DEFAULT_DETECTOR_DENOISE);
-		fprintf(cf, "detector_inpaint_padding_value=%d.0\n", DEFAULT_DETECTOR_INPAINT_PADDING);
-		fprintf(cf, "detector_input_size_value=%d.0\n", DEFAULT_DETECTOR_INPUT_SIZE);
-		fprintf(cf, "detector_mask_blur_value=%d.0\n", DEFAULT_DETECTOR_MASK_BLUR);
-		fprintf(cf, "hires_scale_value=%.2f\n", DEFAULT_HIRES_SCALE);
-		fprintf(cf, "hires_steps_value=%d.0\n", DEFAULT_HIRES_STEPS);
-		fprintf(cf, "hires_denoise_value=%.1f\n", DEFAULT_HIRES_DENOISE_STR);
-		fprintf(cf, "flash_attn_value=%d\n", DISABLED_OPT);
-		fprintf(cf, "vae_tiling_index=%d\n", DEFAULT_MODELS);
-		fprintf(cf, "mmap_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "taesd_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "update_cache_bool=%d\n", ENABLED_OPT);
-		fprintf(cf, "verbose_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "chroma_dit_mask_bool=%d\n", ENABLED_OPT);
-		fprintf(cf, "qwen_zero_cond_t_bool=%d\n", DISABLED_OPT);
-		fprintf(cf, "model_runtime_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "model_param_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "te_runtime_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "te_param_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "vae_runtime_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "vae_param_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "cnet_runtime_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "cnet_param_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "upscaler_runtime_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "upscaler_param_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "detector_runtime_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "detector_param_backend_index=%d\n", DEFAULT_BACKEND);
-		fprintf(cf, "seed=%lld\n", DEFAULT_SEED);
-		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
-		fprintf(cf, "cnet_strength=%.2f\n", DEFAULT_CNET_STRENGTH);
-		fprintf(cf, "denoise_strength=%.2f\n", DEFAULT_DENOISE);
-		fprintf(cf, "clip_skip=%d\n", DEFAULT_CLIP_SKIP);
-		fprintf(cf, "repeat_upscale=%d.0\n", DEFAULT_RP_UPSCALE);
-		fclose(cf);
-	}
-	return;
-}
-
 char* ini_file_get_value(const char *filename, const char *search_key)
 {
 	FILE *file = fopen(filename, "r");
@@ -151,8 +56,6 @@ void load_pp_cache(GtkTextBuffer *pos_tb)
 			gtk_text_buffer_set_text (pos_tb, POSITIVE_PROMPT, -1);
 			return;
 		}
-		char line[512];
-		int i = 0;
 		
 		fseek(pcf, 0, SEEK_END);
 		long pcf_size = ftell(pcf);
@@ -193,8 +96,6 @@ void load_np_cache(GtkTextBuffer *neg_tb)
 			gtk_text_buffer_set_text (neg_tb, NEGATIVE_PROMPT, -1);
 			return;
 		}
-		char line[512];
-		int i = 0;
 		
 		fseek(ncf, 0, SEEK_END);
 		long ncf_size = ftell(ncf);
