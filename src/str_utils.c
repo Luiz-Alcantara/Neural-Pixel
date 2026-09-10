@@ -47,6 +47,47 @@ int check_gtk_list_contains_item(GtkStringList *list, const char* item)
 	return 0;
 }
 
+gboolean check_prompt_contains_lora(const char *prompt_string, const char *lora_name)
+{
+	if (!prompt_string || !lora_name) {
+		return FALSE;
+	}
+
+	GRegex *regex;
+	GMatchInfo *match_info = NULL;
+	gboolean result = FALSE;
+	char *base_name;
+	char *escaped_name;
+	char *pattern;
+
+	char *dot = strrchr(lora_name, '.');
+	if (dot != NULL) {
+		gsize len = dot - lora_name;
+		base_name = g_strndup(lora_name, len);
+	} else {
+		base_name = g_strdup(lora_name);
+	}
+
+	escaped_name = g_regex_escape_string(base_name, -1);
+	pattern = g_strdup_printf("<lora:%s:-?[0-9]+(\\.[0-9]+)?>", escaped_name);
+	g_free(base_name);
+	g_free(escaped_name);
+
+	GError *error = NULL;
+	regex = g_regex_new(pattern, 0, 0, &error);
+	if (regex != NULL) {
+		result = g_regex_match(regex, prompt_string, 0, &match_info);
+		g_match_info_free(match_info);
+		g_regex_unref(regex);
+	} else {
+		g_warning("Failed to compile lora regex: %s", error->message);
+		g_error_free(error);
+	}
+	
+	g_free(pattern);
+	return result;
+}
+
 int compare_strings(const void *a, const void *b)
 {
 	return strcasecmp(*(const char **)a, *(const char **)b);

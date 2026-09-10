@@ -27,18 +27,21 @@ void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpo
 		const char* item_string = gtk_string_object_get_string(selected_item);
 
 		if (strcmp(item_string, "None") != 0) {
-			char *text = format_lora_embedding_string(item_string, tb_type);
 			GtkTextIter si;
 			GtkTextIter ei;
-			GtkTextIter sel_i;
 			gtk_text_buffer_get_bounds (tv_tb, &si, &ei);
+			char *addon_string = format_lora_embedding_string(item_string, tb_type);
+
 			if (tb_type == 0) {
-				sel_i = ei;
+				gtk_text_buffer_insert (tv_tb, &ei, addon_string, -1);
 			} else {
-				sel_i = si;
+				char *prompt_string = gtk_text_buffer_get_text(tv_tb, &si, &ei, FALSE);
+				if (!check_prompt_contains_lora(prompt_string, item_string)) {
+					gtk_text_buffer_insert (tv_tb, &si, addon_string, -1);
+				}
+				g_free(prompt_string);
 			}
-			gtk_text_buffer_insert (tv_tb, &sel_i, text, -1);
-			free(text);
+			g_free(addon_string);
 		}
 	}
 }
