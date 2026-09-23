@@ -839,33 +839,22 @@ static void *save_lora_triggers(GtkWidget *btn, gpointer user_data)
 
 void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data)
 {
-	SeedEntryData *data = user_data;
-	long long int *seed_ptr = (long long int *)data->seed;
-	
-	g_signal_stop_emission_by_name (editable, "insert-text");
-	
-	const char *entry_text = gtk_editable_get_text(editable);
-	
-	char full_text[32];
-	snprintf(full_text, sizeof(full_text), "%s%s", entry_text, text);
-	
-	char *endptr;
-	errno = 0;
-	long long int potential_seed = strtoll(full_text, &endptr, 10);
-	
-	if (*endptr != '\0' || potential_seed < -1 || errno == ERANGE) {
-		show_simple_message(data->win,
-			"Seed Input Error",
-			"The seed must be numeric only;\nits value must be from -1 to 9223372036854775807.", 1);
-		
-		g_printerr("Invalid seed input, using default value.\n");
-		gtk_editable_set_text(editable, "-1");
-		*seed_ptr = DEFAULT_SEED;
-	} else {
-		g_signal_handlers_block_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-		gtk_editable_insert_text (editable, text, length, position);
-		g_signal_handlers_unblock_by_func (editable,(gpointer) seed_entry_int_filter, user_data);
-		*seed_ptr = potential_seed;
+	const char *current_text = gtk_editable_get_text(editable);
+
+	g_autofree char *before = g_utf8_substring (current_text, 0, *position);
+	g_autofree char *after = g_utf8_substring (current_text, *position, g_utf8_strlen (current_text, -1));
+
+	g_autofree char *insert_str = (length < 0) ? g_strdup (text) : g_strndup (text, length);
+	g_autofree char *proposed = g_strdup_printf ("%s%s%s", before, insert_str, after);
+
+	if (proposed[0] == '\0' || g_strcmp0 (proposed, "-") == 0) {
+		return;
+	}
+
+	gint64 seed;
+	if (!g_ascii_string_to_signed (proposed, 10, -1, G_MAXINT64, &seed, NULL)) {
+		g_signal_stop_emission_by_name (editable, "insert-text");
+		g_printerr ("Invalid seed input.\n");
 	}
 }
 

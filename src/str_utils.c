@@ -309,6 +309,23 @@ gchar *load_lora_triggers(char *triggers_file_path)
 	return file_cont;
 }
 
+gboolean seed_entry_get_value(GtkEditable *editable, gint64 *out_value)
+{
+	const char *text = gtk_editable_get_text (editable);
+
+	if (text[0] == '\0' || g_strcmp0 (text, "-") == 0) {
+		*out_value = -1;
+		return FALSE;
+	}
+
+	if (!g_ascii_string_to_signed (text, 10, -1, G_MAXINT64, out_value, NULL)) {
+		*out_value = -1;
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 gboolean string_equal(gconstpointer a, gconstpointer b)
 {
 	return g_strcmp0(a, b) == 0;

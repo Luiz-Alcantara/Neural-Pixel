@@ -657,7 +657,15 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->scheduler_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->scheduler_dd));
 	snapshot_data->cfg_scale_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->cfg_spin));
 	snapshot_data->denoise_strength_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->denoise_spin));
-	snapshot_data->seed_value = app_data->seed_value;
+
+	GtkEditable *seed_entry_editable = gtk_editable_get_delegate(GTK_EDITABLE(data->seed_entry));
+
+	gint64 seed_value;
+	if (!seed_entry_get_value (seed_entry_editable, &seed_value)) {
+		g_printerr ("[ERROR] Seed entry had an invalid value at read time, using default value.\n");
+	}
+	snapshot_data->seed_value = seed_value;
+
 	snapshot_data->clip_skip_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->clip_skip_spin));
 	snapshot_data->upscale_passes_value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->upscale_passes_spin));
 	snapshot_data->cnet_strength_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->cnet_strength_spin));

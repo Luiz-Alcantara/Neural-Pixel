@@ -204,7 +204,6 @@ app_activate (GApplication *app, gpointer user_data)
 	LoadPNGData *load_png_info_d;
 	LoadImg2ImgData *load_img2img_file_d;
 	LoadImg2ImgFromPreviewData *load_img2img_from_preview_d;
-	SeedEntryData *seed_entry_d;
 	//End defining GTK Widgets;
 
 	win = gtk_application_window_new (GTK_APPLICATION (app));
@@ -884,6 +883,7 @@ app_activate (GApplication *app, gpointer user_data)
 	char seed_str[LONGLONG_STR_SIZE];
 	snprintf(seed_str, sizeof(seed_str), "%lld", app_data->seed_value);
 	gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
+	g_signal_connect(gtk_editable_get_delegate(GTK_EDITABLE(seed_entry)), "insert-text", G_CALLBACK(seed_entry_int_filter), NULL);
 	gtk_box_append (GTK_BOX (box_params_row5), seed_entry);
 	
 	//Set Parameters Sixth Row Widgets
@@ -1616,12 +1616,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(to_trash_btn), "Move to Trash (can be restored).");
 	gtk_widget_set_size_request(GTK_WIDGET(to_trash_btn), 60, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), to_trash_btn);
-	
-	seed_entry_d = g_new0 (SeedEntryData, 1);
-	seed_entry_d->seed = &app_data->seed_value;
-	seed_entry_d->win = win;
-	g_signal_connect(gtk_editable_get_delegate(GTK_EDITABLE(seed_entry)),
-	"insert-text", G_CALLBACK(seed_entry_int_filter), seed_entry_d);
 
 	reload_d = g_new0 (ReloadDropDownData, 1);
 	reload_d->app = app;
@@ -1816,6 +1810,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->batch_count_spin = batch_count_spin;
 	gen_d->cfg_spin = cfg_spin;
 	gen_d->denoise_spin = denoise_spin;
+	gen_d->seed_entry = seed_entry;
 	gen_d->clip_skip_spin = clip_skip_spin;
 	gen_d->upscale_passes_spin = upscale_passes_spin;
 	gen_d->cnet_strength_spin = cnet_strength_spin;

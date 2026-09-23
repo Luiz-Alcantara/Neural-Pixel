@@ -140,6 +140,7 @@ typedef struct {
 	GtkWidget *batch_count_spin;
 	GtkWidget *cfg_spin;
 	GtkWidget *denoise_spin;
+	GtkWidget *seed_entry;
 	GtkWidget *clip_skip_spin;
 	GtkWidget *upscale_passes_spin;
 	GtkWidget *cnet_strength_spin;
@@ -444,11 +445,6 @@ typedef struct {
 	int *sdpid;
 	GDataInputStream *err_pipe_stream;
 } SDProcessErrorData;
-
-typedef struct {
-	long long int *seed;
-	GtkWidget *win;
-} SeedEntryData;
 
 typedef struct {
 	gchar *new_img_path;
