@@ -69,10 +69,11 @@ void gen_sd_string(GenerationSnapshotData *data)
 				g_ptr_array_add(
 					data->sd_cmd_array,
 					g_strdup_printf(
-						"confidence=%.2f,denoising_strength=%.2f,inpaint_padding=%d,mask_blur=%d,input_size=%d",
+						"confidence=%.2f,denoising_strength=%.2f,inpaint_width=%d,inpaint_height=%d,inpaint_padding=%d,input_size=%d,mask_blur=%d",
 						data->detector_confidence_value, data->detector_denoise_value,
-						data->detector_inpaint_padding_value, data->detector_mask_blur_value,
-						data->detector_input_size_value
+						data->detector_inpaint_size_value, data->detector_inpaint_size_value,
+						data->detector_inpaint_padding_value, data->detector_input_size_value,
+						data->detector_mask_blur_value
 					)
 				);
 			} else if (data->inpaint_enabled) {

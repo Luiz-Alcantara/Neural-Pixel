@@ -68,6 +68,7 @@ extern const int DEFAULT_RP_UPSCALE;
 extern const int DEFAULT_N_STEPS;
 extern const int DEFAULT_HIRES_STEPS;
 extern const int DEFAULT_DETECTOR_INPAINT_PADDING;
+extern const int DEFAULT_DETECTOR_INPAINT_SIZE;
 extern const int DEFAULT_DETECTOR_INPUT_SIZE;
 extern const int DEFAULT_DETECTOR_MASK_BLUR;
 extern const int DEFAULT_BATCH_COUNT;

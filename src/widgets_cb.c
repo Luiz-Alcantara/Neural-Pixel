@@ -719,6 +719,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *detector_inpaint_padding_spin = data->detector_inpaint_padding_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_inpaint_padding_spin), DEFAULT_DETECTOR_INPAINT_PADDING);
+
+	GtkWidget *detector_inpaint_size_spin = data->detector_inpaint_size_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_inpaint_size_spin), DEFAULT_DETECTOR_INPAINT_SIZE);
 	
 	GtkWidget *detector_input_size_spin = data->detector_input_size_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_input_size_spin), DEFAULT_DETECTOR_INPUT_SIZE);

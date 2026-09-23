@@ -74,6 +74,7 @@ static void create_default_files(char *file_path, GError **error)
 		fprintf(cf, "detector_confidence_value=%.2f\n", DEFAULT_DETECTOR_CONFIDENCE);
 		fprintf(cf, "detector_denoise_value=%.2f\n", DEFAULT_DETECTOR_DENOISE);
 		fprintf(cf, "detector_inpaint_padding_value=%d.0\n", DEFAULT_DETECTOR_INPAINT_PADDING);
+		fprintf(cf, "detector_inpaint_size_value=%d.0\n", DEFAULT_DETECTOR_INPAINT_SIZE);
 		fprintf(cf, "detector_input_size_value=%d.0\n", DEFAULT_DETECTOR_INPUT_SIZE);
 		fprintf(cf, "detector_mask_blur_value=%d.0\n", DEFAULT_DETECTOR_MASK_BLUR);
 		fprintf(cf, "hires_scale_value=%.2f\n", DEFAULT_HIRES_SCALE);

@@ -58,9 +58,10 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_detector_widgets;
 	GtkWidget *detector_model_lab, *detector_dd, *detector_check;
 	GtkWidget *box_detector_buttons, *box_detector_buttons_col1, *box_detector_buttons_col2;
-	GtkWidget *detector_confidence_lab, *detector_mask_blur_lab, *detector_inpaint_padding_lab, *detector_input_size_lab;
-	GtkWidget *detector_confidence_spin, *detector_mask_blur_spin, *detector_inpaint_padding_spin, *detector_input_size_spin;
-	GtkWidget *detector_denoise_lab, *detector_denoise_spin;
+	GtkWidget *detector_confidence_lab, *detector_mask_blur_lab, *detector_denoise_lab;
+	GtkWidget *detector_inpaint_padding_lab, *detector_inpaint_size_lab, *detector_input_size_lab;
+	GtkWidget *detector_confidence_spin, *detector_mask_blur_spin, *detector_denoise_spin;
+	GtkWidget *detector_inpaint_padding_spin, *detector_inpaint_size_spin, *detector_input_size_spin;
 
 	GtkWidget *mask_inpainting_separator;
 	GtkWidget *mask_inpainting_lab;
@@ -417,6 +418,20 @@ app_activate (GApplication *app, gpointer user_data)
 	stop_spinbutton_scroll(detector_mask_blur_spin, properties_scrollable);
 	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_mask_blur_spin);
 
+	detector_denoise_lab = gtk_label_new ("ADetailer Denoise Strength");
+	gtk_widget_set_halign(detector_denoise_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(detector_denoise_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_denoise_lab);
+	
+	detector_denoise_spin = gtk_spin_button_new_with_range (0.05, 1.0, 0.05);
+	gtk_widget_add_css_class(detector_denoise_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_denoise_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_denoise_spin), app_data->detector_denoise_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_denoise_spin),
+	"Controls how much the detected area is changed.\nThe higher the value, the stronger the changes.\nTakes precedence over 'Denoise Str'.");
+	stop_spinbutton_scroll(detector_denoise_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col1), detector_denoise_spin);
+
 	detector_inpaint_padding_lab = gtk_label_new ("Inpaint Padding");
 	gtk_widget_add_css_class(detector_inpaint_padding_lab, "param_label");
 	gtk_widget_set_halign(detector_inpaint_padding_lab, LABEL_ALIGNMENT);
@@ -430,7 +445,21 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_inpaint_padding_spin), "Padding around the detected region.");
 	stop_spinbutton_scroll(detector_inpaint_padding_spin, properties_scrollable);
 	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_inpaint_padding_spin);
-	
+
+	detector_inpaint_size_lab = gtk_label_new ("Inpaint Resolution");
+	gtk_widget_add_css_class(detector_inpaint_size_lab, "param_label");
+	gtk_widget_set_halign(detector_inpaint_size_lab, LABEL_ALIGNMENT);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_inpaint_size_lab);
+
+	detector_inpaint_size_spin = gtk_spin_button_new_with_range (256, 1024, 64);
+	gtk_widget_add_css_class(detector_inpaint_size_spin, "custom_spin");
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_inpaint_size_spin), TRUE);
+	gtk_spin_button_set_snap_to_ticks (GTK_SPIN_BUTTON(detector_inpaint_size_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_inpaint_size_spin), app_data->detector_inpaint_size_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_inpaint_size_spin), "Controls the resolution at which detected regions are refined.");
+	stop_spinbutton_scroll(detector_inpaint_size_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_inpaint_size_spin);
+
 	detector_input_size_lab = gtk_label_new ("Input Size");
 	gtk_widget_add_css_class(detector_input_size_lab, "param_label");
 	gtk_widget_set_halign(detector_input_size_lab, LABEL_ALIGNMENT);
@@ -444,20 +473,6 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_input_size_spin), "Square YOLO input size.");
 	stop_spinbutton_scroll(detector_input_size_spin, properties_scrollable);
 	gtk_box_append (GTK_BOX (box_detector_buttons_col2), detector_input_size_spin);
-	
-	detector_denoise_lab = gtk_label_new ("ADetailer Denoise Strength");
-	gtk_widget_set_halign(detector_denoise_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(detector_denoise_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_img2img), detector_denoise_lab);
-	
-	detector_denoise_spin = gtk_spin_button_new_with_range (0.05, 1.0, 0.05);
-	gtk_widget_add_css_class(detector_denoise_spin, "custom_spin");
-	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(detector_denoise_spin), TRUE);
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON(detector_denoise_spin), app_data->detector_denoise_value);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_denoise_spin),
-	"Controls how much the detected area is changed.\nThe higher the value, the stronger the changes.\nTakes precedence over 'Denoise Str'.");
-	stop_spinbutton_scroll(detector_denoise_spin, properties_scrollable);
-	gtk_box_append (GTK_BOX (box_img2img), detector_denoise_spin);
 
 	// Set Mask Inpaint Widgets
 
@@ -1657,6 +1672,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->detector_confidence_spin = detector_confidence_spin;
 	reset_d->detector_denoise_spin = detector_denoise_spin;
 	reset_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
+	reset_d->detector_inpaint_size_spin = detector_inpaint_size_spin;
 	reset_d->detector_input_size_spin = detector_input_size_spin;
 	reset_d->detector_mask_blur_spin = detector_mask_blur_spin;
 	reset_d->hires_scale_spin = hires_scale_spin;
@@ -1803,6 +1819,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->detector_confidence_spin = detector_confidence_spin;
 	gen_d->detector_denoise_spin = detector_denoise_spin;
 	gen_d->detector_inpaint_padding_spin = detector_inpaint_padding_spin;
+	gen_d->detector_inpaint_size_spin = detector_inpaint_size_spin;
 	gen_d->detector_input_size_spin = detector_input_size_spin;
 	gen_d->detector_mask_blur_spin = detector_mask_blur_spin;
 	gen_d->generation_label = generation_label;

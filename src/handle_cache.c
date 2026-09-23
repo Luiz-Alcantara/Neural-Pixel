@@ -170,6 +170,7 @@ void load_cache_fallback(gpointer user_data)
 	data->detector_confidence_value = DEFAULT_DETECTOR_CONFIDENCE;
 	data->detector_denoise_value = DEFAULT_DETECTOR_DENOISE;
 	data->detector_inpaint_padding_value = DEFAULT_DETECTOR_INPAINT_PADDING;
+	data->detector_inpaint_size_value = DEFAULT_DETECTOR_INPAINT_SIZE;
 	data->detector_input_size_value = DEFAULT_DETECTOR_INPUT_SIZE;
 	data->detector_mask_blur_value = DEFAULT_DETECTOR_MASK_BLUR;
 	data->hires_scale_value = DEFAULT_HIRES_SCALE;
@@ -360,6 +361,14 @@ void load_cache(gpointer user_data)
 			data->detector_inpaint_padding_value = g_ascii_strtod(detector_inpaint_padding_value_str, &endptr);
 		} else {
 			data->detector_inpaint_padding_value = DEFAULT_DETECTOR_INPAINT_PADDING;
+		}
+
+		char *detector_inpaint_size_value_str = ini_file_get_value(cache_filename, "detector_inpaint_size_value");
+		if (detector_inpaint_size_value_str) {
+			char *endptr;
+			data->detector_inpaint_size_value = g_ascii_strtod(detector_inpaint_size_value_str, &endptr);
+		} else {
+			data->detector_inpaint_size_value = DEFAULT_DETECTOR_INPAINT_SIZE;
 		}
 		
 		char *detector_input_size_value_str = ini_file_get_value(cache_filename, "detector_input_size_value");
@@ -642,6 +651,7 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "detector_confidence_value=%.2f\n", data->detector_confidence_value);
 	fprintf(cf, "detector_denoise_value=%.2f\n", data->detector_denoise_value);
 	fprintf(cf, "detector_inpaint_padding_value=%.1f\n", (float)data->detector_inpaint_padding_value);
+	fprintf(cf, "detector_inpaint_size_value=%.1f\n", (float)data->detector_inpaint_size_value);
 	fprintf(cf, "detector_input_size_value=%.1f\n", (float)data->detector_input_size_value);
 	fprintf(cf, "detector_mask_blur_value=%.1f\n", (float)data->detector_mask_blur_value);
 	fprintf(cf, "hires_scale_value=%.2f\n", data->hires_scale_value);
