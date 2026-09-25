@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.8.10";
+const char* APP_NAME_VERSION = "Neural Pixel v0.9.0";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -57,6 +57,8 @@ const size_t LIST_HIRES_UPSCALERS_COUNT = sizeof(LIST_HIRES_UPSCALERS) / sizeof(
  
 const char* POSITIVE_PROMPT = "masterpiece, high quality, realistic, ultra-detailed, rose, red flower, dewdrops, lush green grass, soft sunlight, cozy atmosphere, (bokeh, macro shot), depth of field, blurry background, mountain in distance, ethereal, RAW photo, photo noise, film grain";
 const char* NEGATIVE_PROMPT = "(worst quality, blurry, out of focus, hazy, low quality:1.4), text, watermark";
+const char* DETECTOR_POSITIVE_PROMPT = "detailed face";
+const char* DETECTOR_NEGATIVE_PROMPT = "deformed face";
 const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const char* EMPTY_IMG_PATH = "./resources/empty.png";

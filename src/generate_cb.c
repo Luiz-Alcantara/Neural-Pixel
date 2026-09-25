@@ -146,6 +146,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					"[INFO ] detailer.cpp:%*d - ADetailer detected %d object(s), taking %*lfs",
 					&n_detected_obj) == 1) {
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Encoding...");
+						data->is_generating_latent = 0;
 						data->is_img2img_encoding = 1;
 					}
 				} else if (strstr(line, "target") != NULL) {
@@ -216,7 +217,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					if (sscanf(line,
 					"[INFO ] stable-diffusion.cpp:%i - generate_image completed in %lfs",
 					&x, &gen_seconds) == 2) {
-						*(data->total_time) = (int)gen_seconds;
+						*(data->total_time) += (int)gen_seconds;
 					} else {
 						g_printerr("Error: Could not extract time from string: \"%s\"\n", line);
 					}
@@ -420,6 +421,8 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	g_free(result_img_path);
 	g_free(data->output_path);
 	g_free(data->img2img_file_path);
+	g_free(data->detector_negative_prompt);
+	g_free(data->detector_positive_prompt);
 	g_free(data->positive_prompt);
 	g_free(data->negative_prompt);
 	g_free(data->checkpoint_filename);
@@ -593,6 +596,18 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->taesd_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->taesd_check));
 	snapshot_data->update_cache_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->update_cache_check));
 	snapshot_data->verbose_enabled = gtk_check_button_get_active(GTK_CHECK_BUTTON(data->verbose_check));
+
+	GtkTextBuffer *detector_pos_tb = data->detector_pos_p;
+	GtkTextIter dpsi;
+	GtkTextIter dpei;
+	gtk_text_buffer_get_bounds (detector_pos_tb, &dpsi, &dpei);
+	snapshot_data->detector_positive_prompt = gtk_text_buffer_get_text(detector_pos_tb, &dpsi, &dpei, FALSE);
+
+	GtkTextBuffer *detector_neg_tb = data->detector_neg_p;
+	GtkTextIter dnsi;
+	GtkTextIter dnei;
+	gtk_text_buffer_get_bounds (detector_neg_tb, &dnsi, &dnei);
+	snapshot_data->detector_negative_prompt = gtk_text_buffer_get_text(detector_neg_tb, &dnsi, &dnei, FALSE);
 	
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;

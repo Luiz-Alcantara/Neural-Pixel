@@ -13,7 +13,7 @@
 
 #define FULL_PATH_MAX 512
 
-static void create_default_files(char *file_path, GError **error)
+static void create_default_files(const char *file_path, GError **error)
 {
 	DIR* cd = opendir(".cache");
 	if (cd == NULL) {
@@ -41,6 +41,28 @@ static void create_default_files(char *file_path, GError **error)
 		}
 		fprintf(ncf, "%s", NEGATIVE_PROMPT);
 		fclose(ncf);
+		return;
+	}
+
+	if (strcmp(file_path, ".cache/detector_pp_cache") == 0) {
+		FILE *dpcf = fopen(".cache/detector_pp_cache", "wb");
+		if (dpcf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/detector_pp_cache' does not exist or cannot be accessed.");
+			return;
+		}
+		fprintf(dpcf, "%s", DETECTOR_POSITIVE_PROMPT);
+		fclose(dpcf);
+		return;
+	}
+
+	if (strcmp(file_path, ".cache/detector_np_cache") == 0) {
+		FILE *dncf = fopen(".cache/detector_np_cache", "wb");
+		if (dncf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/detector_np_cache' does not exist or cannot be accessed.");
+			return;
+		}
+		fprintf(dncf, "%s", DETECTOR_NEGATIVE_PROMPT);
+		fclose(dncf);
 		return;
 	}
 
@@ -197,13 +219,14 @@ int count_output_files()
 	return nf;
 }
 
-int check_file_exists(char *filename, int is_text_file)
+int check_file_exists(const char *filename, int is_text_file)
 {
 	/* Check if file exists */
 	if (access(filename, F_OK) == 0) {
 		/* If it's a text file, verify it's not empty and initialize if needed */
 		if (is_text_file == 1) {
-			if (is_file_empty(filename) == 1 && strcmp(filename, ".cache/np_cache") != 0) {
+			/* pp_cache should NOT be empty */
+			if ((is_file_empty(filename) == 1) && strcmp(filename, ".cache/pp_cache") == 0) {
 				GError *err = NULL;
 				create_default_files(filename, &err);
 				if (err != NULL) {

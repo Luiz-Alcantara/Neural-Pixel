@@ -49,6 +49,10 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/vae/%s", data->vae_filename));
 	}
 
+	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path, "None") == 0 && data->detector_enabled) {
+		show_simple_message(data->win, "ADetailer is enabled, but no base image is set.", "ADetailer will be skipped and a normal generation will be performed. If this is not what you intended, cancel the current generation.", 1);
+	}
+
 	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path, "None") != 0) {
 		if (data->cnet_filename != NULL && strcmp(data->cnet_filename, "None") != 0) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-net"));
@@ -60,24 +64,45 @@ void gen_sd_string(GenerationSnapshotData *data)
 		} else {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled ? "--ref-image" : "--init-img"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
-			
+
 			if (data->detector_enabled && data->detector_filename != NULL && strcmp(data->detector_filename, "None") != 0) {
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-model"));
 				g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/detectors/%s", data->detector_filename));
-				
+
+				if (data->detector_positive_prompt && strcmp(data->detector_positive_prompt, "") != 0 &&
+					strcmp(data->detector_positive_prompt, " ") != 0) {
+					g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-prompt"));
+					g_ptr_array_add(data->sd_cmd_array, g_strdup(data->detector_positive_prompt));
+				}
+
+				if (data->detector_negative_prompt && strcmp(data->detector_negative_prompt, "") != 0 &&
+					strcmp(data->detector_negative_prompt, " ") != 0) {
+					g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-negative-prompt"));
+					g_ptr_array_add(data->sd_cmd_array, g_strdup(data->detector_negative_prompt));
+				}
+
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--extra-ad-args"));
 				g_ptr_array_add(
 					data->sd_cmd_array,
 					g_strdup_printf(
-						"confidence=%.2f,denoising_strength=%.2f,inpaint_width=%d,inpaint_height=%d,inpaint_padding=%d,input_size=%d,mask_blur=%d",
-						data->detector_confidence_value, data->detector_denoise_value,
-						data->detector_inpaint_size_value, data->detector_inpaint_size_value,
-						data->detector_inpaint_padding_value, data->detector_input_size_value,
+						"confidence=%.2f,"
+						"denoising_strength=%.2f,"
+						"inpaint_width=%d,"
+						"inpaint_height=%d,"
+						"inpaint_padding=%d,"
+						"input_size=%d,"
+						"mask_blur=%d",
+						data->detector_confidence_value,
+						data->detector_denoise_value,
+						data->detector_inpaint_size_value,
+						data->detector_inpaint_size_value,
+						data->detector_inpaint_padding_value,
+						data->detector_input_size_value,
 						data->detector_mask_blur_value
 					)
 				);
 			} else if (data->inpaint_enabled) {
-				int result = check_file_exists((char *)MASK_IMG_PATH, 0);
+				int result = check_file_exists(MASK_IMG_PATH, 0);
 
 				if (result == 1) {
 					g_ptr_array_add(data->sd_cmd_array, g_strdup("--mask"));

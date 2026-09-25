@@ -14,7 +14,7 @@ int count_files(DIR* dir, const char * dir_path, const char* const* array);
 
 int count_output_files();
 
-int check_file_exists(char *filename, int is_text_file);
+int check_file_exists(const char *filename, int is_text_file);
 
 int has_files(const char *directory);
 

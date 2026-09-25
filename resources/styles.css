@@ -1,51 +1,37 @@
 /* resources/styles.css */
 
 /* Greenish color
-@define-color primary-color #1F281F;
-@define-color primary-color-light #3A463A;
-@define-color primary-color-lighter #12B212;
-@define-color primary-color-dark #252F25;
-@define-color primary-color-darker #161D16;
-@define-color primary-color-accent #57FF3D;
-@define-color text-light #E0E0E0;
-@define-color text-dark #333333;
-@define-color separator #415841;
+TODO: Create the greenish color palette and more
 */
-
 
 /* Bluish color */
-@define-color primary-color #1F1F28;
-@define-color primary-color-light #3A3A46;
-@define-color primary-color-lighter #1212B2;
-@define-color primary-color-dark #25252F;
-@define-color primary-color-darker #16161D;
-@define-color primary-color-accent #3D57FF;
-@define-color text-light #E0E0E0;
+@define-color primary-color #181C22;
+@define-color primary-color-light #252B34;
+@define-color primary-color-light-alt #303843;
+@define-color primary-color-lighter #414751;
+@define-color primary-color-dark #1D2229;
+@define-color primary-color-darker #12161C;
+@define-color primary-color-accent #5AA9FF;
+@define-color text-light #D8DCE3;
 @define-color text-dark #333333;
-@define-color separator #414158;
+@define-color clickable-border #2E353E;
+@define-color separator #3A4250;
+@define-color separator-inner #292F38;
 
-
-/* Reddish color 
-@define-color primary-color #281F1F;
-@define-color primary-color-light #463A3A;
-@define-color primary-color-lighter #B21212;
-@define-color primary-color-dark #2F2525;
-@define-color primary-color-darker #1D1616;
-@define-color primary-color-accent #FF573D;
-@define-color text-light #E0E0E0;
+/* Reddish color (Warmer colors, more comfortable for the eyes)
+@define-color primary-color #221818;
+@define-color primary-color-light #342525;
+@define-color primary-color-light-alt #433030;
+@define-color primary-color-lighter #514141;
+@define-color primary-color-dark #291D1D;
+@define-color primary-color-darker #1C1212;
+@define-color primary-color-accent #FF5A67;
+@define-color text-light #E3D8D8;
 @define-color text-dark #333333;
-@define-color separator #584141;
+@define-color clickable-border #3E2E2F;
+@define-color separator #503B3A;
+@define-color separator-inner #382929;
 */
-
-
-/* Focus outline color
-*:focus {
-	border: 1px solid var(--separator);
-	outline-color: var(--primary-color-accent);
-	outline-style: solid;
-	outline-width: 1px;
-	outline-offset: -2px;
-}*/
 
 
 /* Title Bar */
@@ -99,6 +85,10 @@
 
 
 /* Other Buttons */
+.custom_btn_img2img {
+	border: 1px solid @primary-color-accent;
+}
+
 .custom_btn {
 	background-image: none;
 	background-color: @primary-color-light;
@@ -111,6 +101,7 @@
 .label_btn {
 	background-image: none;
 	background-color: @primary-color;
+	border: none;
 	color: white;
 }
 
@@ -135,6 +126,7 @@
 .custom_dd > button {
 	background-image: none;
 	background-color: @primary-color-light;
+	border: 1px solid @clickable-border;
 }
 
 .custom_dd > popover.menu > contents {
@@ -154,12 +146,12 @@
 
 .custom_dd > popover.menu > contents > box > scrolledwindow > listview > row:hover {
 	background-image: none;
-	background-color: @primary-color-dark;
+	background-color: @primary-color-light-alt;
 }
 
 .custom_dd > popover.menu > contents > box > scrolledwindow > listview > row:selected {
 	background-image: none;
-	background-color: @primary-color-dark;
+	background-color: @primary-color-light-alt;
 }
 
 
@@ -167,6 +159,7 @@
 .custom_entry {
 	background-image: none;
 	background-color: @primary-color-dark;
+	font-family: IBM Plex Mono, JetBrains Mono, monospace;
 	color: @text-light;
 	font-size: 11pt;
 	font-weight: 500;
@@ -202,9 +195,15 @@
 	background-color: @primary-color-light;
 }
 
+.custom_seed_entry:focus-within {
+	 outline: 1px solid @primary-color-accent;
+	outline-offset: 0px;
+}
+
+
 /* Separators */
 .horiz_separator {
-	background-color: @separator;
+	background-color: @separator-inner;
 	/*min-height: 2px;*/
 }
 
@@ -213,6 +212,7 @@
 .custom_spin {
 	background-image: none;
 	background-color: @primary-color-light;
+	border: 1px solid @clickable-border;
 }
 
 .custom_spin:active {
@@ -226,7 +226,12 @@
 
 .custom_spin > button:hover {
 	background-image: none;
-	background-color: @primary-color-dark;
+	background-color: @primary-color-light-alt;
+}
+
+.custom_spin:focus-within {
+	 outline: 1px solid @primary-color-accent;
+	outline-offset: 0px;
 }
 
 
@@ -260,9 +265,9 @@
 
 /* Left Window Inner Boxes */
 .inner_box {
-	border: 1px solid @separator;
-	border-top-right-radius: 6pt;
-	border-top-left-radius: 6pt;
+	border: 2px solid @separator;
+	border-top-right-radius: 3pt;
+	border-top-left-radius: 3pt;
 	border-bottom-right-radius: 3pt;
 	border-bottom-left-radius: 3pt;
 }
@@ -273,10 +278,12 @@
 	background-color: @primary-color;
 }
 
+
 /* Right Box */
 .right_box, .img_preview_box {
 	background-color: @primary-color-darker;
 }
+
 
 /* Scrollbar */
 scrollbar {
@@ -309,15 +316,10 @@ scrollbar slider:hover {
 /* Widget Labels */
 .param_label, .pos_prompt_label, .neg_prompt_label {
 	color: @text-light;
-	/*font-family: JetBrains Mono, monospace;*/
 	font-size: 12pt;
 	font-weight: bold;
 }
 
-/* IMG2IMG Expander Arrow */
-.img2img_active > box > title > expander {
-	color: @primary-color-accent;
-}
 
 /* Info Labels */
 .info_box {

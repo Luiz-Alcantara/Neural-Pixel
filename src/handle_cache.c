@@ -47,86 +47,6 @@ char* ini_file_get_value(const char *filename, const char *search_key)
 	return NULL;
 }
 
-void load_pp_cache(GtkTextBuffer *pos_tb)
-{
-	if (check_file_exists(".cache/pp_cache", 1) == 1) {
-		FILE *pcf = fopen(".cache/pp_cache", "r");
-		if (pcf == NULL) {
-			g_printerr("Failed to open file '.cache/pp_cache', using default value(s).\n");
-			gtk_text_buffer_set_text (pos_tb, POSITIVE_PROMPT, -1);
-			return;
-		}
-		
-		fseek(pcf, 0, SEEK_END);
-		long pcf_size = ftell(pcf);
-		fseek(pcf, 0, SEEK_SET);
-		char *pb = (char *)malloc(pcf_size + 1);
-		if (pb == NULL) {
-			g_printerr("Memory allocation error in function 'load_pp_cache', using default value(s)\n");
-			fclose(pcf);
-			gtk_text_buffer_set_text (pos_tb, POSITIVE_PROMPT, -1);
-			return;
-		}
-		size_t pbr = fread(pb, 1, pcf_size, pcf);
-		if (pbr != pcf_size) {
-			g_printerr("Error reading file '.cache/pp_cache', using default value(s)\n");
-			free(pb);
-			fclose(pcf);
-			gtk_text_buffer_set_text (pos_tb, POSITIVE_PROMPT, -1);
-			return;
-		}
-		pb[pbr] = '\0';
-
-		gtk_text_buffer_set_text (pos_tb, pb, -1);
-
-		free(pb);
-		fclose(pcf);
-	} else {
-		g_printerr("Error loading '.cache/pp_cache', using default value(s).\n");
-		gtk_text_buffer_set_text (pos_tb, POSITIVE_PROMPT, -1);
-	}
-}
-
-void load_np_cache(GtkTextBuffer *neg_tb)
-{
-	if (check_file_exists(".cache/np_cache", 1) == 1) {
-		FILE *ncf = fopen(".cache/np_cache", "r");
-		if (ncf == NULL) {
-			g_printerr("Failed to open file '.cache/np_cache', using default value(s).\n");
-			gtk_text_buffer_set_text (neg_tb, NEGATIVE_PROMPT, -1);
-			return;
-		}
-		
-		fseek(ncf, 0, SEEK_END);
-		long ncf_size = ftell(ncf);
-		fseek(ncf, 0, SEEK_SET);
-		char *nb = (char *)malloc(ncf_size + 1);
-		if (nb == NULL) {
-			g_printerr("Memory allocation error in function 'load_np_cache', using default value(s)\n");
-			fclose(ncf);
-			gtk_text_buffer_set_text (neg_tb, NEGATIVE_PROMPT, -1);
-			return;
-		}
-		size_t nbr = fread(nb, 1, ncf_size, ncf);
-		if (nbr != ncf_size) {
-			g_printerr("Error reading file '.cache/np_cache', using default value(s)\n");
-			free(nb);
-			fclose(ncf);
-			gtk_text_buffer_set_text (neg_tb, NEGATIVE_PROMPT, -1);
-			return ;
-		}
-		nb[nbr] = '\0';
-
-		gtk_text_buffer_set_text (neg_tb, nb, -1);
-
-		free(nb);
-		fclose(ncf);
-	} else {
-		g_printerr("Error loading '.cache/np_cache', using default value(s).\n");
-		gtk_text_buffer_set_text (neg_tb, NEGATIVE_PROMPT, -1);
-	}
-}
-
 void load_cache_fallback(gpointer user_data)
 {
 	AppStartData *data = user_data;
@@ -603,15 +523,44 @@ void load_cache(gpointer user_data)
 	}
 }
 
+void load_prompt_text(GtkTextBuffer *text_buffer, const char *prompt_file_path, const char *default_prompt)
+{
+	gchar *file_cont = NULL;
+	gsize cont_len = 0;
+	GError *error = NULL;
+
+	if (check_file_exists(prompt_file_path, 1) && g_file_get_contents(prompt_file_path, &file_cont, &cont_len, &error)) {
+		if (g_utf8_validate(file_cont, cont_len, NULL)) {
+			gtk_text_buffer_set_text (text_buffer, file_cont, -1);
+		} else {
+			g_printerr("File '%s' is not valid UTF-8.\n", prompt_file_path);
+			gtk_text_buffer_set_text (text_buffer, default_prompt, -1);
+		}
+		g_free(file_cont);
+	} else {
+		g_printerr("Failed to load '%s': %s.\n", prompt_file_path, error->message);
+		g_error_free(error);
+		gtk_text_buffer_set_text (text_buffer, default_prompt, -1);
+	}
+}
+
 void update_cache(GenerationSnapshotData *data)
 {
+	FILE *dpcf = fopen(".cache/detector_pp_cache", "wb");
+	FILE *dncf = fopen(".cache/detector_np_cache", "wb");
 	FILE *pcf = fopen(".cache/pp_cache", "wb");
 	FILE *ncf = fopen(".cache/np_cache", "wb");
 	FILE *cf = fopen(".cache/np_cache.ini", "wb");
-	if (pcf == NULL || ncf == NULL || cf == NULL) {
+	if (dpcf == NULL || dncf == NULL || pcf == NULL || ncf == NULL || cf == NULL) {
 		g_printerr("Error updating cache. If the error persists, try deleting the '.cache' directory.\n");
 		return;
 	}
+
+	fprintf(dpcf, "%s", data->detector_positive_prompt);
+	fclose(dpcf);
+
+	fprintf(dncf, "%s", data->detector_negative_prompt);
+	fclose(dncf);
 
 	fprintf(pcf, "%s", data->positive_prompt);
 	fclose(pcf);

@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "constants.h"
-#include "dropdown_widgets.h"
+#include "custom_widgets.h"
 #include "file_utils.h"
 #include "generate_cb.h"
 #include "handle_cache.h"
@@ -48,14 +48,26 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_properties, *boxl_topbar;
 	GtkWidget *info_btn, *donate_btn, *reload_btn, *reset_default_btn, *load_from_img_btn;
-	
-	GtkWidget *img2img_expander_lab, *img2img_expander;
-	GtkWidget *box_img2img, *box_img2img_top_buttons, *box_preview_img2img, *box_img2img_bottom_buttons;
+
+	GtkWidget *img2img_visibility_toggle_btn;
+	GtkWidget *box_img2img, *box_img2img_inner, *box_img2img_top_buttons, *box_preview_img2img, *box_img2img_bottom_buttons;
 	GtkWidget *load_img2img_btn, *kontext_check, *clear_img2img_btn;
 	GtkWidget *overlay_img2img, *preview_img2img;
 	GtkWidget *detector_separator;
 	GtkWidget *detector_info_btn;
-	GtkWidget *box_detector_widgets;
+
+	GtkWidget *box_detector_prompts;
+	GtkWidget *detector_pp_visibility_toggle_btn;
+	GtkWidget *detector_pos_scr;
+	GtkWidget *detector_pos_tv;
+	GtkTextBuffer *detector_pos_tb;
+
+	GtkWidget *detector_np_visibility_toggle_btn;
+	GtkWidget *detector_neg_scr;
+	GtkWidget *detector_neg_tv;
+	GtkTextBuffer *detector_neg_tb;
+
+	GtkWidget *box_detector_widgets;	
 	GtkWidget *detector_model_lab, *detector_dd, *detector_check;
 	GtkWidget *box_detector_buttons, *box_detector_buttons_col1, *box_detector_buttons_col2;
 	GtkWidget *detector_confidence_lab, *detector_mask_blur_lab, *detector_denoise_lab;
@@ -69,12 +81,12 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_prompts ,*box_pos_prompt, *box_neg_prompt;
 	
-	GtkWidget *pp_lab;
+	GtkWidget *pp_visibility_toggle_btn;
 	GtkWidget *pos_scr;
 	GtkWidget *pos_tv;
 	GtkTextBuffer *pos_tb;
 
-	GtkWidget *np_lab;
+	GtkWidget *np_visibility_toggle_btn;
 	GtkWidget *neg_scr;
 	GtkWidget *neg_tv;
 	GtkTextBuffer *neg_tb;
@@ -84,8 +96,8 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *checkpoint_lab, *checkpoint_dd, *sd_based_check;
 	GtkWidget *vae_lab, *vae_dd;
 
-	GtkWidget *addons_expander;
-	GtkWidget *box_addons;
+	GtkWidget *addons_visibility_toggle_btn;
+	GtkWidget *box_addons, *box_addons_inner;
 	GtkWidget *cnet_lab, *cnet_dd;
 	GtkWidget *upscaler_lab, *upscaler_dd;
 	GtkWidget *clip_l_lab, *clip_l_dd;
@@ -128,7 +140,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *hires_steps_lab, *hires_steps_spin;
 	GtkWidget *hires_denoise_lab, *hires_denoise_spin;
 	
-	GtkWidget *extra_opts_expander, *box_extra_opts, *box_extra_opts_row1, *box_extra_opts_col1, *box_extra_opts_col2;
+	GtkWidget *extra_opts_visibility_toggle_btn, *box_extra_opts, *box_extra_opts_inner, *box_extra_opts_row1, *box_extra_opts_col1, *box_extra_opts_col2;
 
 	GtkWidget *model_args_separator;
 	GtkWidget *model_args_lab;
@@ -282,7 +294,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_left), properties_scrollable);
 	
 	// Set Properties Box
-	box_properties = gtk_box_new (GTK_ORIENTATION_VERTICAL, HUGE_SPACING);
+	box_properties = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
 	gtk_widget_set_hexpand (box_properties, TRUE);
 	gtk_widget_set_margin_bottom (box_properties, MEDIUM_SPACING);
 	gtk_widget_set_margin_end (box_properties, LARGE_SPACING);
@@ -298,23 +310,24 @@ app_activate (GApplication *app, gpointer user_data)
 	}
 
 	//Set IMG2IMG Widgets
-	img2img_expander_lab = gtk_label_new ("Image to Image");
-	gtk_widget_add_css_class(img2img_expander_lab, "param_label");
-	gtk_widget_set_tooltip_text(GTK_WIDGET(img2img_expander_lab), "Configure image-to-image processing: ADetailer, ControlNet, Flux Kontext or Masked Inpaint.\nThe arrow on the side will be colored whenever an image is loaded.");
-	
-	img2img_expander = gtk_expander_new (NULL);
-	gtk_widget_add_css_class(img2img_expander, "param_label");
-	gtk_expander_set_label_widget (GTK_EXPANDER(img2img_expander), img2img_expander_lab);
-	gtk_box_append (GTK_BOX (box_properties), img2img_expander);
-	
-	box_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	box_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
 	gtk_widget_add_css_class(box_img2img, "inner_box");
 	gtk_box_set_homogeneous (GTK_BOX (box_img2img), FALSE);
-	gtk_expander_set_child(GTK_EXPANDER(img2img_expander), box_img2img);
+
+	box_img2img_inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_widget_set_visible(box_img2img_inner, FALSE);
+
+	img2img_visibility_toggle_btn = gen_visibility_toggle_button("Image to Image", "param_label", box_img2img_inner);
+	gtk_box_append (GTK_BOX (box_img2img), img2img_visibility_toggle_btn);
+
+	gtk_box_append (GTK_BOX (box_img2img), box_img2img_inner);
+	gtk_box_append (GTK_BOX (box_properties), box_img2img);
 	
 	box_img2img_top_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_img2img_top_buttons), FALSE);
-	gtk_box_append (GTK_BOX (box_img2img), box_img2img_top_buttons);
+	gtk_widget_set_margin_end (box_img2img_top_buttons, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_img2img_top_buttons, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_img2img_inner), box_img2img_top_buttons);
 	
 	load_img2img_btn = gtk_button_new_with_label ("Choose Image");
 	gtk_widget_set_hexpand (load_img2img_btn, TRUE);
@@ -337,9 +350,12 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_preview_img2img = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_add_css_class(box_preview_img2img, "img_preview_box");
+	gtk_widget_set_margin_end (box_preview_img2img, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_preview_img2img, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_preview_img2img, LARGE_SPACING);
 	gtk_widget_set_hexpand (box_preview_img2img, FALSE);
 	gtk_widget_set_vexpand (box_preview_img2img, FALSE);
-	gtk_box_append (GTK_BOX (box_img2img), box_preview_img2img);
+	gtk_box_append (GTK_BOX (box_img2img_inner), box_preview_img2img);
 	
 	overlay_img2img = gtk_overlay_new();
 	
@@ -357,18 +373,78 @@ app_activate (GApplication *app, gpointer user_data)
 
 	detector_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(detector_separator, "horiz_separator");
-	gtk_box_append (GTK_BOX (box_img2img), detector_separator);
+	gtk_box_append (GTK_BOX (box_img2img_inner), detector_separator);
 	
 	detector_info_btn = gtk_button_new_with_label ("ADetailer ⓘ");
 	gtk_widget_add_css_class(detector_info_btn, "label_btn");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_info_btn), "Click for more info about ADetailer.");
 	gtk_widget_set_hexpand (detector_info_btn, FALSE);
 	gtk_widget_set_halign(detector_info_btn, GTK_ALIGN_CENTER);
+	gtk_widget_set_margin_bottom (detector_info_btn, MEDIUM_SPACING);
 	g_signal_connect (detector_info_btn, "clicked", G_CALLBACK (show_detector_message), win);
-	gtk_box_append (GTK_BOX (box_img2img), detector_info_btn);
+	gtk_box_append (GTK_BOX (box_img2img_inner), detector_info_btn);
 
+	// Detector Prompt Widgets
+	box_detector_prompts = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_widget_set_size_request(box_detector_prompts, 420, -1);
+	gtk_widget_set_margin_bottom (box_detector_prompts, LARGE_SPACING);
+	gtk_widget_set_hexpand (box_detector_prompts, TRUE);
+	gtk_box_append (GTK_BOX (box_img2img_inner), box_detector_prompts);
+
+	// Detector Positive Prompt Widgets
+	detector_pos_scr = gtk_scrolled_window_new ();
+	gtk_widget_set_size_request(detector_pos_scr, -1, 250);
+	gtk_widget_set_margin_end (detector_pos_scr, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (detector_pos_scr, MEDIUM_SPACING);
+	gtk_widget_set_visible(detector_pos_scr, FALSE);
+	
+	detector_pos_tv = gtk_text_view_new ();
+	gtk_widget_add_css_class(detector_pos_tv, "custom_entry");
+	detector_pos_tb = gtk_text_view_get_buffer (GTK_TEXT_VIEW (detector_pos_tv));
+	
+	gtk_widget_set_hexpand (detector_pos_tv, TRUE);
+	gtk_widget_set_vexpand (detector_pos_tv, TRUE);
+	load_prompt_text(detector_pos_tb, ".cache/detector_pp_cache", DETECTOR_POSITIVE_PROMPT);
+	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (detector_pos_tv), GTK_WRAP_WORD_CHAR);
+	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (detector_pos_scr), detector_pos_tv);
+
+	detector_pp_visibility_toggle_btn = gen_visibility_toggle_button("ADetailer Positive Prompt", "pos_prompt_label", detector_pos_scr);
+	gtk_widget_set_margin_end (detector_pp_visibility_toggle_btn, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (detector_pp_visibility_toggle_btn, MEDIUM_SPACING);
+
+	gtk_box_append (GTK_BOX (box_detector_prompts), detector_pp_visibility_toggle_btn);
+	gtk_box_append (GTK_BOX (box_detector_prompts), detector_pos_scr);
+
+	// Detector Negative Prompt Widgets
+	detector_neg_scr = gtk_scrolled_window_new ();
+	gtk_widget_set_size_request(detector_neg_scr, -1, 250);
+	gtk_widget_set_margin_end (detector_neg_scr, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (detector_neg_scr, MEDIUM_SPACING);
+	gtk_widget_set_visible(detector_neg_scr, FALSE);
+
+	detector_neg_tv = gtk_text_view_new ();
+	gtk_widget_add_css_class(detector_neg_tv, "custom_entry");
+	detector_neg_tb = gtk_text_view_get_buffer (GTK_TEXT_VIEW (detector_neg_tv));
+	
+	gtk_widget_set_hexpand (detector_neg_tv, TRUE);
+	gtk_widget_set_vexpand (detector_neg_tv, TRUE);
+	load_prompt_text(detector_neg_tb, ".cache/detector_np_cache", DETECTOR_NEGATIVE_PROMPT);
+	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (detector_neg_tv), GTK_WRAP_WORD_CHAR);
+	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (detector_neg_scr), detector_neg_tv);
+
+	detector_np_visibility_toggle_btn = gen_visibility_toggle_button("ADetailer Negative Prompt", "neg_prompt_label", detector_neg_scr);
+	gtk_widget_set_margin_end (detector_np_visibility_toggle_btn, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (detector_np_visibility_toggle_btn, MEDIUM_SPACING);
+
+	gtk_box_append (GTK_BOX (box_detector_prompts), detector_np_visibility_toggle_btn);
+	gtk_box_append (GTK_BOX (box_detector_prompts), detector_neg_scr);
+
+	// Detector Widgets
 	box_detector_widgets = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_box_append (GTK_BOX (box_img2img), box_detector_widgets);
+	gtk_widget_set_margin_end (box_detector_widgets, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_detector_widgets, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_detector_widgets, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_img2img_inner), box_detector_widgets);
 
 	detector_dd = gen_path_dd(DETECTOR_PATH, NULL, 0, app_data->detector_string, NULL, app, 0);
 	gtk_widget_set_hexpand (detector_dd, TRUE);
@@ -381,8 +457,11 @@ app_activate (GApplication *app, gpointer user_data)
 
 	box_detector_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_detector_buttons), TRUE);
+	gtk_widget_set_margin_end (box_detector_buttons, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_detector_buttons, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_detector_buttons, LARGE_SPACING);
 	gtk_widget_set_hexpand (box_detector_buttons, TRUE);
-	gtk_box_append (GTK_BOX (box_img2img), box_detector_buttons);
+	gtk_box_append (GTK_BOX (box_img2img_inner), box_detector_buttons);
 
 	box_detector_buttons_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_detector_buttons), box_detector_buttons_col1);
@@ -478,18 +557,22 @@ app_activate (GApplication *app, gpointer user_data)
 
 	mask_inpainting_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(mask_inpainting_separator, "horiz_separator");
-	gtk_box_append (GTK_BOX (box_img2img), mask_inpainting_separator);
+	gtk_box_append (GTK_BOX (box_img2img_inner), mask_inpainting_separator);
 
 	mask_inpainting_lab = gtk_label_new ("Mask Inpainting ⓘ");
 	gtk_widget_add_css_class(mask_inpainting_lab, "param_label");
+	gtk_widget_set_margin_top (mask_inpainting_lab, MEDIUM_SPACING);
 	gtk_widget_set_margin_bottom(mask_inpainting_lab, MEDIUM_SPACING);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(mask_inpainting_lab), "Regenerates selected areas of an image while preserving the rest.\nFor optimal results try using a inpainting-specific model.");
 	gtk_widget_set_halign(mask_inpainting_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_img2img), mask_inpainting_lab);
+	gtk_box_append (GTK_BOX (box_img2img_inner), mask_inpainting_lab);
 
 	box_img2img_bottom_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_set_margin_end (box_img2img_bottom_buttons, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_img2img_bottom_buttons, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_img2img_bottom_buttons, LARGE_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_img2img_bottom_buttons), FALSE);
-	gtk_box_append (GTK_BOX (box_img2img), box_img2img_bottom_buttons);
+	gtk_box_append (GTK_BOX (box_img2img_inner), box_img2img_bottom_buttons);
 
 	mask_img2img_btn = gtk_button_new_with_label ("Draw Mask");
 	gtk_widget_set_hexpand (mask_img2img_btn, TRUE);
@@ -513,10 +596,10 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect(inpaint_check, "toggled", G_CALLBACK(toggle_img2img_mode), detector_check);
 
 	//Set Prompts Box
-	box_prompts = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
-	gtk_widget_set_size_request(box_prompts, 460, 500);
+	box_prompts = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
+	gtk_widget_set_size_request(box_prompts, 460, -1);
 	gtk_widget_set_hexpand (box_prompts, TRUE);
-	gtk_box_set_homogeneous (GTK_BOX (box_prompts), TRUE);
+	gtk_box_set_homogeneous (GTK_BOX (box_prompts), FALSE);
 	gtk_widget_add_css_class(box_prompts, "inner_box");
 	gtk_box_append (GTK_BOX (box_properties), box_prompts);
 	
@@ -524,47 +607,44 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_prompts), box_pos_prompt);
 	
 	box_neg_prompt = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
-	gtk_box_append (GTK_BOX (box_prompts), box_neg_prompt);
+	gtk_box_append (GTK_BOX (box_prompts), box_neg_prompt);	
 
-	//Set Prompts Box Labels
-	pp_lab = gtk_label_new ("Positive Prompt");
-	np_lab = gtk_label_new ("Negative Prompt");
-	
-	gtk_widget_set_halign(pp_lab, LABEL_ALIGNMENT);
-	gtk_widget_set_halign(np_lab, LABEL_ALIGNMENT);
-	
-	gtk_widget_add_css_class(pp_lab, "pos_prompt_label");
-	gtk_widget_add_css_class(np_lab, "neg_prompt_label");
-
-	gtk_box_append (GTK_BOX (box_pos_prompt), pp_lab);
-	gtk_box_append (GTK_BOX (box_neg_prompt), np_lab);
-
-	//Set positive textview
+	//Set Positive Prompt Widgets
 	pos_scr = gtk_scrolled_window_new ();
+	gtk_widget_set_size_request(pos_scr, -1, 250);
+	
 	pos_tv = gtk_text_view_new ();
 	gtk_widget_add_css_class(pos_tv, "custom_entry");
 	pos_tb = gtk_text_view_get_buffer (GTK_TEXT_VIEW (pos_tv));
 	
 	gtk_widget_set_hexpand (pos_tv, TRUE);
 	gtk_widget_set_vexpand (pos_tv, TRUE);
-	load_pp_cache(pos_tb);
+	load_prompt_text(pos_tb, ".cache/pp_cache", POSITIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (pos_tv), GTK_WRAP_WORD_CHAR);
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (pos_scr), pos_tv);
 
+	pp_visibility_toggle_btn = gen_visibility_toggle_button("Positive Prompt", "pos_prompt_label", pos_scr);
+
+	gtk_box_append (GTK_BOX (box_pos_prompt), pp_visibility_toggle_btn);
 	gtk_box_append (GTK_BOX (box_pos_prompt), pos_scr);
 
-	//Set negative textview
+	//Set Negative Prompt Widgets
 	neg_scr = gtk_scrolled_window_new ();
+	gtk_widget_set_size_request(neg_scr, -1, 250);
+
 	neg_tv = gtk_text_view_new ();
 	gtk_widget_add_css_class(neg_tv, "custom_entry");
 	neg_tb = gtk_text_view_get_buffer (GTK_TEXT_VIEW (neg_tv));
 	
 	gtk_widget_set_hexpand (neg_tv, TRUE);
 	gtk_widget_set_vexpand (neg_tv, TRUE);
-	load_np_cache(neg_tb);
+	load_prompt_text(neg_tb, ".cache/np_cache", NEGATIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (neg_tv), GTK_WRAP_WORD_CHAR);
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (neg_scr), neg_tv);
 
+	np_visibility_toggle_btn = gen_visibility_toggle_button("Negative Prompt", "neg_prompt_label", neg_scr);
+
+	gtk_box_append (GTK_BOX (box_neg_prompt), np_visibility_toggle_btn);
 	gtk_box_append (GTK_BOX (box_neg_prompt), neg_scr);
 
 	//Set Checkpoint Widgets
@@ -579,6 +659,9 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_checkpoint), checkpoint_lab);
 	
 	box_checkpoint_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_set_margin_end (box_checkpoint_buttons, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_checkpoint_buttons, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_checkpoint_buttons, LARGE_SPACING);
 	gtk_box_append (GTK_BOX (box_checkpoint), box_checkpoint_buttons);
 	
 	generate_btn = gtk_button_new_with_label ("Add to Queue");
@@ -596,70 +679,76 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_checkpoint_buttons), sd_based_check);
 	
 	//Set add-ons Widgets
-	
-	addons_expander = gtk_expander_new ("Extra Addons");
-	gtk_widget_add_css_class(addons_expander, "param_label");
-	gtk_box_append (GTK_BOX (box_properties), addons_expander);
-	
-	box_addons = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+
+	box_addons = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_addons), FALSE);
 	gtk_widget_add_css_class(box_addons, "inner_box");
-	gtk_expander_set_child(GTK_EXPANDER(addons_expander), box_addons);
+
+	box_addons_inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_widget_set_margin_end (box_addons_inner, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_addons_inner, MEDIUM_SPACING);
+	gtk_widget_set_visible(box_addons_inner, FALSE);
+
+	addons_visibility_toggle_btn = gen_visibility_toggle_button("Extra Addons", "param_label", box_addons_inner);
+	gtk_box_append (GTK_BOX (box_addons), addons_visibility_toggle_btn);
+
+	gtk_box_append (GTK_BOX (box_addons), box_addons_inner);
+	gtk_box_append (GTK_BOX (box_properties), box_addons);
 	
 	//Set VAE Widgets
 
 	vae_lab = gtk_label_new ("VAE");
 	gtk_widget_set_halign(vae_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(vae_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_addons), vae_lab);
+	gtk_box_append (GTK_BOX (box_addons_inner), vae_lab);
 
 	vae_dd = gen_path_dd(VAES_PATH, NULL, 0, app_data->vae_string, NULL, app, 0);
-	gtk_box_append (GTK_BOX (box_addons), vae_dd);
+	gtk_box_append (GTK_BOX (box_addons_inner), vae_dd);
 
 	//Set CNet Widgets
 	
 	cnet_lab = gtk_label_new ("Control Net");
 	gtk_widget_set_halign(cnet_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(cnet_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_addons), cnet_lab);
+	gtk_box_append (GTK_BOX (box_addons_inner), cnet_lab);
 	
 	cnet_dd = gen_path_dd(CONTROLNET_PATH, NULL, 0, app_data->cnet_string, NULL, app, 0);
-	gtk_box_append (GTK_BOX (box_addons), cnet_dd);
+	gtk_box_append (GTK_BOX (box_addons_inner), cnet_dd);
 	
 	//Set Upscaler Widgets
 
 	upscaler_lab = gtk_label_new ("Upscaler");
 	gtk_widget_set_halign(upscaler_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(upscaler_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_addons), upscaler_lab);
+	gtk_box_append (GTK_BOX (box_addons_inner), upscaler_lab);
 
 	upscaler_dd = gen_path_dd(UPSCALES_PATH, NULL, 0, app_data->upscaler_string, NULL, app, 0);
-	gtk_box_append (GTK_BOX (box_addons), upscaler_dd);
+	gtk_box_append (GTK_BOX (box_addons_inner), upscaler_dd);
 
 	//Set Clip_l Widgets
 	
 	clip_l_lab = gtk_label_new ("Clip_l");
 	gtk_widget_set_halign(clip_l_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(clip_l_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_addons), clip_l_lab);
+	gtk_box_append (GTK_BOX (box_addons_inner), clip_l_lab);
 	
 	clip_l_dd = gen_path_dd(CLIPS_PATH, NULL, 0, app_data->clip_l_string, NULL, app, 0);
-	gtk_box_append (GTK_BOX (box_addons), clip_l_dd);
+	gtk_box_append (GTK_BOX (box_addons_inner), clip_l_dd);
 	
 	//Set Clip_g Widgets
 	
 	clip_g_lab = gtk_label_new ("Clip_g");
 	gtk_widget_set_halign(clip_g_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(clip_g_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_addons), clip_g_lab);
+	gtk_box_append (GTK_BOX (box_addons_inner), clip_g_lab);
 	
 	clip_g_dd = gen_path_dd(CLIPS_PATH, NULL, 0, app_data->clip_g_string, NULL, app, 0);
-	gtk_box_append (GTK_BOX (box_addons), clip_g_dd);
+	gtk_box_append (GTK_BOX (box_addons_inner), clip_g_dd);
 	
 	//Set Text Encoder Widgets
 	
 	box_text_encoder = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
-	gtk_box_append (GTK_BOX (box_addons), box_text_encoder);
+	gtk_box_append (GTK_BOX (box_addons_inner), box_text_encoder);
 	
 	text_enc_lab = gtk_label_new ("Text Encoder(T5xxl/LLM)");
 	gtk_widget_set_halign(text_enc_lab, LABEL_ALIGNMENT);
@@ -670,6 +759,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_text_encoder), box_text_encoder_buttons);
 	
 	text_enc_dd = gen_path_dd(TEXT_ENCODERS_PATH, NULL, 0, app_data->text_enc_string, NULL, app, 0);
+	gtk_widget_set_margin_bottom (text_enc_dd, LARGE_SPACING);
 	gtk_widget_set_hexpand (text_enc_dd, TRUE);
 	gtk_box_append (GTK_BOX (box_text_encoder_buttons), text_enc_dd);
 	
@@ -694,6 +784,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_model_adapters), lora_lab);
 
 	box_lora_widgets = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_set_margin_end (box_lora_widgets, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_lora_widgets, MEDIUM_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_lora_widgets), FALSE);
 	gtk_box_append (GTK_BOX (box_model_adapters), box_lora_widgets);
 	
@@ -714,6 +806,9 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_model_adapters), embedding_lab);
 
 	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, neg_tb, 0, NULL, NULL, app, 0);
+	gtk_widget_set_margin_end (embedding_dd, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (embedding_dd, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (embedding_dd, LARGE_SPACING);
 	gtk_box_append (GTK_BOX (box_model_adapters), embedding_dd);
 
 	//Set Parameters Widgets
@@ -725,6 +820,8 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_params_row1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_params_row1), TRUE);
+	gtk_widget_set_margin_end (box_params_row1, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_params_row1, MEDIUM_SPACING);
 	gtk_widget_set_hexpand (box_params_row1, TRUE);
 	gtk_box_append (GTK_BOX (box_params), box_params_row1);
 
@@ -758,6 +855,8 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_params_row2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_params_row2), TRUE);
+	gtk_widget_set_margin_end (box_params_row2, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_params_row2, MEDIUM_SPACING);
 	gtk_widget_set_hexpand (box_params_row2, TRUE);
 	gtk_box_append (GTK_BOX (box_params), box_params_row2);
 
@@ -803,6 +902,8 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_params_row3 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_params_row3), TRUE);
+	gtk_widget_set_margin_end (box_params_row3, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_params_row3, MEDIUM_SPACING);
 	gtk_widget_set_hexpand (box_params_row3, TRUE);
 	gtk_box_append (GTK_BOX (box_params), box_params_row3);
 
@@ -836,6 +937,8 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_params_row4 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_params_row4), TRUE);
+	gtk_widget_set_margin_end (box_params_row4, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_params_row4, MEDIUM_SPACING);
 	gtk_widget_set_hexpand (box_params_row4, TRUE);
 	gtk_box_append (GTK_BOX (box_params), box_params_row4);
 
@@ -880,6 +983,8 @@ app_activate (GApplication *app, gpointer user_data)
 	//Set Parameters Fifth Row Widgets
 	
 	box_params_row5 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_widget_set_margin_end (box_params_row5, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_params_row5, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_params), box_params_row5);
 	
 	//Set Seed Widgets
@@ -905,6 +1010,8 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_params_row6 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_params_row6), TRUE);
+	gtk_widget_set_margin_end (box_params_row6, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_params_row6, MEDIUM_SPACING);
 	gtk_widget_set_hexpand (box_params_row6, TRUE);
 	gtk_box_append (GTK_BOX (box_params), box_params_row6);
 
@@ -960,6 +1067,9 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	cnet_strength_spin = gtk_spin_button_new_with_range (0, 1.0, 0.05);
 	gtk_widget_add_css_class(cnet_strength_spin, "custom_spin");
+	gtk_widget_set_margin_end (cnet_strength_spin, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (cnet_strength_spin, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (cnet_strength_spin, LARGE_SPACING);
 	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(cnet_strength_spin), TRUE);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cnet_strength_spin), app_data->cnet_value);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(cnet_strength_spin),
@@ -976,10 +1086,14 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	box_hires_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_hires_col1), TRUE);
+	gtk_widget_set_margin_start (box_hires_col1, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_hires_col1, LARGE_SPACING);
 	gtk_box_append (GTK_BOX (box_hires), box_hires_col1);
 	
 	box_hires_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_hires_col2), TRUE);
+	gtk_widget_set_margin_end (box_hires_col2, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_hires_col2, LARGE_SPACING);
 	gtk_box_append (GTK_BOX (box_hires), box_hires_col2);
 
 	//Set Hires DD Widgets
@@ -1043,26 +1157,29 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Set Extra Options Widgets
 
-	extra_opts_expander = gtk_expander_new ("Extra Options");
-	gtk_widget_add_css_class(extra_opts_expander, "param_label");
-	gtk_box_append (GTK_BOX (box_properties), extra_opts_expander);
-	
 	box_extra_opts = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_add_css_class(box_extra_opts, "inner_box");
-	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts), FALSE);
-	gtk_expander_set_child(GTK_EXPANDER(extra_opts_expander), box_extra_opts);
+
+	box_extra_opts_inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_widget_set_visible(box_extra_opts_inner, FALSE);
+
+	extra_opts_visibility_toggle_btn = gen_visibility_toggle_button("Extra Options", "param_label", box_extra_opts_inner);
+	gtk_box_append (GTK_BOX (box_extra_opts), extra_opts_visibility_toggle_btn);
+
+	gtk_box_append (GTK_BOX (box_extra_opts), box_extra_opts_inner);
+	gtk_box_append (GTK_BOX (box_properties), box_extra_opts);
 	
 	// Miscellaneous Widgets
 	
 	miscellaneous_lab = gtk_label_new ("Miscellaneous");
 	gtk_widget_add_css_class(miscellaneous_lab, "param_label");
-	gtk_widget_set_margin_bottom(miscellaneous_lab, MEDIUM_SPACING);
 	gtk_widget_set_halign(miscellaneous_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_extra_opts), miscellaneous_lab);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), miscellaneous_lab);
 	
 	box_extra_opts_row1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_set_margin_bottom(box_extra_opts_row1, MEDIUM_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_row1), TRUE);
-	gtk_box_append (GTK_BOX (box_extra_opts), box_extra_opts_row1);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), box_extra_opts_row1);
 	
 	box_extra_opts_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_extra_opts_col1), TRUE);
@@ -1108,13 +1225,13 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	model_args_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(model_args_separator, "horiz_separator");
-	gtk_box_append (GTK_BOX (box_extra_opts), model_args_separator);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), model_args_separator);
 
 	model_args_lab = gtk_label_new ("Model-specific Args");
 	gtk_widget_add_css_class(model_args_lab, "param_label");
 	gtk_widget_set_margin_bottom(model_args_lab, MEDIUM_SPACING);
 	gtk_widget_set_halign(model_args_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_extra_opts), model_args_lab);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), model_args_lab);
 
 	chroma_dit_mask_check = gtk_check_button_new_with_label("Enable Chroma DiT Masking");
 	gtk_widget_add_css_class(chroma_dit_mask_check, "custom_check");
@@ -1122,34 +1239,35 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_valign(chroma_dit_mask_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(chroma_dit_mask_check), app_data->chroma_dit_mask_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(chroma_dit_mask_check), "Uses a DiT mask to isolate and protect color channels.\nOn by default. Won't affect other checkpoint types.");
-	gtk_box_append (GTK_BOX (box_extra_opts), chroma_dit_mask_check);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), chroma_dit_mask_check);
 
 	qwen_zero_cond_t_check = gtk_check_button_new_with_label("Enable Qwen Image Zero Cond T");
 	gtk_widget_add_css_class(qwen_zero_cond_t_check, "custom_check");
+	gtk_widget_set_margin_bottom (qwen_zero_cond_t_check, MEDIUM_SPACING);
 	gtk_widget_set_halign(qwen_zero_cond_t_check, GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(qwen_zero_cond_t_check, GTK_ALIGN_CENTER);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(qwen_zero_cond_t_check), app_data->qwen_zero_cond_t_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(qwen_zero_cond_t_check), "Enhances image edit fidelity and detail resolution.");
-	gtk_box_append (GTK_BOX (box_extra_opts), qwen_zero_cond_t_check);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), qwen_zero_cond_t_check);
 	
 	//Set Extra Options Widgets
 	
 	fa_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(fa_separator, "horiz_separator");
-	gtk_box_append (GTK_BOX (box_extra_opts), fa_separator);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), fa_separator);
 	
 	fa_toggle_lab = gtk_label_new ("Flash Attention ⓘ");
 	gtk_widget_add_css_class(fa_toggle_lab, "param_label");
 	gtk_widget_set_margin_bottom(fa_toggle_lab, MEDIUM_SPACING);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(fa_toggle_lab), "Enables a faster, more memory-efficient attention method that\nreduces VRAM usage and can speed up image generation.");
 	gtk_widget_set_halign(fa_toggle_lab, LABEL_ALIGNMENT);
-	gtk_box_append (GTK_BOX (box_extra_opts), fa_toggle_lab);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), fa_toggle_lab);
 	
 	box_fa_toggle = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_widget_set_margin_end (box_fa_toggle, MEDIUM_SPACING);
 	gtk_widget_set_margin_start (box_fa_toggle, MEDIUM_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_fa_toggle), TRUE);
-	gtk_box_append (GTK_BOX (box_extra_opts), box_fa_toggle);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), box_fa_toggle);
 	
 	fa_off_btn = gtk_toggle_button_new_with_label("Disabled");
 	gtk_widget_add_css_class(fa_off_btn, "toggle_btn");
@@ -1189,25 +1307,26 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	vae_tiling_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(vae_tiling_separator, "horiz_separator");
-	gtk_widget_set_margin_top(vae_tiling_separator, MEDIUM_SPACING);
-	gtk_box_append (GTK_BOX (box_extra_opts), vae_tiling_separator);
+	gtk_widget_set_margin_top(vae_tiling_separator, LARGE_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), vae_tiling_separator);
 	
 	vae_tiling_lab = gtk_label_new ("VAE Tiling ⓘ");
 	gtk_widget_add_css_class(vae_tiling_lab, "param_label");
 	gtk_widget_set_margin_bottom(vae_tiling_lab, MEDIUM_SPACING);
 	gtk_widget_set_halign(vae_tiling_lab, LABEL_ALIGNMENT);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(vae_tiling_lab), "Process VAE in tiles to reduce memory usage.");
-	gtk_box_append (GTK_BOX (box_extra_opts), vae_tiling_lab);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), vae_tiling_lab);
 	
 	vae_tiling_dd = gen_const_dd(LIST_VAE_TILE_SIZES, &app_data->vae_tiling_index);
 	gtk_widget_set_margin_end (vae_tiling_dd, MEDIUM_SPACING);
 	gtk_widget_set_margin_start (vae_tiling_dd, MEDIUM_SPACING);
-	gtk_box_append (GTK_BOX (box_extra_opts), vae_tiling_dd);
+	gtk_widget_set_margin_bottom (vae_tiling_dd, LARGE_SPACING);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), vae_tiling_dd);
 	
 	// Backend Manager Widgets
 	backends_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(backends_separator, "horiz_separator");
-	gtk_box_append (GTK_BOX (box_extra_opts), backends_separator);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), backends_separator);
 
 	backend_info_btn = gtk_button_new_with_label ("Backends ⓘ");
 	gtk_widget_add_css_class(backend_info_btn, "label_btn");
@@ -1215,16 +1334,16 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_hexpand (backend_info_btn, FALSE);
 	gtk_widget_set_halign(backend_info_btn, GTK_ALIGN_CENTER);
 	g_signal_connect (backend_info_btn, "clicked", G_CALLBACK (get_backend_info), win);
-	gtk_box_append (GTK_BOX (box_extra_opts), backend_info_btn);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), backend_info_btn);
 	
 	box_backends = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
 	gtk_widget_add_css_class(box_backends, "inner_box");
-	gtk_widget_set_margin_bottom (box_backends, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (box_backends, LARGE_SPACING);
 	gtk_widget_set_margin_end (box_backends, MEDIUM_SPACING);
 	gtk_widget_set_margin_start (box_backends, MEDIUM_SPACING);
 	gtk_widget_set_margin_top (box_backends, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_backends), FALSE);
-	gtk_box_append (GTK_BOX (box_extra_opts), box_backends);
+	gtk_box_append (GTK_BOX (box_extra_opts_inner), box_backends);
 	
 	// Diffusion Backend Widgets
 	model_backend_lab = gtk_label_new ("Model Backend");
@@ -1235,6 +1354,8 @@ app_activate (GApplication *app, gpointer user_data)
 	box_model_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_model_backend), TRUE);
 	gtk_widget_set_hexpand (box_model_backend, TRUE);
+	gtk_widget_set_margin_end (box_model_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_model_backend, MEDIUM_SPACING);
 	gtk_widget_set_margin_bottom(box_model_backend, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_backends), box_model_backend);
 	
@@ -1274,6 +1395,8 @@ app_activate (GApplication *app, gpointer user_data)
 	box_te_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_te_backend), TRUE);
 	gtk_widget_set_hexpand (box_te_backend, TRUE);
+	gtk_widget_set_margin_end (box_te_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_te_backend, MEDIUM_SPACING);
 	gtk_widget_set_margin_bottom(box_te_backend, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_backends), box_te_backend);
 	
@@ -1313,6 +1436,8 @@ app_activate (GApplication *app, gpointer user_data)
 	box_vae_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_vae_backend), TRUE);
 	gtk_widget_set_hexpand (box_vae_backend, TRUE);
+	gtk_widget_set_margin_end (box_vae_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_vae_backend, MEDIUM_SPACING);
 	gtk_widget_set_margin_bottom(box_vae_backend, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_backends), box_vae_backend);
 	
@@ -1352,6 +1477,8 @@ app_activate (GApplication *app, gpointer user_data)
 	box_cnet_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_cnet_backend), TRUE);
 	gtk_widget_set_hexpand (box_cnet_backend, TRUE);
+	gtk_widget_set_margin_end (box_cnet_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_cnet_backend, MEDIUM_SPACING);
 	gtk_widget_set_margin_bottom(box_cnet_backend, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_backends), box_cnet_backend);
 	
@@ -1391,6 +1518,8 @@ app_activate (GApplication *app, gpointer user_data)
 	box_upscaler_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_upscaler_backend), TRUE);
 	gtk_widget_set_hexpand (box_upscaler_backend, TRUE);
+	gtk_widget_set_margin_end (box_upscaler_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_upscaler_backend, MEDIUM_SPACING);
 	gtk_widget_set_margin_bottom(box_upscaler_backend, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_backends), box_upscaler_backend);
 	
@@ -1430,7 +1559,9 @@ app_activate (GApplication *app, gpointer user_data)
 	box_detector_backend = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_detector_backend), TRUE);
 	gtk_widget_set_hexpand (box_detector_backend, TRUE);
-	gtk_widget_set_margin_bottom(box_detector_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_end (box_detector_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_detector_backend, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom(box_detector_backend, LARGE_SPACING);
 	gtk_box_append (GTK_BOX (box_backends), box_detector_backend);
 	
 	box_detector_backend_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
@@ -1752,7 +1883,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	load_img2img_file_d = g_new0 (LoadImg2ImgData, 1);
 	load_img2img_file_d->win = win;
-	load_img2img_file_d->img2img_expander = img2img_expander;
+	load_img2img_file_d->img2img_visibility_toggle_btn = img2img_visibility_toggle_btn;
 	load_img2img_file_d->overlay_img2img = overlay_img2img;
 	load_img2img_file_d->detector_check = detector_check;
 	load_img2img_file_d->inpaint_check = inpaint_check;
@@ -1769,7 +1900,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_img2img_from_preview_d->image_files = app_data->preview_image_files;
 	load_img2img_from_preview_d->img2img_file_path = app_data->img2img_file_path;
 	load_img2img_from_preview_d->image_wgt = preview_img2img;
-	load_img2img_from_preview_d->img2img_expander = img2img_expander;
+	load_img2img_from_preview_d->img2img_visibility_toggle_btn = img2img_visibility_toggle_btn;
 	load_img2img_from_preview_d->overlay_img2img = overlay_img2img;
 	load_img2img_from_preview_d->inpaint_check = inpaint_check;
 	g_signal_connect (set_img2img_from_preview_btn, "clicked", G_CALLBACK (set_current_preview_to_img2img), load_img2img_from_preview_d);
@@ -1784,6 +1915,8 @@ app_activate (GApplication *app, gpointer user_data)
 
 	gen_d = g_new0 (GenerationData, 1);
 	gen_d->app_data = app_data;
+	gen_d->detector_neg_p = detector_neg_tb;
+	gen_d->detector_pos_p = detector_pos_tb;
 	gen_d->neg_p = neg_tb;
 	gen_d->pos_p = pos_tb;
 	gen_d->cancel_all_btn = cancel_all_btn;

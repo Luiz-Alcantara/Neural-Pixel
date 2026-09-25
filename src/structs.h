@@ -76,12 +76,6 @@ typedef struct {
 } CancelAllData;
 
 typedef struct {
-	char *pos_p;
-	char *neg_p;
-	char *img_name;
-} MyCacheData;
-
-typedef struct {
 	GString *dd_item_str;
 	int req_int;
 	GtkWidget *g_btn;
@@ -99,6 +93,8 @@ typedef struct {
 
 typedef struct {
 	AppStartData *app_data;
+	GtkTextBuffer *detector_neg_p;
+	GtkTextBuffer *detector_pos_p;
 	GtkTextBuffer *neg_p;
 	GtkTextBuffer *pos_p;
 	GtkWidget *cancel_all_btn;
@@ -172,6 +168,8 @@ typedef struct {
 	char *clip_g_filename;
 	char *cnet_filename;
 	char *detector_filename;
+	char *detector_negative_prompt;
+	char *detector_positive_prompt;
 	char *img2img_file_path;
 	char *negative_prompt;
 	char *output_path;
@@ -247,7 +245,7 @@ typedef struct {
 
 typedef struct {
 	GtkWidget *win;
-	GtkWidget *img2img_expander;
+	GtkWidget *img2img_visibility_toggle_btn;
 	GtkWidget *overlay_img2img;
 	GtkWidget *image_wgt;
 	GtkWidget *detector_check;
@@ -261,7 +259,7 @@ typedef struct {
 	GPtrArray *image_files;
 	GString *img2img_file_path;
 	GtkWidget *image_wgt;
-	GtkWidget *img2img_expander;
+	GtkWidget *img2img_visibility_toggle_btn;
 	GtkWidget *overlay_img2img;
 	GtkWidget *detector_check;
 	GtkWidget *inpaint_check;

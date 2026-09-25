@@ -162,7 +162,7 @@ void clear_mask_btn_cb (GtkButton *btn, gpointer user_data)
 void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
 {
 	LoadImg2ImgData *data = user_data;
-	gtk_widget_remove_css_class(data->img2img_expander, "img2img_active");
+	gtk_widget_remove_css_class(data->img2img_visibility_toggle_btn, "custom_btn_img2img");
 	GString *gstr = data->img2img_file_path;
 	g_string_assign(gstr, "None");
 	GtkPicture *preview_img = GTK_PICTURE(data->image_wgt);
@@ -216,17 +216,6 @@ void dropdown_items_update (const char *path, GtkWidget *dd, GApplication *app)
 		gtk_drop_down_set_model(GTK_DROP_DOWN(dd), G_LIST_MODEL(new_dd_items));
 		g_object_unref(new_dd_items);
 	}
-}
-
-void free_cache_data (MyCacheData *s)
-{
-	if (s == NULL) {
-		return;
-	}
-	free(s->pos_p);
-	free(s->neg_p);
-	free(s->img_name);
-	free(s);
 }
 
 void free_preview_data (gpointer data)
@@ -1264,4 +1253,15 @@ void toggle_fa_options(GtkToggleButton *btn, gpointer user_data)
 	} else {
 		*i = 0;
 	}
+}
+
+void toggle_wgt_visibility(GtkButton *btn, gpointer user_data)
+{
+	GtkWidget *wgt = GTK_WIDGET(user_data);
+	gboolean is_visible = gtk_widget_get_visible(wgt);
+
+	gtk_widget_set_visible(wgt, !is_visible);
+
+	GtkImage *icon = g_object_get_data(G_OBJECT(btn), "toggle-icon");
+	gtk_image_set_from_icon_name(icon, !is_visible ? "pan-down-symbolic" : "pan-end-symbolic");
 }

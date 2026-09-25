@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <string.h>
+#include "constants.h"
 #include "file_utils.h"
 #include "str_utils.h"
 #include "structs.h"
@@ -98,4 +99,29 @@ GtkWidget* gen_path_dd(const char* path, GtkTextBuffer *tb, int tb_type, GString
 		}
 		return dd;
 	}
+}
+
+GtkWidget* gen_visibility_toggle_button(const char *btn_text, const char *css_class_str, GtkWidget *wgt)
+{
+	GtkWidget *btn = gtk_button_new();
+	gtk_widget_add_css_class(btn, "custom_btn");
+
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
+
+	gboolean is_visible = gtk_widget_get_visible(wgt);
+	const char *icon_name = is_visible ? "pan-down-symbolic" : "pan-end-symbolic";
+
+	GtkWidget *icon = gtk_image_new_from_icon_name(icon_name);
+	GtkWidget *label = gtk_label_new(btn_text);
+	gtk_widget_set_halign(label, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(label, css_class_str);
+
+	gtk_box_append(GTK_BOX(box), icon);
+	gtk_box_append(GTK_BOX(box), label);
+	gtk_button_set_child(GTK_BUTTON(btn), box);
+
+	g_object_set_data(G_OBJECT(btn), "toggle-icon", icon);
+	g_signal_connect(btn, "clicked", G_CALLBACK(toggle_wgt_visibility), wgt);
+	return btn;
 }

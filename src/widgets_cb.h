@@ -25,8 +25,6 @@ static gboolean steal_scroll_cb(GtkEventControllerScroll *controller, double dx,
 
 void dropdown_items_update(const char *path, GtkWidget *dd, GApplication *app);
 
-void free_cache_data(MyCacheData *s);
-
 void free_preview_data(gpointer data);
 
 static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
@@ -116,5 +114,7 @@ void toggle_img2img_mode(GtkWidget *wgt, gpointer user_data);
 void toggle_extra_options(GtkCheckButton *btn, gpointer user_data);
 
 void toggle_fa_options(GtkToggleButton *btn, gpointer user_data);
+
+void toggle_wgt_visibility(GtkButton *btn, gpointer user_data);
 
 #endif // WIDGETS_CB_H

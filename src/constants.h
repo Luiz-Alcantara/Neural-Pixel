@@ -55,6 +55,8 @@ extern const size_t LIST_HIRES_UPSCALERS_COUNT;
 
 extern const char* POSITIVE_PROMPT;
 extern const char* NEGATIVE_PROMPT;
+extern const char* DETECTOR_POSITIVE_PROMPT;
+extern const char* DETECTOR_NEGATIVE_PROMPT;
 extern const char* OPTIONAL_ITEMS;
 extern const char* DEFAULT_IMG_PATH;
 extern const char* EMPTY_IMG_PATH;
