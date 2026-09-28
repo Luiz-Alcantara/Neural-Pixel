@@ -609,6 +609,13 @@ void on_set_img2img_from_preview_btn_destroy (GtkWidget* wgt, gpointer user_data
 	g_free(data);
 }
 
+void on_swap_dimensions_btn_destroy (GtkWidget *wgt, gpointer user_data)
+{
+	SwapDimensionsData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
 void quit_btn_callback (GtkWidget *wgt, GtkWidget *win)
 {
 	gtk_window_close(GTK_WINDOW(win));
@@ -1196,6 +1203,17 @@ void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable)
 
 	g_signal_connect(sc, "scroll", G_CALLBACK (steal_scroll_cb), GTK_SCROLLED_WINDOW(properties_scrollable));
 	gtk_widget_add_controller (btn, sc);
+}
+
+void swap_dimensions_cb(GtkGestureClick *gesture, int n_press, double x, double y, gpointer user_data)
+{
+	SwapDimensionsData *data = user_data;
+
+	guint selected_height = gtk_drop_down_get_selected(GTK_DROP_DOWN(data->height_dd));
+	guint selected_width = gtk_drop_down_get_selected(GTK_DROP_DOWN(data->width_dd));
+
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(data->height_dd), selected_width);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(data->width_dd), selected_height);
 }
 
 void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position, GdkEvent *event, gpointer user_data)

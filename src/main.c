@@ -120,7 +120,9 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *lora_triggers_btn;
 	GtkWidget *embedding_lab, *embedding_dd;
 
+	GtkGesture *gesture_width_dd;
 	GtkWidget *width_lab, *width_dd;
+	GtkGesture *gesture_height_dd;
 	GtkWidget *height_lab, *height_dd;
 	GtkWidget *steps_lab, *steps_spin;
 	GtkWidget *batch_count_lab, *batch_count_spin;
@@ -211,6 +213,7 @@ app_activate (GApplication *app, gpointer user_data)
 	PreviewBoxHoverData *preview_box_hover_d;
 	ReloadDropDownData *reload_d;
 	ResetCbData *reset_d;
+	SwapDimensionsData *swap_dimensions_d;
 	CancelAllData *cancel_all_d;
 	GenerationData *gen_d;
 	ManageTriggersData *manage_triggers_d;
@@ -832,15 +835,20 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_params_row1), box_params_row1_col2);
 	
 	//Set Width Widgets
-	
+
 	width_lab = gtk_label_new ("Width");
 	gtk_widget_add_css_class(width_lab, "param_label");
 	gtk_widget_set_halign(width_lab, LABEL_ALIGNMENT);
 	gtk_box_append (GTK_BOX (box_params_row1_col1), width_lab);
 	
 	width_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->w_index);
+	gtk_widget_set_tooltip_text(width_dd, "Controls the width of the generated image.\nRight-click to swap width and height values.");
 	gtk_box_append (GTK_BOX (box_params_row1_col1), width_dd);
-	
+
+	gesture_width_dd = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture_width_dd), GDK_BUTTON_SECONDARY);
+	gtk_widget_add_controller(width_dd, GTK_EVENT_CONTROLLER(gesture_width_dd));
+
 	//Set Height Widgets
 	
 	height_lab = gtk_label_new ("Height");
@@ -849,8 +857,13 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_params_row1_col2), height_lab);
 	
 	height_dd = gen_const_dd(LIST_RESOLUTIONS_STR, &app_data->h_index);
+	gtk_widget_set_tooltip_text(height_dd, "Controls the height of the generated image.\nRight-click to swap width and height values.");
 	gtk_box_append (GTK_BOX (box_params_row1_col2), height_dd);
-	
+
+	gesture_height_dd = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture_height_dd), GDK_BUTTON_SECONDARY);
+	gtk_widget_add_controller(height_dd, GTK_EVENT_CONTROLLER(gesture_height_dd));
+
 	//Set Parameters Second Row Widgets
 	
 	box_params_row2 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
@@ -1776,6 +1789,13 @@ app_activate (GApplication *app, gpointer user_data)
 	reload_d->embedding_dd = embedding_dd;
 	g_signal_connect (reload_btn, "clicked", G_CALLBACK (reload_dropdown), reload_d);
 	g_signal_connect (reload_btn, "destroy", G_CALLBACK (on_reload_btn_destroy), reload_d);
+
+	swap_dimensions_d = g_new0(SwapDimensionsData, 1);
+	swap_dimensions_d->height_dd = height_dd;
+	swap_dimensions_d->width_dd = width_dd;
+	g_signal_connect(gesture_width_dd, "pressed", G_CALLBACK(swap_dimensions_cb), swap_dimensions_d);
+	g_signal_connect(gesture_height_dd, "pressed", G_CALLBACK(swap_dimensions_cb), swap_dimensions_d);
+	g_signal_connect (height_dd, "destroy", G_CALLBACK (on_swap_dimensions_btn_destroy), swap_dimensions_d);
 
 	reset_d = g_new0 (ResetCbData, 1);
 	reset_d->pos_tb = pos_tb;

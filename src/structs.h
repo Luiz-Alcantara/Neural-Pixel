@@ -470,4 +470,9 @@ typedef struct {
 	GtkWidget* halt_btn;
 } StartGenData;
 
+typedef struct {
+	GtkWidget *height_dd;
+	GtkWidget *width_dd;
+} SwapDimensionsData;
+
 #endif // STRUCTS_H

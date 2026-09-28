@@ -85,6 +85,8 @@ void on_reset_default_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_set_img2img_from_preview_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
+void on_swap_dimensions_btn_destroy (GtkWidget *wgt, gpointer user_data);
+
 void quit_btn_callback (GtkWidget *wgt, GtkWidget *win);
 
 void reload_dropdown(GtkWidget* wgt, gpointer user_data);
@@ -104,6 +106,8 @@ void show_detector_message(GtkWidget *btn, gpointer user_data);
 void show_no_models_message(GtkWidget *main_win);
 
 void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable);
+
+void swap_dimensions_cb(GtkGestureClick *gesture, int n_press, double x, double y, gpointer user_data);
 
 void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position, GdkEvent *event, gpointer user_data);
 
