@@ -222,7 +222,7 @@ int count_output_files()
 int check_file_exists(const char *filename, int is_text_file)
 {
 	/* Check if file exists */
-	if (access(filename, F_OK) == 0) {
+	if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
 		/* If it's a text file, verify it's not empty and initialize if needed */
 		if (is_text_file == 1) {
 			/* pp_cache should NOT be empty */
