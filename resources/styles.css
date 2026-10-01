@@ -1,7 +1,7 @@
 /* resources/styles.css */
 
 /* Greenish color
-TODO: Create the greenish color palette
+TODO: Create the greenish color palette and more
 */
 
 
@@ -19,7 +19,7 @@ TODO: Create the greenish color palette
 @define-color separator #3A4250;
 @define-color separator-inner #292F38;
 
-/* Reddish color
+/* Reddish color (Warmer colors, more comfortable for the eyes)
 @define-color primary-color #221818;
 @define-color primary-color-light #342525;
 @define-color primary-color-light-alt #433030;
@@ -33,15 +33,6 @@ TODO: Create the greenish color palette
 @define-color separator #503B3A;
 @define-color separator-inner #382929;
 */
-
-/* Focus outline color
-*:focus {
-	border: 1px solid var(--separator);
-	outline-color: var(--primary-color-accent);
-	outline-style: solid;
-	outline-width: 1px;
-	outline-offset: -2px;
-}*/
 
 
 /* Title Bar */
@@ -169,7 +160,7 @@ TODO: Create the greenish color palette
 .custom_entry {
 	background-image: none;
 	background-color: @primary-color-dark;
-	font-family: IBM Plex Mono, monospace;
+	font-family: IBM Plex Mono, JetBrains Mono, monospace;
 	color: @text-light;
 	font-size: 11pt;
 	font-weight: 500;
@@ -335,7 +326,6 @@ scrollbar slider:hover {
 /* Widget Labels */
 .param_label, .pos_prompt_label, .neg_prompt_label {
 	color: @text-light;
-	/*font-family: JetBrains Mono, monospace;*/
 	font-size: 12pt;
 	font-weight: bold;
 }
