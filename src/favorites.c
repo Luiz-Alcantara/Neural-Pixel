@@ -78,7 +78,12 @@ static void favorites_factory_bind_cb(GtkSignalListItemFactory *factory, GtkList
 	GtkWidget *fav_card = gtk_list_item_get_child(item);
 	GtkWidget *fav_image = g_object_get_data(G_OBJECT(fav_card), "fav-image");
 
-	gtk_picture_set_filename(GTK_PICTURE(fav_image), path);
+	if (check_file_exists(path, 0)) {
+		gtk_picture_set_filename(GTK_PICTURE(fav_image), path);
+	} else {
+		gtk_picture_set_filename(GTK_PICTURE(fav_image), EMPTY_IMG_PATH);
+		g_printerr("Failed to load file: '%s'.\n", path);
+	}
 }
 
 static void favorites_window_update(FavoritesWindowData *favorites_d)
@@ -179,7 +184,7 @@ void show_favorites_manager(GtkButton *btn, gpointer user_data)
 	gtk_widget_add_css_class(favorites_win, "info_box");
 	gtk_window_set_transient_for(GTK_WINDOW(favorites_win), GTK_WINDOW(data->win));
 	gtk_window_set_title(GTK_WINDOW(favorites_win), "Favorites");
-	gtk_window_set_default_size(GTK_WINDOW(favorites_win), 1280, -1);
+	gtk_window_set_default_size(GTK_WINDOW(favorites_win), 1280, 640);
 	gtk_window_set_modal(GTK_WINDOW(favorites_win), TRUE);
 	gtk_window_set_resizable (GTK_WINDOW(favorites_win), FALSE);
 	gtk_window_set_deletable (GTK_WINDOW(favorites_win), TRUE);

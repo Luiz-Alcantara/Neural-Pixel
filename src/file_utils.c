@@ -28,7 +28,7 @@ static void create_default_files(const char *file_path, GError **error)
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/favorites' does not exist or cannot be accessed.");
 			return;
 		}
-		fprintf(fcf, "%s", DEFAULT_IMG_PATH);
+		fprintf(fcf, "%s\n", DEFAULT_IMG_PATH);
 		fclose(fcf);
 		return;
 	}

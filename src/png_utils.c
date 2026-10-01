@@ -580,8 +580,16 @@ void load_metadata_from_favorites(GtkWidget *btn, gpointer user_data)
 	gchar *img_path = g_file_get_path(img_file);
 	if (img_path == NULL) { g_printerr("Failed to get image path.\n"); return; }
 
+	size_t img_path_len = strlen(img_path);
+	size_t empty_path_len = strlen(EMPTY_IMG_PATH) - 2;
+
 	if (check_file_exists(img_path, 0) == 1) {
-		set_png_metadata(img_path, favorites_d->load_png_info_d);
+		if (img_path_len >= empty_path_len && strcmp(img_path + img_path_len - empty_path_len, EMPTY_IMG_PATH + 2) != 0) {
+			set_png_metadata(img_path, favorites_d->load_png_info_d);
+		} else { 
+			g_printerr("Failed to load metadata from '%s'.\n", img_path);
+			g_free(img_path);
+		}
 	} else {
 		g_printerr("File '%s' does not exist or cannot be accessed.\n", img_path);
 		g_free(img_path);
