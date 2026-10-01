@@ -1,8 +1,9 @@
 /* resources/styles.css */
 
 /* Greenish color
-TODO: Create the greenish color palette and more
+TODO: Create the greenish color palette
 */
+
 
 /* Bluish color */
 @define-color primary-color #181C22;
@@ -18,7 +19,7 @@ TODO: Create the greenish color palette and more
 @define-color separator #3A4250;
 @define-color separator-inner #292F38;
 
-/* Reddish color (Warmer colors, more comfortable for the eyes)
+/* Reddish color
 @define-color primary-color #221818;
 @define-color primary-color-light #342525;
 @define-color primary-color-light-alt #433030;
@@ -32,6 +33,15 @@ TODO: Create the greenish color palette and more
 @define-color separator #503B3A;
 @define-color separator-inner #382929;
 */
+
+/* Focus outline color
+*:focus {
+	border: 1px solid var(--separator);
+	outline-color: var(--primary-color-accent);
+	outline-style: solid;
+	outline-width: 1px;
+	outline-offset: -2px;
+}*/
 
 
 /* Title Bar */
@@ -159,10 +169,21 @@ TODO: Create the greenish color palette and more
 .custom_entry {
 	background-image: none;
 	background-color: @primary-color-dark;
-	font-family: IBM Plex Mono, JetBrains Mono, monospace;
+	font-family: IBM Plex Mono, monospace;
 	color: @text-light;
 	font-size: 11pt;
 	font-weight: 500;
+}
+
+
+/* Favorites List View */
+.favorites_listview {
+	background-color: @primary-color;
+}
+
+.favorites_listview row:hover, .favorites_listview row:selected, .favorites_listview row:selected:focus{
+	background-color: transparent;
+	color: inherit;
 }
 
 
@@ -278,12 +299,10 @@ TODO: Create the greenish color palette and more
 	background-color: @primary-color;
 }
 
-
 /* Right Box */
 .right_box, .img_preview_box {
 	background-color: @primary-color-darker;
 }
-
 
 /* Scrollbar */
 scrollbar {
@@ -316,10 +335,10 @@ scrollbar slider:hover {
 /* Widget Labels */
 .param_label, .pos_prompt_label, .neg_prompt_label {
 	color: @text-light;
+	/*font-family: JetBrains Mono, monospace;*/
 	font-size: 12pt;
 	font-weight: bold;
 }
-
 
 /* Info Labels */
 .info_box {

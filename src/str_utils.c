@@ -18,6 +18,41 @@ gchar *ascii_format_double(const char *format, double value)
 	return g_strdup(result);
 }
 
+int check_file_has_line(const char *file_path, const char *line_to_search)
+{
+	FILE *fp = fopen(file_path, "r");
+	if (!fp) return 0;
+
+	size_t cap = strlen(line_to_search) + 3;
+	char *buf = malloc(cap);
+	if (!buf) { fclose(fp); return 0; }
+
+	int found = 0;
+
+	while (fgets(buf, (int)cap, fp)) {
+		size_t len = strlen(buf);
+
+		if (len > 0 && buf[len - 1] == '\n') {
+			buf[--len] = '\0';
+			if (len > 0 && buf[len - 1] == '\r') buf[--len] = '\0';
+		} else if (!feof(fp)) {
+			int c;
+			while ((c = getc(fp)) != EOF && c != '\n')
+				;
+			continue;
+		}
+
+		if (strcmp(buf, line_to_search) == 0) {
+			found = 1;
+			break;
+		}
+	}
+
+	free(buf);
+	fclose(fp);
+	return found;
+}
+
 int check_list_contains_item(const char* const* list, const char* item)
 {
 	int i = 0;

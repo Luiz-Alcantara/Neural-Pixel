@@ -290,6 +290,13 @@ typedef struct {
 } LoadPNGData;
 
 typedef struct {
+	LoadPNGData *load_png_info_d;
+	GtkStringList *store;
+	GtkWidget *stack;
+	gboolean modified;
+} FavoritesWindowData;
+
+typedef struct {
 	GtkWidget *lora_dd;
 	GtkWidget *win;
 } ManageTriggersData;

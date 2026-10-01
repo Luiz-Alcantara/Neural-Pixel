@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include "constants.h"
 #include "custom_widgets.h"
+#include "favorites.h"
 #include "file_utils.h"
 #include "generate_cb.h"
 #include "handle_cache.h"
@@ -47,7 +48,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *properties_scrollable;
 
 	GtkWidget *box_properties, *boxl_topbar;
-	GtkWidget *info_btn, *donate_btn, *reload_btn, *reset_default_btn, *load_from_img_btn;
+	GtkWidget *info_btn, *donate_btn, *reload_btn, *reset_default_btn, *load_from_img_btn, *show_favorites_btn;
 
 	GtkWidget *img2img_visibility_toggle_btn;
 	GtkWidget *box_img2img, *box_img2img_inner, *box_img2img_top_buttons, *box_preview_img2img, *box_img2img_bottom_buttons;
@@ -203,7 +204,8 @@ app_activate (GApplication *app, gpointer user_data)
 
 	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_box, *boxr_bottom_right_box;
 	GtkWidget *preview_img;
-	GtkWidget *prev_10_img_button, *prev_img_button, *img_index_label, *next_img_button, *next_10_img_button, *load_from_current_btn, *set_img2img_from_preview_btn, *hide_img_btn, *to_trash_btn;
+	GtkWidget *prev_10_img_button, *prev_img_button, *img_index_label, *next_img_button, *next_10_img_button;
+	GtkWidget *load_from_current_btn, *set_img2img_from_preview_btn, *add_favorite_btn, *hide_img_btn, *to_trash_btn;
 
 	GtkEventController *preview_box_scroll;
 	GtkEventController *main_win_key_press;
@@ -281,12 +283,18 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(load_from_img_btn, "custom_btn_title");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_img_btn),
 	"Load the prompt, model, sampler settings, and other parameters\nfrom the embedded metadata of the selected image file.");
+
+	show_favorites_btn = gtk_button_new_from_icon_name ("starred-symbolic");
+	gtk_widget_add_css_class(show_favorites_btn, "custom_btn_title");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(show_favorites_btn),
+	"Favorites Manager.");
 	
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), info_btn);
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), donate_btn);
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), reload_btn);
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), reset_default_btn);
 	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), load_from_img_btn);
+	gtk_header_bar_pack_start ( GTK_HEADER_BAR (titlebar), show_favorites_btn);
 	
 	//Properties Scrollable
 	properties_scrollable = gtk_scrolled_window_new();
@@ -1748,7 +1756,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(load_from_current_btn, "custom_btn");
 	gtk_widget_set_focusable(load_from_current_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(load_from_current_btn), "Load prompt and generation parameters from the displayed image.");
-	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 60, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(load_from_current_btn), 48, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), load_from_current_btn);
 	
 	//Set img2img file from current preview image
@@ -1756,16 +1764,24 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(set_img2img_from_preview_btn, "custom_btn");
 	gtk_widget_set_focusable(set_img2img_from_preview_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(set_img2img_from_preview_btn),
-	"Sets the current preview image as the template for img2img/ControlNet processing.");
-	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 60, -1);
+	"Set the current preview image as the template for img2img/ControlNet processing.");
+	gtk_widget_set_size_request(GTK_WIDGET(set_img2img_from_preview_btn), 48, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), set_img2img_from_preview_btn);
-	
+
+	//Add Img to favorites list
+	add_favorite_btn = gtk_button_new_from_icon_name ("starred-symbolic");
+	gtk_widget_add_css_class(add_favorite_btn, "custom_btn");
+	gtk_widget_set_focusable(add_favorite_btn, FALSE);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(add_favorite_btn), "Add the displayed image to favorites.");
+	gtk_widget_set_size_request(GTK_WIDGET(add_favorite_btn), 48, -1);
+	gtk_box_append (GTK_BOX (boxr_bottom_right_box), add_favorite_btn);
+
 	//Hide Img Button
 	hide_img_btn = gtk_button_new_from_icon_name ("view-reveal-symbolic");
 	gtk_widget_add_css_class(hide_img_btn, "custom_btn");
 	gtk_widget_set_focusable(hide_img_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hide_img_btn), "Toggle displayed image visibility.");
-	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 60, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(hide_img_btn), 48, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), hide_img_btn);
 
 	//Send Img to system trash Button
@@ -1773,7 +1789,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(to_trash_btn, "custom_btn");
 	gtk_widget_set_focusable(to_trash_btn, FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(to_trash_btn), "Move to Trash (can be restored).");
-	gtk_widget_set_size_request(GTK_WIDGET(to_trash_btn), 60, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(to_trash_btn), 48, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), to_trash_btn);
 
 	reload_d = g_new0 (ReloadDropDownData, 1);
@@ -1866,6 +1882,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (prev_img_button, "clicked", G_CALLBACK (navigate_img_prev), preview_d);
 	g_signal_connect (next_img_button, "clicked", G_CALLBACK (navigate_img_next), preview_d);
 	g_signal_connect (next_10_img_button, "clicked", G_CALLBACK (navigate_10_img_next), preview_d);
+	g_signal_connect (add_favorite_btn, "clicked", G_CALLBACK (add_image_to_favorites), preview_d);
 	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
 	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
 	g_signal_connect (to_trash_btn, "clicked", G_CALLBACK (send_to_trash), preview_d);
@@ -1900,6 +1917,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (load_from_img_btn, "clicked", G_CALLBACK (load_from_img_btn_cb), load_png_info_d);
 	g_signal_connect (load_from_current_btn, "clicked", G_CALLBACK (load_from_img_preview), load_png_info_d);
 	g_signal_connect (load_from_img_btn, "destroy", G_CALLBACK (on_load_from_img_btn_destroy), load_png_info_d);
+	g_signal_connect (show_favorites_btn, "clicked", G_CALLBACK (show_favorites_manager), load_png_info_d);
 	
 	load_img2img_file_d = g_new0 (LoadImg2ImgData, 1);
 	load_img2img_file_d->win = win;

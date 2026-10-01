@@ -565,6 +565,29 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 
 #endif
 
+void load_metadata_from_favorites(GtkWidget *btn, gpointer user_data)
+{
+	if (user_data == NULL) { g_printerr("Critical error in function 'load_from_favorites'.\n"); return; }
+	
+	GtkWidget *fav_image = GTK_WIDGET(user_data);
+	FavoritesWindowData *favorites_d = g_object_get_data(G_OBJECT(btn), "favorites_d");
+
+	if (favorites_d == NULL || fav_image == NULL) { g_printerr("Critical error in function 'load_from_favorites'.\n"); return; }
+
+	GFile *img_file = gtk_picture_get_file(GTK_PICTURE(fav_image));
+	if (img_file == NULL) { g_printerr("Failed to get image file.\n"); return; }
+	
+	gchar *img_path = g_file_get_path(img_file);
+	if (img_path == NULL) { g_printerr("Failed to get image path.\n"); return; }
+
+	if (check_file_exists(img_path, 0) == 1) {
+		set_png_metadata(img_path, favorites_d->load_png_info_d);
+	} else {
+		g_printerr("File '%s' does not exist or cannot be accessed.\n", img_path);
+		g_free(img_path);
+	}
+}
+
 void load_from_img_preview(GtkWidget *btn, gpointer user_data)
 {
 	LoadPNGData *data = user_data;

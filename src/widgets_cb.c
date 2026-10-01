@@ -46,6 +46,33 @@ void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpo
 	}
 }
 
+void add_image_to_favorites(GtkWidget *btn, gpointer user_data)
+{
+	PreviewImageData *data = user_data;
+	gsize img_count = data->image_files->len;
+	
+	if (img_count > 0) {
+		gchar *file_to_favorite = g_ptr_array_index(data->image_files, *data->current_image_index);
+		if (file_to_favorite && check_file_exists(file_to_favorite, 0) == 1) {
+			if (!check_file_has_line(".cache/favorites", file_to_favorite)) {
+				FILE *fcf = fopen(".cache/favorites", "ab");
+				if (fcf) {
+					fprintf(fcf, "%s\n", file_to_favorite);
+					fclose(fcf);
+				} else {
+					g_printerr("File '.cache/favorites' does not exist or cannot be accessed.\n");
+				}	
+			} else {
+				g_printerr("Failed to add image to favorites, it is already favorited.\n");
+			}
+		} else {
+			g_printerr("Failed to add image to favorites, the file does not exist.\n");
+		}
+	} else {
+		g_printerr("Failed to add image to favorites, no image to add.\n");
+	}
+}
+
 void app_start_data_free (gpointer user_data)
 {
 	if (user_data == NULL) return;

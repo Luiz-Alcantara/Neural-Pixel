@@ -3,6 +3,8 @@
 
 gchar *ascii_format_double(const char *format, double value);
 
+int check_file_has_line(const char *file_path, const char *line_to_search);
+
 int check_list_contains_item(const char* const* list, const char* item);
 
 int check_gtk_list_contains_item(GtkStringList *list, const char* item);

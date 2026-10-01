@@ -22,6 +22,17 @@ static void create_default_files(const char *file_path, GError **error)
 	}
 	closedir(cd);
 
+	if (strcmp(file_path, ".cache/favorites") == 0) {
+		FILE *fcf = fopen(".cache/favorites", "wb");
+		if (fcf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/favorites' does not exist or cannot be accessed.");
+			return;
+		}
+		fprintf(fcf, "%s", DEFAULT_IMG_PATH);
+		fclose(fcf);
+		return;
+	}
+
 	if (strcmp(file_path, ".cache/pp_cache") == 0) {
 		FILE *pcf = fopen(".cache/pp_cache", "wb");
 		if (pcf == NULL) {
@@ -226,13 +237,15 @@ int check_file_exists(const char *filename, int is_text_file)
 		/* If it's a text file, verify it's not empty and initialize if needed */
 		if (is_text_file == 1) {
 			/* pp_cache should NOT be empty */
-			if ((is_file_empty(filename) == 1) && strcmp(filename, ".cache/pp_cache") == 0) {
-				GError *err = NULL;
-				create_default_files(filename, &err);
-				if (err != NULL) {
-					g_printerr("Error: %s\n", err->message);
-					g_error_free(err);
-					return 0;
+			if (is_file_empty(filename) == 1) {
+				if (strcmp(filename, ".cache/pp_cache") == 0) {
+					GError *err = NULL;
+					create_default_files(filename, &err);
+					if (err != NULL) {
+						g_printerr("Error: %s\n", err->message);
+						g_error_free(err);
+						return 0;
+					}
 				}
 			}
 		}

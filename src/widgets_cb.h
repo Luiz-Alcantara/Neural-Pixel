@@ -7,6 +7,8 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
 
 void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
 
+void add_image_to_favorites(GtkWidget *btn, gpointer user_data);
+
 void app_start_data_free (gpointer user_data);
 
 void array_strings_free(const char **list);
