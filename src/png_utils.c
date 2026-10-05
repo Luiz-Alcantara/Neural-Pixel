@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include <png.h>
 #include <stdio.h>
 #ifdef _WIN32
@@ -22,7 +23,7 @@ int get_png_dimensions(const char *filename, uint32_t *w, uint32_t *h)
 	uint8_t buffer[8];
 	uint32_t data[2];
 
-	FILE *f = fopen(filename, "rb");
+	FILE *f = g_fopen(filename, "rb");
 	if (!f) { g_printerr("Could not open png file: '%s'\n", filename); return -1; }
 
 	if (fread(buffer, 1, 8, f) != 8) { fclose(f); return -1; }
@@ -47,7 +48,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 {
 	LoadPNGData *data = user_data;
 
-	FILE *fp = fopen(path, "rb");
+	FILE *fp = g_fopen(path, "rb");
 	if (!fp) {
 		fprintf(stderr, "File opening failed.\n");
 		g_free(path);
@@ -274,7 +275,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	if (ptr) {
 		char sampler_str[MAX_PROPERTY_LENGTH];
 		char scheduler_str[MAX_PROPERTY_LENGTH];
-		if (sscanf(ptr + strlen("Sampler: "), "%s %[^,],", &sampler_str, &scheduler_str) == 2) {
+		if (sscanf(ptr + strlen("Sampler: "), "%s %[^,],", sampler_str, scheduler_str) == 2) {
 			GtkWidget *sampler_dd = data->sampler_dd;
 			GtkWidget *scheduler_dd = data->scheduler_dd;
 			

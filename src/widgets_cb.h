@@ -23,13 +23,9 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data);
 
 void donate_btn_callback(GtkButton *btn, gpointer user_data);
 
-static gboolean steal_scroll_cb(GtkEventControllerScroll *controller, double dx, double dy, gpointer user_data);
-
 void dropdown_items_update(const char *path, GtkWidget *dd, GApplication *app);
 
 void free_preview_data(gpointer data);
-
-static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
 
 void get_backend_info(GtkButton *btn, gpointer user_data);
 
@@ -40,8 +36,6 @@ void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
 void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data);
 
 void manage_lora_triggers (GtkButton *btn, gpointer user_data);
-
-static void navigate_images(PreviewImageData *data, int offset);
 
 void navigate_10_img_prev(GtkButton* btn, gpointer user_data);
 
@@ -96,8 +90,6 @@ void reload_dropdown(GtkWidget* wgt, gpointer user_data);
 void reset_default_btn_cb (GtkWidget* btn, gpointer user_data);
 
 gboolean seed_entry_int_filter(GtkEditable *editable, gpointer user_data);
-
-static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, gpointer user_data);
 
 void send_to_trash(GtkWidget* btn, gpointer user_data);
 

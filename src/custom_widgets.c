@@ -99,6 +99,7 @@ GtkWidget* gen_path_dd(const char* path, GtkTextBuffer *tb, int tb_type, GString
 		}
 		return dd;
 	}
+	return NULL;
 }
 
 GtkWidget* gen_visibility_toggle_button(const char *btn_text, const char *css_class_str, GtkWidget *wgt)

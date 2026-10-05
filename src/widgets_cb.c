@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include <ctype.h>
 #include <errno.h>
 #ifdef _WIN32
@@ -55,7 +56,7 @@ void add_image_to_favorites(GtkWidget *btn, gpointer user_data)
 		gchar *file_to_favorite = g_ptr_array_index(data->image_files, *data->current_image_index);
 		if (file_to_favorite && check_file_exists(file_to_favorite, 0) == 1) {
 			if (!check_file_has_line(".cache/favorites", file_to_favorite)) {
-				FILE *fcf = fopen(".cache/favorites", "ab");
+				FILE *fcf = g_fopen(".cache/favorites", "ab");
 				if (fcf) {
 					fprintf(fcf, "%s\n", file_to_favorite);
 					fclose(fcf);
@@ -202,6 +203,7 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 {
 	app_start_data_free(user_data);
 	gtk_window_destroy (win);
+	return TRUE;
 }
 
 void donate_btn_callback(GtkButton *btn, gpointer user_data)
@@ -599,12 +601,14 @@ gboolean on_preview_widget_enter(GtkEventControllerMotion *controller, double x,
 {
 	PreviewBoxHoverData *data = user_data;
 	data->is_hovering_preview = TRUE;
+	return TRUE;
 }
 
 gboolean on_preview_widget_leave(GtkEventControllerMotion *controller, gpointer user_data)
 {
 	PreviewBoxHoverData *data = user_data;
 	data->is_hovering_preview = FALSE;
+	return TRUE;
 }
 
 void on_reload_btn_destroy (GtkWidget* wgt, gpointer user_data)
@@ -843,11 +847,11 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(detector_parameter_backend_dd), DEFAULT_BACKEND);
 }
 
-static void *save_lora_triggers(GtkWidget *btn, gpointer user_data)
+static void save_lora_triggers(GtkWidget *btn, gpointer user_data)
 {
 	SaveTriggersData *data = user_data;
 
-	FILE *triggers_file = fopen(data->path, "wb");
+	FILE *triggers_file = g_fopen(data->path, "wb");
 	if (triggers_file) {
 		GtkTextIter tsi;
 		GtkTextIter tei;

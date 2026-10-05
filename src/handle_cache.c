@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +13,7 @@
 
 char* ini_file_get_value(const char *filename, const char *search_key)
 {
-	FILE *file = fopen(filename, "r");
+	FILE *file = g_fopen(filename, "r");
 	if (file == NULL) {
 		g_printerr("Failed to open file '%s', using default value(s).\n", filename);
 		return NULL;
@@ -546,11 +547,11 @@ void load_prompt_text(GtkTextBuffer *text_buffer, const char *prompt_file_path, 
 
 void update_cache(GenerationSnapshotData *data)
 {
-	FILE *dpcf = fopen(".cache/detector_pp_cache", "wb");
-	FILE *dncf = fopen(".cache/detector_np_cache", "wb");
-	FILE *pcf = fopen(".cache/pp_cache", "wb");
-	FILE *ncf = fopen(".cache/np_cache", "wb");
-	FILE *cf = fopen(".cache/np_cache.ini", "wb");
+	FILE *dpcf = g_fopen(".cache/detector_pp_cache", "wb");
+	FILE *dncf = g_fopen(".cache/detector_np_cache", "wb");
+	FILE *pcf = g_fopen(".cache/pp_cache", "wb");
+	FILE *ncf = g_fopen(".cache/np_cache", "wb");
+	FILE *cf = g_fopen(".cache/np_cache.ini", "wb");
 	if (dpcf == NULL || dncf == NULL || pcf == NULL || ncf == NULL || cf == NULL) {
 		g_printerr("Error updating cache. If the error persists, try deleting the '.cache' directory.\n");
 		return;

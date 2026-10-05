@@ -47,7 +47,7 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	GtkWidget *properties_scrollable;
 
-	GtkWidget *box_properties, *boxl_topbar;
+	GtkWidget *box_properties;
 	GtkWidget *info_btn, *donate_btn, *reload_btn, *reset_default_btn, *load_from_img_btn, *show_favorites_btn;
 
 	GtkWidget *img2img_visibility_toggle_btn;
@@ -69,7 +69,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkTextBuffer *detector_neg_tb;
 
 	GtkWidget *box_detector_widgets;	
-	GtkWidget *detector_model_lab, *detector_dd, *detector_check;
+	GtkWidget *detector_dd, *detector_check;
 	GtkWidget *box_detector_buttons, *box_detector_buttons_col1, *box_detector_buttons_col2;
 	GtkWidget *detector_confidence_lab, *detector_mask_blur_lab, *detector_denoise_lab;
 	GtkWidget *detector_inpaint_padding_lab, *detector_inpaint_size_lab, *detector_input_size_lab;

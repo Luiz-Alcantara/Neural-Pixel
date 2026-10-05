@@ -1,29 +1,43 @@
+#include <glib/gstdio.h>
 #include <gtk/gtk.h>
+
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <limits.h>
 #ifdef _WIN32
 	#include <windows.h>
 #endif
-#include "constants.h"
-#include "handle_cache.h"
-#include "file_utils.h"
-#include "str_utils.h"
 
-#define FULL_PATH_MAX 512
+#include "constants.h"
+#include "file_utils.h"
+#include "handle_cache.h"
+#include "str_utils.h"
 
 static void create_default_files(const char *file_path, GError **error)
 {
-	DIR* cd = opendir(".cache");
-	if (cd == NULL) {
-		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '.cache' does not exist or cannot be accessed.");
+	if (strncmp(file_path, "./.lora_triggers/", 17) == 0) {
+		GDir* ltd = g_dir_open("./.lora_triggers", 0, error);
+		if (ltd == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '.lora_triggers' does not exist or cannot be accessed.");
+			return;
+		}
+		g_dir_close(ltd);
+
+		FILE *ltf = g_fopen(file_path, "wb");
+		if (ltf == NULL) {
+			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "The lora trigger file cannot be created or open.");
+			return;
+		}
+		fclose(ltf);
 		return;
 	}
-	closedir(cd);
+
+	GDir* cd = g_dir_open(".cache", 0, error);
+	if (cd == NULL) return;
+	g_dir_close(cd);
 
 	if (strcmp(file_path, ".cache/favorites") == 0) {
-		FILE *fcf = fopen(".cache/favorites", "wb");
+		FILE *fcf = g_fopen(".cache/favorites", "wb");
 		if (fcf == NULL) {
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/favorites' does not exist or cannot be accessed.");
 			return;
@@ -34,7 +48,7 @@ static void create_default_files(const char *file_path, GError **error)
 	}
 
 	if (strcmp(file_path, ".cache/pp_cache") == 0) {
-		FILE *pcf = fopen(".cache/pp_cache", "wb");
+		FILE *pcf = g_fopen(".cache/pp_cache", "wb");
 		if (pcf == NULL) {
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/pp_cache' does not exist or cannot be accessed.");
 			return;
@@ -45,7 +59,7 @@ static void create_default_files(const char *file_path, GError **error)
 	}
 
 	if (strcmp(file_path, ".cache/np_cache") == 0) {
-		FILE *ncf = fopen(".cache/np_cache", "wb");
+		FILE *ncf = g_fopen(".cache/np_cache", "wb");
 		if (ncf == NULL) {
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache' does not exist or cannot be accessed.");
 			return;
@@ -56,7 +70,7 @@ static void create_default_files(const char *file_path, GError **error)
 	}
 
 	if (strcmp(file_path, ".cache/detector_pp_cache") == 0) {
-		FILE *dpcf = fopen(".cache/detector_pp_cache", "wb");
+		FILE *dpcf = g_fopen(".cache/detector_pp_cache", "wb");
 		if (dpcf == NULL) {
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/detector_pp_cache' does not exist or cannot be accessed.");
 			return;
@@ -67,7 +81,7 @@ static void create_default_files(const char *file_path, GError **error)
 	}
 
 	if (strcmp(file_path, ".cache/detector_np_cache") == 0) {
-		FILE *dncf = fopen(".cache/detector_np_cache", "wb");
+		FILE *dncf = g_fopen(".cache/detector_np_cache", "wb");
 		if (dncf == NULL) {
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/detector_np_cache' does not exist or cannot be accessed.");
 			return;
@@ -78,7 +92,7 @@ static void create_default_files(const char *file_path, GError **error)
 	}
 
 	if (strcmp(file_path, ".cache/np_cache.ini") == 0) {
-		FILE *cf = fopen(".cache/np_cache.ini", "wb");
+		FILE *cf = g_fopen(".cache/np_cache.ini", "wb");
 		if (cf == NULL) {
 			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "File '.cache/np_cache.ini' does not exist or cannot be accessed.");
 			return;
@@ -142,29 +156,11 @@ static void create_default_files(const char *file_path, GError **error)
 		fclose(cf);
 		return;
 	}
-
-	if (strncmp(file_path, "./.lora_triggers/", 17) == 0) {
-		DIR* ltd = opendir("./.lora_triggers");
-		if (ltd == NULL) {
-			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '.lora_triggers' does not exist or cannot be accessed.");
-			return;
-		}
-		closedir(ltd);
-
-		FILE *ltf = fopen(file_path, "wb");
-		if (ltf == NULL) {
-			g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "The lora trigger file cannot be created or open.");
-			return;
-		}
-		fprintf(ltf, "");
-		fclose(ltf);
-		return;
-	}
 }
 
-int is_file_empty(const char *fn)
+static int is_file_empty(const char *fn)
 {
-	FILE *f = fopen(fn, "r");
+	FILE *f = g_fopen(fn, "r");
 	if (f == NULL) {
 		fprintf(stderr, "Error opening file.\n");
 		return -1;
@@ -178,55 +174,21 @@ int is_file_empty(const char *fn)
 	return 0;
 }
 
-
-int is_directory(const char *path)
-{
-	struct stat path_stat;
-	if (stat(path, &path_stat) != 0) return 0;
-	return S_ISDIR(path_stat.st_mode);
-}
-
-int count_files(DIR* dir, const char * dir_path, const char* const* array)
+static int count_files(GDir* dir, const char * dir_path, const char* const* array)
 {
 	int nf = 0;
 	if (dir != NULL && array == NULL) {
-		struct dirent* entry;
-		char full_path[FULL_PATH_MAX];
-		while ((entry = readdir(dir)) != NULL) {
-			snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
-			if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
-				nf++;
-			}
-		}
-		rewinddir(dir);
-	}
-	if (dir == NULL && array != NULL) {
-		while (*array != NULL) {
-			array++;
-			nf++;
-		}
-	}
-	return nf;
-}
+		const char *filename;
 
-int count_output_files()
-{
-	const char *outputs_path = "./outputs";
-	DIR* dir = opendir(outputs_path);
-	if (dir == NULL) {
-		return 0;
-	}
-	int nf = 0;
-
-	struct dirent* entry;
-	char full_path[FULL_PATH_MAX];
-	while ((entry = readdir(dir)) != NULL) {
-		snprintf(full_path, sizeof(full_path), "%s/%s", outputs_path, entry->d_name);
-		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
-			nf++;
+		while ((filename = g_dir_read_name(dir)) != NULL ) {
+			char *full_path = g_build_filename(dir_path, filename, NULL);
+			if (!g_file_test(full_path, G_FILE_TEST_IS_DIR)) nf++;
+			g_free(full_path);
 		}
+		g_dir_rewind(dir);
+	} else if (dir == NULL && array != NULL) {
+		nf = g_strv_length((gchar **)array);
 	}
-	closedir(dir);
 	return nf;
 }
 
@@ -266,120 +228,56 @@ int check_file_exists(const char *filename, int is_text_file)
 	}
 }
 
-int has_files(const char *directory)
+static GDir* check_create_dir(const char* path)
 {
-	DIR *dir;
-	struct dirent *ent;
-	dir = opendir(directory);
+	GError *error = NULL;
+	GDir *dir = g_dir_open(path, 0, &error);
+	
 	if (dir == NULL) {
-		return 0;
-	}
-	while ((ent = readdir(dir)) != NULL) {
-		if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
-			closedir(dir);
-			return 1;
+		g_clear_error(&error);
+		if (g_mkdir_with_parents(path, 0777) != 0) {
+			g_printerr("Error creating directory: %s\n", path);
+			return NULL;
+		}
+
+		dir = g_dir_open(path, 0, &error);
+		if (dir == NULL) {
+			g_printerr("Error opening created directory %s\n", error ? error->message : "Unknown error");
+			g_clear_error(&error);
+			return NULL;
 		}
 	}
-	closedir(dir);
-	return 0;
+	
+	return dir;
 }
 
-DIR* check_create_dir(const char* path)
+int check_create_base_dirs(void)
 {
-	DIR* dir = opendir(path);
-	if (dir == NULL) {
-		#ifdef _WIN32
-			if (mkdir(path) != 0) {
-				fprintf(stderr, "Error creating directory.\n");
-				return NULL;
-			}
-
-			DIR* ndir = opendir(path);
-			return ndir;
-		#else
-			if (mkdir(path, 0777) != 0) {
-				fprintf(stderr, "Error creating directory.\n");
-				return NULL;
-			}
-
-			DIR* ndir = opendir(path);
-			return ndir;
-		#endif
-	} else {
-		return dir;
+	if (g_mkdir_with_parents(CACHE_PATH, 0700) != 0) {
+		g_printerr("Failed to create directory: '%s'.\n", CACHE_PATH);
+		return 1;
 	}
-}
 
-int check_create_base_dirs() {
-	DIR* cache_dir = opendir(CACHE_PATH);
-	if (cache_dir == NULL) {
-		#ifdef _WIN32
-			if (mkdir(CACHE_PATH) != 0) {
-				fprintf(stderr, "Error creating required \".cache\" directory.\n");
-				return 1;
-			}
-		#else
-			if (mkdir(CACHE_PATH, 0777) != 0) {
-				fprintf(stderr, "Error creating required \".cache\" directory.\n");
-				return 1;
-			}
-		#endif
+	if (g_mkdir_with_parents(LORA_TRIGGERS_PATH, 0700) != 0) {
+		g_printerr("Failed to create directory: '%s'.\n", LORA_TRIGGERS_PATH);
+		return 1;
 	}
-	closedir(cache_dir);
 
-	DIR* lora_triggers_dir = opendir(LORA_TRIGGERS_PATH);
-	if (lora_triggers_dir == NULL) {
-		#ifdef _WIN32
-			if (mkdir(LORA_TRIGGERS_PATH) != 0) {
-				fprintf(stderr, "Error creating required \".lora_triggers\" directory.\n");
-				return 1;
-			}
-		#else
-			if (mkdir(LORA_TRIGGERS_PATH, 0777) != 0) {
-				fprintf(stderr, "Error creating required \".lora_triggers\" directory.\n");
-				return 1;
-			}
-		#endif
+	if (g_mkdir_with_parents(MODELS_PATH, 0700) != 0) {
+		g_printerr("Failed to create directory: '%s'.\n", MODELS_PATH);
+		return 1;
 	}
-	closedir(lora_triggers_dir);
 
-	DIR* models_dir = opendir(MODELS_PATH);
-	if (models_dir == NULL) {
-		#ifdef _WIN32
-			if (mkdir(MODELS_PATH) != 0) {
-				fprintf(stderr, "Error creating required \"models\" directory.\n");
-				return 1;
-			}
-		#else
-			if (mkdir(MODELS_PATH, 0777) != 0) {
-				fprintf(stderr, "Error creating required \"models\" directory.\n");
-				return 1;
-			}
-		#endif
+	if (g_mkdir_with_parents(OUTPUTS_PATH, 0700) != 0) {
+		g_printerr("Failed to create directory: '%s'.\n", OUTPUTS_PATH);
+		return 1;
 	}
-	closedir(models_dir);
-
-	DIR* outputs_dir = opendir(OUTPUTS_PATH);
-	if (outputs_dir == NULL) {
-		#ifdef _WIN32
-			if (mkdir(OUTPUTS_PATH) != 0) {
-				fprintf(stderr, "Error creating required \"outputs\" directory.\n");
-				return 1;
-			}
-		#else
-			if (mkdir(OUTPUTS_PATH, 0777) != 0) {
-				fprintf(stderr, "Error creating required \"outputs\" directory.\n");
-				return 1;
-			}
-		#endif
-	}
-	closedir(outputs_dir);
 	return 0;
 }
 
 GtkStringList* get_files(const char* path, GError **error)
 {
-	DIR* dir = check_create_dir(path);
+	GDir* dir = check_create_dir(path);
 	if (dir == NULL) {
 		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '%s' does not exist or cannot be accessed.", path);
 		return NULL;
@@ -391,22 +289,19 @@ GtkStringList* get_files(const char* path, GError **error)
 	char** sort_files = malloc(sizeof(char*) * (nf + 1));
 
 	if (sort_files == NULL) {
-		closedir(dir);
-		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Memory allocation failed.", path);
+		g_dir_close(dir);
+		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Memory allocation failed.");
 		return NULL;
 	}
 
-	int i = 0;
-	struct dirent* entry;
-	char full_path[FULL_PATH_MAX];
-
 	sort_files[0] = strdup("None");
-	while ((entry = readdir(dir)) != NULL) {
-		snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
-		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
-			sort_files[i + 1] = strdup(entry->d_name); 
-			i++;
-		}
+	
+	int i = 0;
+	const char *filename;
+	while ((filename = g_dir_read_name(dir)) != NULL ) {
+		char *full_path = g_build_filename(path, filename, NULL);
+		if (!g_file_test(full_path, G_FILE_TEST_IS_DIR)) { sort_files[i + 1] = strdup(filename); i++; }
+		g_free(full_path);
 	}
 
 	qsort(sort_files + 1, nf - 1, sizeof(const char *), compare_strings);
@@ -417,7 +312,7 @@ GtkStringList* get_files(const char* path, GError **error)
 	}
 
 	free(sort_files);
-	closedir(dir);
+	g_dir_close(dir);
 
 	return files;
 }
@@ -499,11 +394,11 @@ void set_current_image_index(char *img_str, GString *img_index_string, GPtrArray
 		}
 		g_string_erase(img_index_string, 0, -1);
 		if (total_time < 0) {
-			g_string_append_printf(img_index_string, "(%d / %d) %s", *current_image_index + 1, img_count, img_str + 8);
+			g_string_append_printf(img_index_string, "(%d / %" G_GSIZE_FORMAT ") %s", *current_image_index + 1, img_count, img_str + 8);
 		} else {
 			int minutes = total_time / 60;
 			int seconds = total_time % 60;
-			g_string_append_printf(img_index_string, "(%d / %d) Last generation took: %dm %ds.",
+			g_string_append_printf(img_index_string, "(%d / %" G_GSIZE_FORMAT ") Last generation took: %dm %ds.",
 			*current_image_index + 1, img_count, minutes, seconds);
 		}
 	} else {

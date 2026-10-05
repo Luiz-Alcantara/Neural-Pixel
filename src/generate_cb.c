@@ -88,7 +88,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		gsize r = 0, w = 0;
 		
 		while (r < data->stdout_string->len) {
-			if (data->stdout_string->str[r] != '\0') data->stdout_string->str[w++] = data->stdout_string->str[r]; r++;
+			if (data->stdout_string->str[r] != '\0') { data->stdout_string->str[w++] = data->stdout_string->str[r]; r++; }
 		}
 		
 		data->stdout_string->len = w;
@@ -143,7 +143,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					int n_detected_obj;
 				
 					if (sscanf(line,
-					"[INFO ] detailer.cpp:%*d - ADetailer detected %d object(s), taking %*lfs",
+					"[INFO ] detailer.cpp:%*d - ADetailer detected %d object(s), taking %*fs",
 					&n_detected_obj) == 1) {
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Encoding...");
 						data->is_generating_latent = 0;

@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -20,7 +21,7 @@ gchar *ascii_format_double(const char *format, double value)
 
 int check_file_has_line(const char *file_path, const char *line_to_search)
 {
-	FILE *fp = fopen(file_path, "r");
+	FILE *fp = g_fopen(file_path, "r");
 	if (!fp) return 0;
 
 	size_t cap = strlen(line_to_search) + 3;
