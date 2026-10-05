@@ -1,10 +1,10 @@
 <div align="center">
 
 # Neural-Pixel
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Luiz-Alcantara/Neural-Pixel)
+[![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-blue)](https://deepwiki.com/Luiz-Alcantara/Neural-Pixel)
 [![Download](https://img.shields.io/github/downloads/Luiz-Alcantara/Neural-Pixel/total.svg)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/latest)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ)
-[![X/Twitter](https://img.shields.io/badge/Join-X-black.svg)](https://x.com/NeuralPixel_AI)
+[![X/Twitter](https://img.shields.io/badge/Join-X-red.svg)](https://x.com/NeuralPixel_AI)
 
 **A simple GUI wrapper for stable-diffusion.cpp written using C and GTK 4.**
 ![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/assets/screenshots/img1.png?raw=true)
@@ -28,7 +28,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - Vulkan backend (Optional): Vulkan driver/loader/tools & >= 2GB of VRAM.
 
 ### 2. How to Run
-- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.2-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.2/NeuralPixel-Linux_v0.9.2.zip)
+- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.3-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.3/NeuralPixel-Linux_v0.9.3.zip)
 - Extract the archive and execute the `run_neural_pixel` file.
 - Tip: For debugging, launch from a terminal and enable Terminal Verbose under Extra Options.
 
@@ -38,7 +38,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
 ### 2. How to Run
-- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.2-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.2/NeuralPixel-Windows_v0.9.2.zip)
+- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.3-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.3/NeuralPixel-Windows_v0.9.3.zip)
 - Extract the archive and execute the `neural_pixel.bat` file.
 
 ## Recommended checkpoints
