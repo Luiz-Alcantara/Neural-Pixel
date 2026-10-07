@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <gio/gio.h>
 #include <string.h>
 #include "constants.h"
 #include "file_utils.h"
@@ -6,7 +7,11 @@
 #include "structs.h"
 #include "widgets_cb.h"
 
+#define IMG_DIMENSION 640
+
+static void load_scaled_image_thread(GTask *task, gpointer source_obj, gpointer task_data, GCancellable *task_can);
 static void on_delete_favorite(GtkButton *btn, gpointer user_data);
+static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer user_data);
 static void save_favorites(GtkStringList *store);
 
 static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer user_data)
@@ -31,11 +36,11 @@ static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkLis
 	GtkWidget *fav_image_frame = gtk_scrolled_window_new();
 	gtk_widget_add_css_class(fav_image_frame, "img_preview_box");
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(fav_image_frame), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(fav_image_frame), 640);
-	gtk_scrolled_window_set_max_content_width(GTK_SCROLLED_WINDOW(fav_image_frame), 640);
-	gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(fav_image_frame), 640);
-	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(fav_image_frame), 640);
-	gtk_widget_set_size_request(fav_image_frame, 640, 640);
+	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(fav_image_frame), IMG_DIMENSION);
+	gtk_scrolled_window_set_max_content_width(GTK_SCROLLED_WINDOW(fav_image_frame), IMG_DIMENSION);
+	gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(fav_image_frame), IMG_DIMENSION);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(fav_image_frame), IMG_DIMENSION);
+	gtk_widget_set_size_request(fav_image_frame, IMG_DIMENSION, IMG_DIMENSION);
 	gtk_widget_set_hexpand(fav_image_frame, FALSE);
 	gtk_widget_set_vexpand(fav_image_frame, FALSE);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(fav_image_frame), fav_image);
@@ -72,17 +77,49 @@ static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkLis
 
 static void favorites_factory_bind_cb(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer user_data)
 {
+	GdkTexture *empty_texture = GDK_TEXTURE(user_data);
 	GtkStringObject *obj = gtk_list_item_get_item(item);
+	if (obj == NULL) return;
+	
 	const char *path = gtk_string_object_get_string(obj);
-
 	GtkWidget *fav_card = gtk_list_item_get_child(item);
 	GtkWidget *fav_image = g_object_get_data(G_OBJECT(fav_card), "fav-image");
 
-	if (check_file_exists(path, 0)) {
-		gtk_picture_set_filename(GTK_PICTURE(fav_image), path);
-	} else {
-		gtk_picture_set_filename(GTK_PICTURE(fav_image), EMPTY_IMG_PATH);
-		g_printerr("Failed to load file: '%s'.\n", path);
+	gtk_picture_set_paintable(GTK_PICTURE(fav_image), GDK_PAINTABLE(empty_texture));
+	g_object_set_data_full(G_OBJECT(fav_image), "image-path", path ? g_strdup(path) : NULL, g_free);
+
+	GCancellable *old_can = g_object_get_data(G_OBJECT(item), "load-cancellable");
+	if (old_can) g_cancellable_cancel(old_can);
+	g_object_set_data(G_OBJECT(item), "load-cancellable", NULL);
+
+	if (!path || !check_file_exists(path, 0)) {
+		g_printerr("Failed to load file: '%s'.\n", path ? path : "(null)");
+		return;
+	}
+
+	GCancellable *new_can = g_cancellable_new();
+	g_object_set_data_full(G_OBJECT(item), "load-cancellable", new_can, g_object_unref);
+
+	GTask *task = g_task_new(item, new_can, on_image_loaded_cb, NULL);
+	g_task_set_task_data(task, g_strdup(path), g_free);
+	g_task_run_in_thread(task, load_scaled_image_thread);
+	g_object_unref(task);
+}
+
+static void favorites_factory_unbind_cb(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer user_data)
+{
+	GCancellable *item_can = g_object_get_data(G_OBJECT(item), "load-cancellable");
+	if (item_can) {
+		g_cancellable_cancel(item_can);
+		g_object_set_data(G_OBJECT(item), "load-cancellable", NULL);
+	}
+
+	GtkWidget *fav_card = gtk_list_item_get_child(item);
+	if (fav_card) {
+		GtkWidget *fav_image = g_object_get_data(G_OBJECT(fav_card), "fav-image");
+		if (fav_image) {
+			gtk_picture_set_paintable(GTK_PICTURE(fav_image), NULL);
+		}
 	}
 }
 
@@ -119,6 +156,21 @@ static GtkStringList *load_favorites()
 	return store;
 }
 
+static void load_scaled_image_thread(GTask *task, gpointer source_obj, gpointer task_data, GCancellable *task_can)
+{
+	const char *path = (const char *)task_data;
+	GError *error = NULL;
+
+	if (g_cancellable_is_cancelled(task_can)) {
+		g_task_return_new_error(task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Load cancelled");
+		return;
+	}
+
+	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(path, IMG_DIMENSION, IMG_DIMENSION, TRUE, &error);
+	if (!pixbuf) { g_task_return_error(task, error); return; }
+	g_task_return_pointer(task, pixbuf, g_object_unref);
+}
+
 static void on_delete_favorite(GtkButton *btn, gpointer user_data)
 {
 	GtkListItem *item = GTK_LIST_ITEM(user_data);
@@ -153,6 +205,42 @@ static void on_favorites_window_destroy (gpointer user_data)
     g_free(data);
 }
 
+static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer user_data)
+{
+	GtkListItem *item = GTK_LIST_ITEM(source_obj);
+	const char *img_path = g_task_get_task_data(G_TASK(res));
+	GError *error = NULL;
+
+	GdkPixbuf *pixbuf = g_task_propagate_pointer(G_TASK(res), &error);
+
+	GtkStringObject *current_obj = gtk_list_item_get_item(item);
+	gboolean is_same_row = FALSE;
+
+	if (current_obj != NULL) {
+		const char *current_path = gtk_string_object_get_string(current_obj);
+		if (current_path && g_strcmp0(current_path, img_path) == 0) is_same_row = TRUE;
+	}
+
+	GtkWidget *fav_card = gtk_list_item_get_child(item);
+	GtkWidget *fav_image = fav_card ? g_object_get_data(G_OBJECT(fav_card), "fav-image") : NULL;
+
+	if (is_same_row && fav_image) {
+		if (pixbuf) {
+			GdkTexture *texture = gdk_texture_new_for_pixbuf(pixbuf);
+			gtk_picture_set_paintable(GTK_PICTURE(fav_image), GDK_PAINTABLE(texture));
+			g_object_unref(texture);
+		} else {
+			gtk_picture_set_filename(GTK_PICTURE(fav_image), EMPTY_IMG_PATH);
+			if (error && !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+				g_printerr("Failed to load file: '%s'. Error: %s\n", img_path, error->message);
+			}
+		}
+	}
+
+	if (pixbuf) g_object_unref(pixbuf);
+	if (error) g_clear_error(&error);
+}
+
 static void save_favorites(GtkStringList *store)
 {
 	GString *out = g_string_new("");
@@ -180,6 +268,10 @@ void show_favorites_manager(GtkButton *btn, gpointer user_data)
 	favorites_d->load_png_info_d = data;
 	favorites_d->store = load_favorites();
 
+	GError *error = NULL;
+	GdkTexture *empty_texture = gdk_texture_new_from_filename(EMPTY_IMG_PATH, &error);
+	if (!empty_texture) { g_printerr("Failed to load placeholder: %s\n", error->message); g_clear_error(&error); }
+
 	GtkWidget *favorites_win = gtk_window_new();
 	gtk_widget_add_css_class(favorites_win, "info_box");
 	gtk_window_set_transient_for(GTK_WINDOW(favorites_win), GTK_WINDOW(data->win));
@@ -195,7 +287,8 @@ void show_favorites_manager(GtkButton *btn, gpointer user_data)
 
 	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
 	g_signal_connect(factory, "setup", G_CALLBACK(favorites_factory_setup_cb), favorites_d);
-	g_signal_connect(factory, "bind",  G_CALLBACK(favorites_factory_bind_cb),  favorites_d);
+	g_signal_connect_data(factory, "bind", G_CALLBACK(favorites_factory_bind_cb), empty_texture, (GClosureNotify)g_object_unref, 0);
+	g_signal_connect(factory, "unbind", G_CALLBACK(favorites_factory_unbind_cb), NULL);
 
 	GtkNoSelection *selection = gtk_no_selection_new(G_LIST_MODEL(g_object_ref(favorites_d->store)));
 
