@@ -34,10 +34,15 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		}
 		
 		int n_error;
+		int n_error1;
 		int n_error2;
 		int n_error3;
 		char file_name[256];
 		char backend_str[16];
+					
+		if (sscanf(err_string, "[E] model metadata validation failed --- diffusion_engine.cpp:%i", &n_error1) == 1) {
+			show_simple_message(data->win, "Error loading model", "Model metadata validation failed", 1);
+		}
 		
 		if (sscanf(err_string, "[ERROR] stable-diffusion.cpp:%i  - init model loader from file failed: '%255[^']'",
 		&n_error, file_name) == 2) {
@@ -123,11 +128,11 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				char *line = g_strndup(buf, end_index);
 				
 				// Avoid "unused lora tensor" span
-				if (data->verbose_enabled && strstr(line, "[WARN ] lora.hpp:") == NULL) printf("%s\n", line);
+				if (data->verbose_enabled && strstr(line, "[W] unused lora tensor") == NULL) printf("%s\n", line);
 
 				if (strstr(line, "- can not found lora")) {
 					char lora_path[512];
-					if (sscanf(line, "[WARN ] common.cpp:%*d - can not found lora %511[^\n]", lora_path) == 1) {
+					if (sscanf(line, "[W] common.cpp:%*d - can not found lora %511[^\n]", lora_path) == 1) {
 						char *filename = strrchr(lora_path, '/');
 						filename = filename ? filename + 1 : lora_path;
 						if (*filename) {
@@ -143,19 +148,18 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					int n_detected_obj;
 				
 					if (sscanf(line,
-					"[INFO ] detailer.cpp:%*d - ADetailer detected %d object(s), taking %*fs",
+					"[I] ADetailer detected %d object(s), taking %*fs --- detailer.cpp:%*i",
 					&n_detected_obj) == 1) {
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Encoding...");
 						data->is_generating_latent = 0;
 						data->is_img2img_encoding = 1;
 					}
 				} else if (strstr(line, "target") != NULL) {
-					int x;
 					int n_img2img_tiles;
 		
 					if (sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%i - target t_enc is %i steps",
-					&x, &n_img2img_tiles) == 2) {
+					"[I] target t_enc is %d steps --- image.cpp:%*d",
+					&n_img2img_tiles) == 1) {
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Encoding...");
 						data->is_img2img_encoding = 1;
 					}
@@ -164,14 +168,12 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					data->img2img_enc_completed = 1;
 					gtk_label_set_text(GTK_LABEL(data->generation_label), "Generating...");
 				} else if (strstr(line, "generating image:") != NULL) {
-					int x;
 					int n_current_image;
 					int n_total_images;
-					long long int img_seed;
 		
 					if (sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%i - generating image: %i/%i - seed %lld",
-					&x, &n_current_image, &n_total_images, &img_seed) == 4) {
+					"[I] generating image: %d/%d - seed %*lld --- image.cpp:%*d",
+					&n_current_image, &n_total_images) == 2) {
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Generating...");
 						data->is_generating_latent = 1;
 						data->n_current_image = n_current_image;
@@ -184,24 +186,21 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					data->gen_latent_completed = 1;
 					gtk_label_set_text(GTK_LABEL(data->generation_label), "Processing...");
 				} else if (strstr(line, "decoding") != NULL) {
-					int x;
 					int n_dec_latents;
 		
 					if (sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%i - decoding %i latents",
-					&x, &n_dec_latents) == 2) {
+					"[I] decoding %d latents --- image.cpp:%*d",
+					&n_dec_latents) == 1) {
 						data->is_decoding_latents = 1;
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Decoding...");
 						data->n_current_latent++;
 					}
 				} else if (strstr(line, "decoded, taking") != NULL && data->is_decoding_latents) {
-					int x;
 					int y;
-					double z;
 					
 					if (sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%i - latent %i decoded, taking %lfs",
-					&x, &y, &z) == 3) {
+					"[I] latent %d decoded, taking %*lfs --- image.cpp:%*d",
+					&y) == 1) {
 						if (y < data->n_total_images) data->n_current_latent = y + 1;
 					}
 				} else if (strstr(line, "generate_image completed in") != NULL && data->is_decoding_latents) {
@@ -211,56 +210,58 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					data->is_decoding_latents = 0;
 					data->dec_latents_completed = 1;
 					
-					int x;
 					double gen_seconds;
 					
 					if (sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%i - generate_image completed in %lfs",
-					&x, &gen_seconds) == 2) {
+					"[I] generate_image completed in %lfs --- image.cpp:%*d",
+					&gen_seconds) == 1) {
 						*(data->total_time) += (int)gen_seconds;
 					} else {
-						g_printerr("Error: Could not extract time from string: \"%s\"\n", line);
+						g_printerr("Error: Could not extract time from string: '%s'\n", line);
 					}
-				} else if (strstr(line, "hires") != NULL) {
-					int x;
-					char str_01[16];
-					char str_02[16];
-					int iw;
-					int ih;
-					int uw;
-					int uh;
+				} else if (data->is_hires_fix == 1 && strstr(line, "hires") != NULL) {
+					int n_current_highres;
 					
 					if (sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%d - hires %15s image upscale %dx%d -> %dx%d",
-					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
-					"stable-diffusion.cpp:%d - hires %15s image upscale %dx%d -> %dx%d",
-					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%d - hires %15s upscale %dx%d -> %dx%d",
-					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
-					"stable-diffusion.cpp:%d - hires %15s upscale %dx%d -> %dx%d",
-					&x, str_01, &iw, &ih, &uw, &uh) == 6 || sscanf(line,
-					"[INFO ] stable-diffusion.cpp:%d - hires %15s (%15[^)]) upscale %dx%d -> %dx%d",
-					&x, str_01, str_02, &iw, &ih, &uw, &uh) == 7 || sscanf(line,
-					"stable-diffusion.cpp:%d - hires %15s (%15[^)]) upscale %dx%d -> %dx%d",
-					&x, str_01, str_02, &iw, &ih, &uw, &uh) == 7) {
+					"[I] hires sampling %d/%*d completed, taking %*lfs --- image.cpp:%*d",
+					&n_current_highres) == 1) {
+						if (data->n_current_hires != n_current_highres) data->n_current_hires = n_current_highres;
+						data->is_hires_fix = 0;
+					}
+				} else if (data->is_hires_fix == 0 && strstr(line, "hires") != NULL) {
+					char str_01[32];
+					char str_02[32];
+					
+					if (sscanf(line, "[I] hires %15s image upscale %*dx%*d -> %*dx%*d --- image.cpp:%*d", str_01) == 1 ||
+					sscanf(line, "hires %15s image upscale %*dx%*d -> %*dx%*d --- image.cpp:%*d", str_01) == 1 ||
+					sscanf(line, "[I] hires %15s upscale %*dx%*d -> %*dx%*d --- image.cpp:%*d", str_01) == 1 ||
+					sscanf(line, "hires %15s upscale %*dx%*d -> %*dx%*d --- image.cpp:%*d", str_01) == 1 ||
+					sscanf(line, "[I] hires %15s (%15[^)]) upscale %*dx%*d -> %*dx%*d --- image.cpp:%*d", str_01, str_02) == 2 ||
+					sscanf(line, "hires %15s (%15[^)]) upscale %*dx%*d -> %*dx%*d --- image.cpp:%*d", str_01, str_02) == 2) {
 						data->is_hires_fix = 1;
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "HiRes Refining...");
 						data->n_current_hires++;
 					}
-				} else if (strstr(line, "- upscaling from") != NULL) {
+				} else if (strstr(line, "upscaling from") != NULL) {
 					data->is_hires_fix = 0;
 					data->is_upscaling = 1;
 					int x;
-					int ow;
-					int oh;
-					int nw;
-					int nh;
 		
 					if (sscanf(line,
-					"[INFO ] upscaler.cpp:%i   - upscaling from (%i x %i) to (%i x %i)",
-					&x, &ow, &oh, &nw, &nh) == 5 ) {
+					"[I] upscaling from (%*d x %*d) to (%*d x %*d) --- upscaler.cpp:%d",
+					&x) == 1 ) {
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Upscaling...");
 						data->n_current_upscale++;
+					}
+				} else if (strstr(line, "input_image_tensor upscaled, taking") != NULL) {
+					double upscale_seconds;
+					
+					if (sscanf(line,
+					"[I] input_image_tensor upscaled, taking %lfs --- upscaler.cpp:%*d",
+					&upscale_seconds) == 1 ) {
+						*(data->total_time) += (int)upscale_seconds;
+					} else {
+						g_printerr("Error: Could not extract time from string: '%s'\n", line);
 					}
 				}
 				
@@ -287,7 +288,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						float time_or_speed;
 						char unit_part1[10], unit_part2[10];
 						
-						if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]",
+						if (sscanf(last_pipe + 1, " %d/%d - %f%9[^/]/%9[ -~]",
 						&step, &steps, &time_or_speed, unit_part1, unit_part2) == 5
 						&& (g_strcmp0(unit_part1, "it") == 0 || g_strcmp0(unit_part2, "it") == 0)) {
 							
@@ -324,7 +325,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 							if (written > 0) {
 								gtk_label_set_text(GTK_LABEL(data->generation_label), progress_label);
 							} else {
-								gtk_label_set_text(GTK_LABEL(data->generation_label), "Loading...");
+								gtk_label_set_text(GTK_LABEL(data->generation_label), "Processing...");
 								g_printerr("Error: Could not fetch progress from line: %s\n", final_string);
 							}
 						}

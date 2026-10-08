@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.9.3";
+const char* APP_NAME_VERSION = "Neural Pixel v0.9.4";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -49,7 +49,7 @@ const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDUL
 const char* LIST_BACKENDS[] = {"auto", "cpu", "cuda0", "cuda1", "rocm0", "rocm1", "sycl0", "sycl1", "vulkan0", "vulkan1", NULL};
 const size_t LIST_BACKENDS_COUNT = sizeof(LIST_BACKENDS) / sizeof(LIST_BACKENDS[0]);
 
-const char* LIST_VAE_TILE_SIZES[] = {"Disabled", "32x32", "48x48", "64x64", "80x80", "96x96", "128x128", NULL};
+const char* LIST_VAE_TILE_SIZES[] = {"Disabled", "64x64", "128x128", "256x256", "384x384", "512x512", "640x640", "768x768", "1024x1024", NULL};
 const size_t LIST_VAE_TILE_SIZES_COUNT = sizeof(LIST_VAE_TILE_SIZES) / sizeof(LIST_VAE_TILE_SIZES[0]);
 
 const char* LIST_HIRES_UPSCALERS[] = {"Disabled", "Lanczos", "Latent", "Latent (nearest)", "Latent (antialiased)", "Nearest", NULL};
