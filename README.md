@@ -14,6 +14,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 
 ## Compatibility
 
+- The current validated stable-diffusion.cpp commit is: [`a1ded76`](https://github.com/leejet/stable-diffusion.cpp/tree/a1ded76da5818803fca97a3b433669ef727d32cf).
 - Neural Pixel supports leading image generation models such as SDXL and FLUX, plus a broad range of community models, extensions, and runtimes.
 - For more information about `ADetailer` and how to convert the files, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/adetailer.md).
 - By default, the release ZIP packages include support for Vulkan and CPU inference only.
@@ -28,7 +29,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - Vulkan backend (Optional): Vulkan driver/loader/tools & >= 2GB of VRAM.
 
 ### 2. How to Run
-- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.3-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.3/NeuralPixel-Linux_v0.9.3.zip)
+- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.4-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.4/NeuralPixel-Linux_v0.9.4.zip)
 - Extract the archive and execute the `run_neural_pixel` file.
 - Tip: For debugging, launch from a terminal and enable Terminal Verbose under Extra Options.
 
@@ -38,7 +39,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
 ### 2. How to Run
-- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.3-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.3/NeuralPixel-Windows_v0.9.3.zip)
+- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.4-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.4/NeuralPixel-Windows_v0.9.4.zip)
 - Extract the archive and execute the `neural_pixel.bat` file.
 
 ## Recommended checkpoints
