@@ -130,17 +130,27 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				// Avoid "unused lora tensor" span
 				if (data->verbose_enabled && strstr(line, "[W] unused lora tensor") == NULL) printf("%s\n", line);
 
-				if (strstr(line, "- can not found lora")) {
-					char lora_path[512];
-					if (sscanf(line, "[W] common.cpp:%*d - can not found lora %511[^\n]", lora_path) == 1) {
-						char *filename = strrchr(lora_path, '/');
-						filename = filename ? filename + 1 : lora_path;
-						if (*filename) {
-							char error_dialog_text[60 + strlen(filename)];
-							snprintf(error_dialog_text, sizeof(error_dialog_text),
-							"LoRA: '%s' was not found.\nGeneration will proceed without it.", filename);
+				const char *lora_error_prefix = "[W] can not found lora ";
+				const char *lora_error_start = strstr(line, lora_error_prefix);
+
+				if (lora_error_start) {
+					const char *path_start = lora_error_start + strlen(lora_error_prefix);
+					const char *lora_error_end = strstr(path_start, " --- ");
+
+					if (lora_error_end) {
+						char *lora_path = g_strndup(path_start, lora_error_end - path_start);
+						char *filename = g_path_get_basename(lora_path);
+
+						if (filename && *filename && strcmp(filename, ".") != 0) {
+							char *error_dialog_text = g_strdup_printf(
+							"LoRA: '%s' was not found.\nGeneration will proceed without it.",
+							filename);
+
 							show_simple_message(data->win, "LoRA not found", error_dialog_text, 1);
+							g_free(error_dialog_text);
 						}
+						g_free(filename);
+						g_free(lora_path);
 					}
 				}
 
