@@ -44,8 +44,25 @@ int get_png_dimensions(const char *filename, uint32_t *w, uint32_t *h)
 	return 0;
 }
 
-static void set_png_metadata(gchar *path, gpointer user_data)
+static void set_png_metadata(gchar *path, int copy_info, gpointer user_data)
 {
+	gboolean set_widgets = TRUE;
+	gboolean copy_all = FALSE;
+	gboolean copy_pp = FALSE;
+	gboolean copy_np = FALSE;
+
+	if (copy_info > 0 && copy_info <= 3) set_widgets = FALSE;
+
+	if (copy_info == 1) {
+		copy_all = TRUE;
+		copy_pp = TRUE;
+		copy_np = TRUE;
+	} else if (copy_info == 2) {
+		copy_pp = TRUE;
+	} else if (copy_info == 3) {
+		copy_np = TRUE;
+	}
+	
 	LoadPNGData *data = user_data;
 
 	FILE *fp = g_fopen(path, "rb");
@@ -92,6 +109,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	png_get_text(png, info, &text, &num_text);
 
 	GString *l1 = g_string_new(NULL);
+	GString *l2 = g_string_new(NULL);
 
 	for (int i = 0; i < num_text; i++) {
 		g_string_append_printf(l1, "%s %s", text[i].key, text[i].text);
@@ -102,7 +120,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 
 	//Set Positive Prompt
 	ptr = strstr(l1->str, "parameters ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_pp)) {
 		const char *start = ptr + strlen("parameters ");
 		const char *neg_end = strstr(start, "\nNegative prompt:");
 		const char *steps_end = strstr(start, "\nSteps:");
@@ -115,14 +133,21 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			char pprompt[MAX_METADATA_PROMPT_LENGTH];
 			strncpy(pprompt, start, len);
 			pprompt[len] = '\0';
-			
-			GtkTextBuffer *ptb = data->pos_tb;
-			gtk_text_buffer_set_text (ptb, pprompt, -1);
+
+			if (set_widgets) {
+				GtkTextBuffer *ptb = data->pos_tb;
+				gtk_text_buffer_set_text (ptb, pprompt, -1);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Prompt: %s\n", pprompt);
+			} else if (copy_pp) {
+				GdkClipboard *clipboard = gtk_widget_get_clipboard(data->win);
+				gdk_clipboard_set_text (clipboard, pprompt);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse positive prompt data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse positive prompt data.\n");
 		n_err++;
 	}
@@ -130,7 +155,7 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	
 	//Set Negative Prompt
 	ptr = strstr(l1->str, "Negative prompt: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_np)) {
 		const char *start = ptr + strlen("Negative prompt: ");
 		const char *end = strstr(start, "\nSteps:");
 		if (start && end && start < end) {
@@ -141,14 +166,21 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			char nprompt[MAX_METADATA_PROMPT_LENGTH];
 			strncpy(nprompt, start, len);
 			nprompt[len] = '\0';
-			
-			GtkTextBuffer *ntb = data->neg_tb;
-			gtk_text_buffer_set_text (ntb, nprompt, -1);
+
+			if (set_widgets) {
+				GtkTextBuffer *ntb = data->neg_tb;
+				gtk_text_buffer_set_text (ntb, nprompt, -1);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Negative Prompt: %s\n", nprompt);
+			} else if (copy_np) {
+				GdkClipboard *clipboard = gtk_widget_get_clipboard(data->win);
+				gdk_clipboard_set_text (clipboard, nprompt);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse negative prompt data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		if (n_err == 0) {
 			GtkTextBuffer *ntb = data->neg_tb;
 			gtk_text_buffer_set_text(ntb, "", -1);
@@ -160,47 +192,58 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	
 	//Set Steps
 	ptr = strstr(l1->str, "Steps: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		int steps_int;
 		if (sscanf(ptr + strlen("Steps: "), "%d", &steps_int) == 1) {
-			
-			GtkWidget *steps_spin = data->steps_spin;
-			gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), steps_int);
+			if (set_widgets) {
+				GtkWidget *steps_spin = data->steps_spin;
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(steps_spin), steps_int);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Steps: %d\n", steps_int);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse steps data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse steps data.\n");
 		n_err++;
 	}
 	
 	//Set CFG Value
 	ptr = strstr(l1->str, "CFG scale: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		double cfg_double;
 		if (sscanf(ptr + strlen("CFG scale: "), "%lf", &cfg_double) == 1) {
-			GtkWidget *cfg_spin = data->cfg_spin;
-			gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), cfg_double);
+			if (set_widgets) {
+				GtkWidget *cfg_spin = data->cfg_spin;
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), cfg_double);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "CFG scale: %.1f\n", cfg_double);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse CFG data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse CFG data.\n");
 		n_err++;
 	}
 	
 	//Set Seed Value
 	ptr = strstr(l1->str, "Seed: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		long long int seed_long;
 		if (sscanf(ptr + strlen("Seed: "), "%lld", &seed_long) == 1) {
 			GtkEntry *seed_entry = GTK_ENTRY(data->seed_entry);
 			char *seed_str;
 			seed_str = convert_long_long_int_to_string(seed_long);
 			if (seed_str != NULL) {
-				gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
+				if (set_widgets) {
+					gtk_editable_set_text(GTK_EDITABLE(seed_entry), seed_str);
+				} else if (copy_all) {
+					g_string_append_printf(l2, "Seed: %lld\n", seed_long);
+				}
 				free(seed_str);
 			} else {
 				fprintf(stderr, "Failed to parse seed data.\n");
@@ -210,42 +253,46 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			fprintf(stderr, "Failed to parse seed data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse seed data.\n");
 		n_err++;
 	}
 	
 	//Set IMG Size
 	ptr = strstr(l1->str, "Size: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		int width_int;
 		int heigth_int;
 		if (sscanf(ptr + strlen("Size: "), "%dx%d", &width_int, &heigth_int) == 2) {
-			char width_str[MAX_PROPERTY_LENGTH];
-			snprintf(width_str, sizeof(width_str), "%d", width_int);
-			
-			char heigth_str[MAX_PROPERTY_LENGTH];
-			snprintf(heigth_str, sizeof(heigth_str), "%d", heigth_int);
-			
-			int width_index = check_list_contains_item(LIST_RESOLUTIONS_STR, width_str);
-			int height_index = check_list_contains_item(LIST_RESOLUTIONS_STR, heigth_str);
-			
-			GtkWidget *width_dd = data->width_dd;
-			GtkWidget *height_dd = data->height_dd;
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(width_dd), width_index);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(height_dd), height_index);
+			if (set_widgets) {
+				char width_str[MAX_PROPERTY_LENGTH];
+				snprintf(width_str, sizeof(width_str), "%d", width_int);
+
+				char heigth_str[MAX_PROPERTY_LENGTH];
+				snprintf(heigth_str, sizeof(heigth_str), "%d", heigth_int);
+
+				int width_index = check_list_contains_item(LIST_RESOLUTIONS_STR, width_str);
+				int height_index = check_list_contains_item(LIST_RESOLUTIONS_STR, heigth_str);
+				
+				GtkWidget *width_dd = data->width_dd;
+				GtkWidget *height_dd = data->height_dd;
+				gtk_drop_down_set_selected(GTK_DROP_DOWN(width_dd), width_index);
+				gtk_drop_down_set_selected(GTK_DROP_DOWN(height_dd), height_index);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Width: %d - Height: %d\n", width_int, heigth_int);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse image size data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse image size data.\n");
 		n_err++;
 	}
 	
 	//Set SD Checkpoint
 	ptr = strstr(l1->str, "Model: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		const char *start = ptr + strlen("Model: ");
 		const char *end = strstr(start, ",");
 		if (start && end && start < end) {
@@ -256,46 +303,54 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			char checkpoint_str[MAX_PROPERTY_LENGTH];
 			strncpy(checkpoint_str, start, len);
 			checkpoint_str[len] = '\0';
-			
-			GtkWidget *checkpoint_dd = data->checkpoint_dd;
-			GtkStringList *checkpoint_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(checkpoint_dd)));
-			int checkpoint_i = check_gtk_list_contains_item(checkpoint_items, checkpoint_str);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(checkpoint_dd), checkpoint_i);
+
+			if (set_widgets) {
+				GtkWidget *checkpoint_dd = data->checkpoint_dd;
+				GtkStringList *checkpoint_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(checkpoint_dd)));
+				int checkpoint_i = check_gtk_list_contains_item(checkpoint_items, checkpoint_str);
+				gtk_drop_down_set_selected(GTK_DROP_DOWN(checkpoint_dd), checkpoint_i);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Checkpoint: %s\n", checkpoint_str);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse checkpoint data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse checkpoint data.\n");
 		n_err++;
 	}
 	
 	//Set Sampler and Scheduler
 	ptr = strstr(l1->str, "Sampler: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		char sampler_str[MAX_PROPERTY_LENGTH];
 		char scheduler_str[MAX_PROPERTY_LENGTH];
 		if (sscanf(ptr + strlen("Sampler: "), "%s %[^,],", sampler_str, scheduler_str) == 2) {
-			GtkWidget *sampler_dd = data->sampler_dd;
-			GtkWidget *scheduler_dd = data->scheduler_dd;
-			
-			int sampler_index = check_list_contains_item(LIST_SAMPLES, sampler_str);
-			int scheduler_index = check_list_contains_item(LIST_SCHEDULES, scheduler_str);
-			
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(sampler_dd), sampler_index);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(scheduler_dd), scheduler_index);
+			if (set_widgets) {
+				GtkWidget *sampler_dd = data->sampler_dd;
+				GtkWidget *scheduler_dd = data->scheduler_dd;
+				
+				int sampler_index = check_list_contains_item(LIST_SAMPLES, sampler_str);
+				int scheduler_index = check_list_contains_item(LIST_SCHEDULES, scheduler_str);
+				
+				gtk_drop_down_set_selected(GTK_DROP_DOWN(sampler_dd), sampler_index);
+				gtk_drop_down_set_selected(GTK_DROP_DOWN(scheduler_dd), scheduler_index);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Sampler: %s, Scheduler: %s\n", sampler_str, scheduler_str);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse sampler data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse sampler data.\n");
 		n_err++;
 	}
 	
 	//Set VAE
 	ptr = strstr(l1->str, ", VAE: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		const char *start = ptr + strlen(", VAE: ");
 		const char *end = strstr(start, ",");
 		if (start && end && start < end) {
@@ -306,16 +361,20 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			char vae_str[MAX_PROPERTY_LENGTH];
 			strncpy(vae_str, start, len);
 			vae_str[len] = '\0';
-			
-			GtkStringList *vae_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(data->vae_dd)));
-			int vae_i = check_gtk_list_contains_item(vae_items, vae_str);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), vae_i);
+
+			if (set_widgets) {
+				GtkStringList *vae_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(data->vae_dd)));
+				int vae_i = check_gtk_list_contains_item(vae_items, vae_str);
+				gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), vae_i);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "VAE: %s\n", vae_str);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse VAE data.\n");
 			if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		if (n_err == 0) {
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
 		} else {
@@ -326,22 +385,26 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	
 	//Set Clip Skip
 	ptr = strstr(l1->str, ", Clip skip: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		int clip_skip_value;
 		if (sscanf(ptr + strlen(", Clip skip: "), "%d", &clip_skip_value) == 1) {
-			gtk_spin_button_set_value (GTK_SPIN_BUTTON(data->clip_skip_spin), clip_skip_value);
+			if (set_widgets) {
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(data->clip_skip_spin), clip_skip_value);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Clip skip: %d\n", clip_skip_value);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse Clip skip data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse Clip skip data.\n");
 		n_err++;
 	}
 	
 	//Set Hires upscaler
 	ptr = strstr(l1->str, ", Hires upscale: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		const char *start = ptr + strlen(", Hires upscale: ");
 		const char *end = strstr(start, ",");
 		if (start && end && start < end) {
@@ -353,15 +416,19 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 			strncpy(hires_upscaler_str, start, len);
 			hires_upscaler_str[len] = '\0';
 			
-			GtkStringList *hires_upscaler_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(data->hires_upscaler_dd)));
-			int hires_upscaler_i = check_gtk_list_contains_item(hires_upscaler_items, hires_upscaler_str);
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), hires_upscaler_i);
+			if (set_widgets) {
+				GtkStringList *hires_upscaler_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(data->hires_upscaler_dd)));
+				int hires_upscaler_i = check_gtk_list_contains_item(hires_upscaler_items, hires_upscaler_str);
+				gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), hires_upscaler_i);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Hires upscale: %s\n", hires_upscaler_str);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse Hires upscale data.\n");
 			if (n_err == 0) gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		if (n_err == 0) {
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
 		} else {
@@ -372,16 +439,20 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	
 	//Set Hires Scale Value
 	ptr = strstr(l1->str, ", Hires scale: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		double hires_scale_double;
 		if (sscanf(ptr + strlen(", Hires scale: "), "%lf", &hires_scale_double) == 1) {
-			GtkWidget *hires_scale_spin = data->hires_scale_spin;
-			gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), hires_scale_double);
+			if (set_widgets) {
+				GtkWidget *hires_scale_spin = data->hires_scale_spin;
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_scale_spin), hires_scale_double);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Hires scale: %.2f\n", hires_scale_double);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse Hires scale data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		if (n_err > 0) { fprintf(stderr, "Failed to parse Hires scale data.\n"); n_err++; }
 	}
 	
@@ -390,64 +461,82 @@ static void set_png_metadata(gchar *path, gpointer user_data)
 	if (ptr) {
 		int hires_width_int;
 		int hires_heigth_int;
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse Hires resize data.\n");
 		n_err++;
 	}*/
 	
 	//Set Hires Steps
 	ptr = strstr(l1->str, ", Hires steps: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		int hires_steps_int;
 		if (sscanf(ptr + strlen(", Hires steps: "), "%d", &hires_steps_int) == 1) {
-			
-			GtkWidget *hires_steps_spin = data->hires_steps_spin;
-			gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_steps_spin), hires_steps_int);
+			if (set_widgets) {
+				GtkWidget *hires_steps_spin = data->hires_steps_spin;
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_steps_spin), hires_steps_int);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Hires steps: %d\n", hires_steps_int);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse Hires steps data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		if (n_err > 0) { fprintf(stderr, "Failed to parse Hires steps data.\n"); n_err++; }
 	}
 	
 	//Set Hires Denoising strength
 	ptr = strstr(l1->str, ", Denoising strength: ");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		double hires_denoising_str_double;
 		if (sscanf(ptr + strlen(", Denoising strength: "), "%lf", &hires_denoising_str_double) == 1) {
-			GtkWidget *hires_denoise_spin = data->hires_denoise_spin;
-			gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_denoise_spin), hires_denoising_str_double);
+			if (set_widgets) {
+				GtkWidget *hires_denoise_spin = data->hires_denoise_spin;
+				gtk_spin_button_set_value (GTK_SPIN_BUTTON(hires_denoise_spin), hires_denoising_str_double);
+			} else if (copy_all) {
+				g_string_append_printf(l2, "Hires Denoising strength: %.2f\n", hires_denoising_str_double);
+			}
 		} else {
 			fprintf(stderr, "Failed to parse Hires denoising strength data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		if (n_err > 0) { fprintf(stderr, "Failed to parse Hires denoising strength data.\n"); n_err++; }
 	}
 
 	//Set Denoise strength
 	ptr = strstr(l1->str, ",\"strength\":");
-	if (ptr) {
+	if (ptr && (set_widgets || copy_all)) {
 		double denoise_str_value;
 		if (sscanf(ptr + strlen(",\"strength\":"), "%lf", &denoise_str_value) == 1) {
 			if (denoise_str_value >= 0 && denoise_str_value <= 1) {
-				GtkWidget *denoise_spin = data->denoise_spin;
-				gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), denoise_str_value);
+				if (set_widgets) {
+					GtkWidget *denoise_spin = data->denoise_spin;
+					gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), denoise_str_value);
+				} else if (copy_all) {
+					g_string_append_printf(l2, "Denoising strength: %.2f\n", denoise_str_value);
+				}
 			}
 		} else {
 			fprintf(stderr, "Failed to parse Denoise strength data.\n");
 			n_err++;
 		}
-	} else {
+	} else if (!ptr) {
 		fprintf(stderr, "Failed to parse Denoise strength data.\n");
 		n_err++;
+	}
+
+	if (copy_all) {
+		g_string_append_printf(l2, "Application: %s (stable-diffusion.cpp)\n", APP_NAME_VERSION);
+		GdkClipboard *clipboard = gtk_widget_get_clipboard(data->win);
+		gdk_clipboard_set_text (clipboard, l2->str);
 	}
 
 	png_destroy_read_struct(&png, &info, NULL);
 	fclose(fp);
 	g_free(path);
 	g_string_free(l1, TRUE);
+	g_string_free(l2, TRUE);
 }
 
 #if GTK_CHECK_VERSION(4, 10, 0)
@@ -464,7 +553,7 @@ static void read_png_metadata(GObject* client, GAsyncResult* res, gpointer user_
 	}
 
 	if (img_path != NULL) {
-		set_png_metadata(img_path, user_data);
+		set_png_metadata(img_path, 0, user_data);
 	}
 	if (data->cancellable != NULL) {
 		g_object_unref(data->cancellable);
@@ -523,7 +612,7 @@ static void read_png_metadata_deprecated(GtkDialog* dialog, int response, gpoint
 		gchar *img_path = g_file_get_path(png_file);
 
 		if (img_path != NULL) {
-			set_png_metadata(img_path, user_data);
+			set_png_metadata(img_path, 0, user_data);
 		}
 	}
 	gtk_window_destroy (GTK_WINDOW (dialog));
@@ -579,11 +668,27 @@ void load_metadata_from_favorites(GtkWidget *btn, gpointer user_data)
 	if (img_path == NULL) { g_printerr("Failed to get image path.\n"); return; }
 
 	if (check_file_exists(img_path, 0) == 1) {
-		set_png_metadata(img_path, favorites_d->load_png_info_d);
+		const char *btn_label = gtk_button_get_label(GTK_BUTTON(btn));
+
+		if (btn_label == NULL) {
+			set_png_metadata(img_path, 0, favorites_d->load_png_info_d);
+		} else if (g_strcmp0 (btn_label, "Copy Negative Prompt") == 0) {
+			set_png_metadata(img_path, 3, favorites_d->load_png_info_d);
+		} else if (g_strcmp0 (btn_label, "Copy Positive Prompt") == 0) {
+			set_png_metadata(img_path, 2, favorites_d->load_png_info_d);
+		} else if (g_strcmp0 (btn_label, "Copy All") == 0) {
+			set_png_metadata(img_path, 1, favorites_d->load_png_info_d);
+		} else {
+			g_printerr("Error in function 'load_metadata_from_favorites': The label '%s' is not recognized.\n", btn_label);
+			set_png_metadata(img_path, 0, favorites_d->load_png_info_d);
+		}
 	} else {
 		g_printerr("File '%s' does not exist or cannot be accessed.\n", img_path);
 		g_free(img_path);
 	}
+
+	GtkWidget *menu_btn_popover = gtk_widget_get_ancestor(btn, GTK_TYPE_POPOVER);
+	if (menu_btn_popover) gtk_popover_popdown(GTK_POPOVER(menu_btn_popover));
 }
 
 void load_from_img_preview(GtkWidget *btn, gpointer user_data)
@@ -594,15 +699,30 @@ void load_from_img_preview(GtkWidget *btn, gpointer user_data)
 		gchar *img_path = g_strdup(g_ptr_array_index(data->image_files, *data->current_image_index));
 		
 		if (img_path != NULL) {
-			set_png_metadata(img_path, user_data);
+			const char *btn_label = gtk_button_get_label(GTK_BUTTON(btn));
+			
+			if (btn_label == NULL) {
+				set_png_metadata(img_path, 0, user_data);
+			} else if (g_strcmp0 (btn_label, "Copy Negative Prompt") == 0) {
+				set_png_metadata(img_path, 3, user_data);
+			} else if (g_strcmp0 (btn_label, "Copy Positive Prompt") == 0) {
+				set_png_metadata(img_path, 2, user_data);
+			} else if (g_strcmp0 (btn_label, "Copy All") == 0) {
+				set_png_metadata(img_path, 1, user_data);
+			} else {
+				g_printerr("Error in function 'load_from_img_preview': The label '%s' is not recognized.\n", btn_label);
+				set_png_metadata(img_path, 0, user_data);
+			}
 		} else {
-			fprintf(stderr, "Failed to get image path.\n");
+			g_printerr("Failed to get image path.\n");
 		}
 	} else {
 		g_printerr("No images in the 'output' directory, using default image.\n");
 		gchar *img_path = g_strdup(DEFAULT_IMG_PATH);
-		set_png_metadata(img_path, user_data);
+		set_png_metadata(img_path, 0, user_data);
 	}
+	GtkWidget *menu_btn_popover = gtk_widget_get_ancestor(btn, GTK_TYPE_POPOVER);
+	if (menu_btn_popover) gtk_popover_popdown(GTK_POPOVER(menu_btn_popover));
 }
 
 void load_from_img_btn_cb(GtkWidget *btn, gpointer user_data)

@@ -48,6 +48,41 @@ static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkLis
 	GtkWidget *box_buttons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_set_homogeneous (GTK_BOX (box_buttons), TRUE);
 
+	// Copy info menu btn
+	GtkWidget *copy_info_btn = gtk_menu_button_new();
+	gtk_widget_add_css_class(copy_info_btn, "custom_menu_btn");
+	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(copy_info_btn), "edit-copy-symbolic");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(copy_info_btn), "Copy generation information, including prompts and generation settings, to the clipboard.");
+	gtk_box_append(GTK_BOX (box_buttons), copy_info_btn);
+
+	GtkWidget *copy_opts_popover = gtk_popover_new();
+	gtk_widget_set_halign(copy_opts_popover, GTK_ALIGN_START);
+	gtk_widget_set_valign(copy_opts_popover, GTK_ALIGN_START);
+
+	GtkWidget *copy_opts_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+
+	GtkWidget *copy_all_info_btn = gtk_button_new_with_label ("Copy All");
+	gtk_widget_add_css_class(copy_all_info_btn, "custom_btn");
+	g_object_set_data(G_OBJECT(copy_all_info_btn), "favorites_d", favorites_d);
+	g_signal_connect(copy_all_info_btn, "clicked", G_CALLBACK(load_metadata_from_favorites), fav_image);
+	gtk_box_append(GTK_BOX(copy_opts_box), copy_all_info_btn);
+
+	GtkWidget *copy_pp_btn = gtk_button_new_with_label ("Copy Positive Prompt");
+	gtk_widget_add_css_class(copy_pp_btn, "custom_btn");
+	g_object_set_data(G_OBJECT(copy_pp_btn), "favorites_d", favorites_d);
+	g_signal_connect(copy_pp_btn, "clicked", G_CALLBACK(load_metadata_from_favorites), fav_image);
+	gtk_box_append(GTK_BOX(copy_opts_box), copy_pp_btn);
+
+	GtkWidget *copy_np_btn = gtk_button_new_with_label ("Copy Negative Prompt");
+	gtk_widget_add_css_class(copy_np_btn, "custom_btn");
+	g_object_set_data(G_OBJECT(copy_np_btn), "favorites_d", favorites_d);
+	g_signal_connect(copy_np_btn, "clicked", G_CALLBACK(load_metadata_from_favorites), fav_image);
+	gtk_box_append(GTK_BOX(copy_opts_box), copy_np_btn);
+
+	gtk_popover_set_child(GTK_POPOVER(copy_opts_popover), copy_opts_box);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(copy_info_btn), copy_opts_popover);
+
+	// Load info btn
 	GtkWidget *load_info_btn = gtk_button_new_from_icon_name ("insert-image-symbolic");
 	gtk_widget_add_css_class(load_info_btn, "custom_btn");
 	gtk_widget_set_hexpand (load_info_btn, TRUE);
@@ -58,6 +93,7 @@ static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkLis
 	g_signal_connect(load_info_btn, "clicked", G_CALLBACK(load_metadata_from_favorites), fav_image);
 	gtk_box_append(GTK_BOX(box_buttons), load_info_btn);
 
+	// Delete favorite btn
 	GtkWidget *delete_btn = gtk_button_new_from_icon_name ("edit-delete-symbolic");
 	gtk_widget_add_css_class(delete_btn, "custom_btn");
 	gtk_widget_set_hexpand (delete_btn, TRUE);

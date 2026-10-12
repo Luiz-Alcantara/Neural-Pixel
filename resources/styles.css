@@ -184,6 +184,10 @@ TODO: Create the greenish color palette and more
 	background-color: @primary-color-light;
 }
 
+.custom_menu_btn > button:hover {
+	background-color: @primary-color-dark;
+}
+
 .custom_menu_btn > popover > contents {
 	background-image: none;
 	background-color: @primary-color-light;
@@ -208,7 +212,7 @@ TODO: Create the greenish color palette and more
 }
 
 .custom_seed_entry:focus-within {
-	 outline: 1px solid @primary-color-accent;
+	outline: 1px solid @primary-color-accent;
 	outline-offset: 0px;
 }
 

@@ -205,6 +205,9 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_right, *boxr_img, *boxr_bottom_bar, *boxr_bottom_left_box, *boxr_bottom_right_box;
 	GtkWidget *preview_img;
 	GtkWidget *prev_10_img_button, *prev_img_button, *img_index_label, *next_img_button, *next_10_img_button;
+	GtkWidget *copy_info_to_clipboard_btn;
+	GtkWidget *copy_opts_popover, *copy_opts_box;
+	GtkWidget *copy_all_info_btn, *copy_pp_btn, *copy_np_btn;
 	GtkWidget *load_from_current_btn, *set_img2img_from_preview_btn, *add_favorite_btn, *hide_img_btn, *to_trash_btn;
 
 	GtkEventController *preview_box_scroll;
@@ -1750,7 +1753,36 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(boxr_bottom_right_box, "left_box");
 	gtk_box_set_homogeneous (GTK_BOX (boxr_bottom_right_box), TRUE);
 	gtk_box_append (GTK_BOX (boxr_bottom_bar), boxr_bottom_right_box);
-	
+
+	// Copy info to clipboard	
+	copy_info_to_clipboard_btn = gtk_menu_button_new();
+	gtk_widget_add_css_class(copy_info_to_clipboard_btn, "custom_menu_btn");
+	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(copy_info_to_clipboard_btn), "edit-copy-symbolic");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(copy_info_to_clipboard_btn),
+	"Copy generation information, including prompts and generation settings, to the clipboard.");
+	gtk_box_append(GTK_BOX (boxr_bottom_right_box), copy_info_to_clipboard_btn);
+
+	copy_opts_popover = gtk_popover_new();
+	gtk_widget_set_halign(copy_opts_popover, GTK_ALIGN_START);
+	gtk_widget_set_valign(copy_opts_popover, GTK_ALIGN_START);
+
+	copy_opts_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+
+	copy_all_info_btn = gtk_button_new_with_label ("Copy All");
+	gtk_widget_add_css_class(copy_all_info_btn, "custom_btn");
+	gtk_box_append(GTK_BOX(copy_opts_box), copy_all_info_btn);
+
+	copy_pp_btn = gtk_button_new_with_label ("Copy Positive Prompt");
+	gtk_widget_add_css_class(copy_pp_btn, "custom_btn");
+	gtk_box_append(GTK_BOX(copy_opts_box), copy_pp_btn);
+
+	copy_np_btn = gtk_button_new_with_label ("Copy Negative Prompt");
+	gtk_widget_add_css_class(copy_np_btn, "custom_btn");
+	gtk_box_append(GTK_BOX(copy_opts_box), copy_np_btn);
+
+	gtk_popover_set_child(GTK_POPOVER(copy_opts_popover), copy_opts_box);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(copy_info_to_clipboard_btn), copy_opts_popover);
+
 	//Load info from current preview image
 	load_from_current_btn = gtk_button_new_from_icon_name ("insert-image-symbolic");
 	gtk_widget_add_css_class(load_from_current_btn, "custom_btn");
@@ -1914,6 +1946,9 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->hires_scale_spin = hires_scale_spin;
 	load_png_info_d->hires_steps_spin = hires_steps_spin;
 	load_png_info_d->hires_denoise_spin = hires_denoise_spin;
+	g_signal_connect(copy_all_info_btn, "clicked", G_CALLBACK(load_from_img_preview), load_png_info_d);
+	g_signal_connect(copy_pp_btn, "clicked", G_CALLBACK(load_from_img_preview), load_png_info_d);
+	g_signal_connect(copy_np_btn, "clicked", G_CALLBACK(load_from_img_preview), load_png_info_d);
 	g_signal_connect (load_from_img_btn, "clicked", G_CALLBACK (load_from_img_btn_cb), load_png_info_d);
 	g_signal_connect (load_from_current_btn, "clicked", G_CALLBACK (load_from_img_preview), load_png_info_d);
 	g_signal_connect (load_from_img_btn, "destroy", G_CALLBACK (on_load_from_img_btn_destroy), load_png_info_d);

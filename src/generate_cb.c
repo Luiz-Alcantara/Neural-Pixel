@@ -182,7 +182,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					int n_total_images;
 		
 					if (sscanf(line,
-					"[I] generating image: %d/%d - seed %*lld --- image.cpp:%*d",
+					"[I] generating image: %d/%d - seed %*d --- image.cpp:%*d",
 					&n_current_image, &n_total_images) == 2) {
 						gtk_label_set_text(GTK_LABEL(data->generation_label), "Generating...");
 						data->is_generating_latent = 1;
@@ -209,7 +209,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					int y;
 					
 					if (sscanf(line,
-					"[I] latent %d decoded, taking %*lfs --- image.cpp:%*d",
+					"[I] latent %d decoded, taking %*fs --- image.cpp:%*d",
 					&y) == 1) {
 						if (y < data->n_total_images) data->n_current_latent = y + 1;
 					}
@@ -233,7 +233,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					int n_current_highres;
 					
 					if (sscanf(line,
-					"[I] hires sampling %d/%*d completed, taking %*lfs --- image.cpp:%*d",
+					"[I] hires sampling %d/%*d completed, taking %*fs --- image.cpp:%*d",
 					&n_current_highres) == 1) {
 						if (data->n_current_hires != n_current_highres) data->n_current_hires = n_current_highres;
 						data->is_hires_fix = 0;
