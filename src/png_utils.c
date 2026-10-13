@@ -12,6 +12,7 @@
 #include "file_utils.h"
 #include "str_utils.h"
 #include "structs.h"
+#include "toast_notification.h"
 #include "widgets_cb.h"
 
 #define MAX_METADATA_PROMPT_LENGTH 2048
@@ -181,12 +182,12 @@ static void set_png_metadata(gchar *path, int copy_info, gpointer user_data)
 			n_err++;
 		}
 	} else if (!ptr) {
-		if (n_err == 0) {
-			GtkTextBuffer *ntb = data->neg_tb;
-			gtk_text_buffer_set_text(ntb, "", -1);
-		} else {
+		if (n_err > 0) {
 			fprintf(stderr, "Failed to parse negative prompt data.\n");
 			n_err++;
+		} else if (n_err == 0 && set_widgets) {
+			GtkTextBuffer *ntb = data->neg_tb;
+			gtk_text_buffer_set_text(ntb, "", -1);
 		}
 	}
 	
@@ -279,7 +280,7 @@ static void set_png_metadata(gchar *path, int copy_info, gpointer user_data)
 				gtk_drop_down_set_selected(GTK_DROP_DOWN(width_dd), width_index);
 				gtk_drop_down_set_selected(GTK_DROP_DOWN(height_dd), height_index);
 			} else if (copy_all) {
-				g_string_append_printf(l2, "Width: %d - Height: %d\n", width_int, heigth_int);
+				g_string_append_printf(l2, "Width: %d, Height: %d\n", width_int, heigth_int);
 			}
 		} else {
 			fprintf(stderr, "Failed to parse image size data.\n");
@@ -375,11 +376,11 @@ static void set_png_metadata(gchar *path, int copy_info, gpointer user_data)
 			n_err++;
 		}
 	} else if (!ptr) {
-		if (n_err == 0) {
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
-		} else {
+		if (n_err > 0) {
 			fprintf(stderr, "Failed to parse VAE data.\n");
 			n_err++;
+		} else if (n_err == 0 && set_widgets) {
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->vae_dd), 0);
 		}
 	}
 	
@@ -429,11 +430,11 @@ static void set_png_metadata(gchar *path, int copy_info, gpointer user_data)
 			n_err++;
 		}
 	} else if (!ptr) {
-		if (n_err == 0) {
-			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
-		} else {
+		if (n_err > 0) {
 			fprintf(stderr, "Failed to parse Hires upscale data.\n");
 			n_err++;
+		} else if (n_err == 0 && set_widgets) {
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(data->hires_upscaler_dd), 0);
 		}
 	}
 	
@@ -527,9 +528,16 @@ static void set_png_metadata(gchar *path, int copy_info, gpointer user_data)
 	}
 
 	if (copy_all) {
-		g_string_append_printf(l2, "Application: %s (stable-diffusion.cpp)\n", APP_NAME_VERSION);
+		g_string_append_printf(l2, "Application: %s (stable-diffusion.cpp)", APP_NAME_VERSION);
 		GdkClipboard *clipboard = gtk_widget_get_clipboard(data->win);
 		gdk_clipboard_set_text (clipboard, l2->str);
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "Generation Info Copied!");
+	} else if (copy_pp) {
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "Positive Prompt Copied!");
+	} else if (copy_np) {
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "Negative Prompt Copied!");
+	} else if (set_widgets) {
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "Generation Info Loaded!");
 	}
 
 	png_destroy_read_struct(&png, &info, NULL);
@@ -581,6 +589,7 @@ static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data
 				gtk_picture_set_filename(prev_img, path);
 				gtk_widget_add_css_class(data->img2img_visibility_toggle_btn, "custom_btn_img2img");
 				clear_mask_btn_cb(NULL, user_data);
+				show_toast_notification(GTK_OVERLAY(data->main_overlay), "Input image set.");
 			} else {
 				g_printerr(
 					"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
@@ -635,6 +644,7 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 					gtk_picture_set_filename(prev_img, path);
 					gtk_widget_add_css_class(data->img2img_visibility_toggle_btn, "custom_btn_img2img");
 					clear_mask_btn_cb(NULL, user_data);
+					show_toast_notification(GTK_OVERLAY(data->main_overlay), "Input image set.");
 				} else {
 					g_printerr(
 						"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
@@ -822,6 +832,7 @@ void set_current_preview_to_img2img(GtkWidget *btn, gpointer user_data)
 		g_string_assign(data->img2img_file_path, path);
 		gtk_picture_set_filename(GTK_PICTURE(data->image_wgt), path);
 		gtk_widget_add_css_class(data->img2img_visibility_toggle_btn, "custom_btn_img2img");
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "Input image set.");
 	} else {
 		g_printerr("Error loading current preview image into img2img.\n");
 	}

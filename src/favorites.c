@@ -5,6 +5,7 @@
 #include "file_utils.h"
 #include "png_utils.h"
 #include "structs.h"
+#include "toast_notification.h"
 #include "widgets_cb.h"
 
 #define IMG_DIMENSION 640
@@ -211,11 +212,13 @@ static void on_delete_favorite(GtkButton *btn, gpointer user_data)
 {
 	GtkListItem *item = GTK_LIST_ITEM(user_data);
 	FavoritesWindowData *favorites_d = g_object_get_data(G_OBJECT(btn), "favorites_d");
+	LoadPNGData *load_png_info_d = favorites_d->load_png_info_d;
 
 	guint pos = gtk_list_item_get_position(item);
 	if (pos == GTK_INVALID_LIST_POSITION) return;
 
 	gtk_string_list_remove(favorites_d->store, pos);
+	show_toast_notification(GTK_OVERLAY(load_png_info_d->main_overlay), "Favorite removed.");
 	favorites_d->modified = TRUE;
 }
 

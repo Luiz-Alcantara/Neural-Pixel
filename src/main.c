@@ -41,6 +41,8 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	GtkWidget *titlebar;
 
+	GtkWidget *main_overlay;
+
 	GtkWidget *paned;
 	
 	GtkWidget *box_left;
@@ -243,7 +245,11 @@ app_activate (GApplication *app, gpointer user_data)
 	//Main container
 	paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_widget_add_css_class(paned, "custom_paned");
-	gtk_window_set_child (GTK_WINDOW (win), paned);
+
+	// Main overlay
+	main_overlay = gtk_overlay_new();
+	gtk_overlay_set_child(GTK_OVERLAY(main_overlay), paned);
+	gtk_window_set_child (GTK_WINDOW (win), main_overlay);
 	
 	//Set Box Left and Right
 	box_left = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
@@ -1908,6 +1914,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 
 	preview_d->hide_img_btn = hide_img_btn;
+	preview_d->main_overlay = main_overlay;
 	preview_d->image_widget = preview_img;
 	preview_d->img_index_label = img_index_label;
 	g_signal_connect (prev_10_img_button, "clicked", G_CALLBACK (navigate_10_img_prev), preview_d);
@@ -1921,6 +1928,7 @@ app_activate (GApplication *app, gpointer user_data)
 
 	manage_triggers_d = g_new0 (ManageTriggersData, 1);
 	manage_triggers_d->lora_dd = lora_dd;
+	manage_triggers_d->main_overlay = main_overlay;
 	manage_triggers_d->win = win;
 	g_signal_connect(lora_triggers_btn, "clicked", G_CALLBACK(manage_lora_triggers), manage_triggers_d);
 	g_signal_connect(lora_triggers_btn, "destroy", G_CALLBACK(on_lora_triggers_btn_destroy), manage_triggers_d);
@@ -1929,6 +1937,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->image_files = app_data->preview_image_files;
 	load_png_info_d->current_image_index = &app_data->preview_image_index;
 	load_png_info_d->win = win;
+	load_png_info_d->main_overlay = main_overlay;
 	load_png_info_d->pos_tb = pos_tb;
 	load_png_info_d->neg_tb = neg_tb;
 	load_png_info_d->steps_spin = steps_spin;
@@ -1957,6 +1966,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_img2img_file_d = g_new0 (LoadImg2ImgData, 1);
 	load_img2img_file_d->win = win;
 	load_img2img_file_d->img2img_visibility_toggle_btn = img2img_visibility_toggle_btn;
+	load_img2img_file_d->main_overlay = main_overlay;
 	load_img2img_file_d->overlay_img2img = overlay_img2img;
 	load_img2img_file_d->detector_check = detector_check;
 	load_img2img_file_d->inpaint_check = inpaint_check;
@@ -1973,6 +1983,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_img2img_from_preview_d->image_files = app_data->preview_image_files;
 	load_img2img_from_preview_d->img2img_file_path = app_data->img2img_file_path;
 	load_img2img_from_preview_d->image_wgt = preview_img2img;
+	load_img2img_from_preview_d->main_overlay = main_overlay;
 	load_img2img_from_preview_d->img2img_visibility_toggle_btn = img2img_visibility_toggle_btn;
 	load_img2img_from_preview_d->overlay_img2img = overlay_img2img;
 	load_img2img_from_preview_d->inpaint_check = inpaint_check;

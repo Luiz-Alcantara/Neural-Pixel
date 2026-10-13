@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include "constants.h"
 #include "png_utils.h"
 #include "structs.h"
+#include "toast_notification.h"
 #include "widgets_cb.h"
-#include "constants.h"
 
 
 static void draw_brush(double x, double y, double line_width, gpointer user_data)
@@ -103,7 +104,7 @@ static void save_png_mask(GtkButton *btn, gpointer user_data)
 	if (status != CAIRO_STATUS_SUCCESS) {
 		g_printerr("Error saving PNG: %s\n", cairo_status_to_string(status));
 	} else {
-		g_print("Image saved successfully to %s\n", MASK_IMG_PATH);
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "Mask image set.");
 		
 		clear_img2img_overlay(GTK_OVERLAY(data->overlay_img2img));
 		
@@ -210,6 +211,7 @@ void show_mask_area (GtkWidget *wgt, gpointer user_data)
 	gtk_widget_set_valign(drawing_area, GTK_ALIGN_CENTER);
 	
 	MaskData *mask_data = g_new(MaskData, 1);
+	mask_data->main_overlay = data->main_overlay;
 	mask_data->overlay_img2img = data->overlay_img2img;
 	mask_data->inpaint_check = data->inpaint_check;
 	mask_data->ref_w = w;

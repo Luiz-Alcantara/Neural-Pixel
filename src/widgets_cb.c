@@ -9,9 +9,10 @@
 #include "file_utils.h"
 #include "str_utils.h"
 #include "structs.h"
+#include "toast_notification.h"
 
 static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
-static void show_lora_triggers(GtkWidget *main_win, char *path);
+static void show_lora_triggers(GtkWidget *main_win, GtkWidget *main_overlay, char *path);
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
 void show_simple_message (GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
 
@@ -60,10 +61,13 @@ void add_image_to_favorites(GtkWidget *btn, gpointer user_data)
 				if (fcf) {
 					fprintf(fcf, "%s\n", file_to_favorite);
 					fclose(fcf);
+
+					show_toast_notification(GTK_OVERLAY(data->main_overlay), "Added to favorites!");
 				} else {
 					g_printerr("File '.cache/favorites' does not exist or cannot be accessed.\n");
 				}	
 			} else {
+				show_toast_notification(GTK_OVERLAY(data->main_overlay), "Already in favorites.");
 				g_printerr("Failed to add image to favorites, it is already favorited.\n");
 			}
 		} else {
@@ -185,6 +189,7 @@ void clear_mask_btn_cb (GtkButton *btn, gpointer user_data)
 	LoadImg2ImgData *data = user_data;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(data->inpaint_check), FALSE);
 	clear_img2img_overlay(GTK_OVERLAY(data->overlay_img2img));
+	show_toast_notification(GTK_OVERLAY(data->main_overlay), "Mask image cleared.");
 }
 
 void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
@@ -197,6 +202,7 @@ void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
 	gtk_picture_set_filename(preview_img, EMPTY_IMG_PATH);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(data->detector_check), FALSE);
 	clear_mask_btn_cb(NULL, user_data);
+	show_toast_notification(GTK_OVERLAY(data->main_overlay), "Input image cleared.");
 }
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)
@@ -359,7 +365,7 @@ void manage_lora_triggers (GtkButton *btn, gpointer user_data)
 		gsize len = last_dot - item_string;
 		char *fp = g_strdup_printf("%s/%.*s.txt", LORA_TRIGGERS_PATH, (int)len, item_string);
 		if (check_file_exists(fp, 1) == 1){
-			show_lora_triggers(data->win, fp);
+			show_lora_triggers(data->win, data->main_overlay, fp);
 		} else {
 			g_printerr("Failed to open or create the file: '%s'\n", fp);
 			g_free(fp);
@@ -862,6 +868,8 @@ static void save_lora_triggers(GtkWidget *btn, gpointer user_data)
 		fclose(triggers_file);
 
 		g_free(tb_cont);
+
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "LoRA triggers saved.");
 	} else {
 		g_printerr("Error saving LoRA triggers data. Try restarting the app.\n");
 	}
@@ -1084,7 +1092,7 @@ void show_info_message (GtkWidget *wgt, GtkWidget *main_win)
 	gtk_window_present (GTK_WINDOW(info_win));
 }
 
-static void show_lora_triggers(GtkWidget *main_win, char *path)
+static void show_lora_triggers(GtkWidget *main_win, GtkWidget *main_overlay, char *path)
 {
 	GtkWidget *triggers_win = gtk_window_new ();
 	gtk_widget_add_css_class(triggers_win, "info_box");
@@ -1135,6 +1143,7 @@ static void show_lora_triggers(GtkWidget *main_win, char *path)
 	SaveTriggersData *save_triggers_d = g_new0 (SaveTriggersData, 1);
 	save_triggers_d->path = path;
 	save_triggers_d->text_buffer = lora_trigger_tb;
+	save_triggers_d->main_overlay = main_overlay;
 	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), triggers_win);
 	g_signal_connect (save_btn, "clicked", G_CALLBACK (save_lora_triggers), save_triggers_d);
 	g_signal_connect (save_btn, "destroy", G_CALLBACK (on_save_triggers_btn_destroy), save_triggers_d);

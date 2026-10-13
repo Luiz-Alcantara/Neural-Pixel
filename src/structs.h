@@ -246,6 +246,7 @@ typedef struct {
 typedef struct {
 	GtkWidget *win;
 	GtkWidget *img2img_visibility_toggle_btn;
+	GtkWidget *main_overlay;
 	GtkWidget *overlay_img2img;
 	GtkWidget *image_wgt;
 	GtkWidget *detector_check;
@@ -260,6 +261,7 @@ typedef struct {
 	GString *img2img_file_path;
 	GtkWidget *image_wgt;
 	GtkWidget *img2img_visibility_toggle_btn;
+	GtkWidget *main_overlay;
 	GtkWidget *overlay_img2img;
 	GtkWidget *detector_check;
 	GtkWidget *inpaint_check;
@@ -269,6 +271,7 @@ typedef struct {
 	GPtrArray *image_files;
 	gint *current_image_index;
 	GtkWidget *win;
+	GtkWidget *main_overlay;
 	GtkTextBuffer *pos_tb;
 	GtkTextBuffer *neg_tb;
 	GtkWidget *steps_spin;
@@ -298,6 +301,7 @@ typedef struct {
 
 typedef struct {
 	GtkWidget *lora_dd;
+	GtkWidget *main_overlay;
 	GtkWidget *win;
 } ManageTriggersData;
 
@@ -307,6 +311,7 @@ typedef struct {
 } MaskWinData;
 
 typedef struct {
+	GtkWidget *main_overlay;
 	GtkWidget *overlay_img2img;
 	GtkWidget *detector_check;
 	GtkWidget *inpaint_check;
@@ -329,6 +334,7 @@ typedef struct {
 	GPtrArray *image_files;
 	GString *img_index_string;
 	GtkWidget *hide_img_btn;
+	GtkWidget *main_overlay;
 	GtkWidget *image_widget;
 	GtkWidget *img_index_label;
 } PreviewImageData;
@@ -421,6 +427,7 @@ typedef struct {
 typedef struct {
 	char *path;
 	GtkTextBuffer *text_buffer;
+	GtkWidget *main_overlay;
 } SaveTriggersData;
 
 typedef struct {
@@ -481,5 +488,13 @@ typedef struct {
 	GtkWidget *height_dd;
 	GtkWidget *width_dd;
 } SwapDimensionsData;
+
+typedef struct {
+	GtkOverlay *overlay;
+	GtkWidget *active_rev;
+	GtkWidget *dismissing_rev;
+	guint toast_timeout_id;
+	guint remove_timeout_id;
+} ToastNotificationData;
 
 #endif // STRUCTS_H

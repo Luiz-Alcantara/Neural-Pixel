@@ -263,6 +263,21 @@ TODO: Create the greenish color palette and more
 }
 
 
+/* Toast Notifications */
+.custom_toast {
+	background-image: none;
+	background-color: @primary-color-light;
+	border: 1px solid @clickable-border;
+}
+
+.toast_label {
+	background-image: none;
+	background-color: @primary-color-light;
+	border: none;
+	color: white;
+}
+
+
 /* Dialog messages */
 .dialog, .dialog-vbox, .dialog-action-box {
 	background-color: @primary-color;
