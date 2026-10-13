@@ -4,6 +4,7 @@
 [![Ask DeepWiki](https://img.shields.io/badge/Ask-DeepWiki-blue)](https://deepwiki.com/Luiz-Alcantara/Neural-Pixel)
 [![Download](https://img.shields.io/github/downloads/Luiz-Alcantara/Neural-Pixel/total.svg)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/latest)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ)
+[![Pixiv](https://img.shields.io/badge/Join-Pixiv-blue.svg)](https://www.pixiv.net/users/130179113)
 [![X/Twitter](https://img.shields.io/badge/Join-X-red.svg)](https://x.com/NeuralPixel_AI)
 
 **A simple GUI wrapper for stable-diffusion.cpp written using C and GTK 4.**
