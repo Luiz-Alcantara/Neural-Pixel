@@ -22,6 +22,16 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - No video support at the moment.
 - See [docs](./docs/compatibility.md) for the full list of supported models, features, formats, platforms, and backends.
 
+## Spell Checker
+
+Neural Pixel includes English-only spell-checking support. Standard dictionaries aren't effective for this application because they lack the specific vocabulary used by popular image-generation models like SDXL, Illustrious, or Anima.
+
+To solve this, I built a custom dictionary tailored specifically for image prompts. It includes the 10k most frequently used English words, romanized personal names, geographic locations, brands, foods, animals, photography and lighting terms, and a massive collection of Danbooru tags.
+
+Even with newer models that use LLM text encoders (like Flux), English prompts remain recommended for the most accurate and consistent results.
+
+#### To disable spell checking, simply remove or rename the `dictionary.txt` file located in the `resources` folder.
+
 ## Linux Setup & Running
 
 ### 1. Requirements
@@ -30,7 +40,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - Vulkan backend (Optional): Vulkan driver/loader/tools & >= 2GB of VRAM.
 
 ### 2. How to Run
-- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.5-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.5/NeuralPixel-Linux_v0.9.5.zip)
+- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.6-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.6/NeuralPixel-Linux_v0.9.6.zip)
 - Extract the archive and execute the `run_neural_pixel` file.
 - Tip: For debugging, launch from a terminal and enable Terminal Verbose under Extra Options.
 
@@ -40,7 +50,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 - A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
 ### 2. How to Run
-- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.5-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.5/NeuralPixel-Windows_v0.9.5.zip)
+- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.6-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.6/NeuralPixel-Windows_v0.9.6.zip)
 - Extract the archive and execute the `neural_pixel.bat` file.
 
 ## Recommended checkpoints
