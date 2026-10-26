@@ -11,6 +11,8 @@ int check_gtk_list_contains_item(GtkStringList *list, const char* item);
 
 gboolean check_prompt_contains_lora(const char *prompt_string, const char *lora_name);
 
+gboolean check_word_contains_num(const char *word);
+
 int compare_strings(const void *a, const void *b);
 
 int count_digits(double n);
@@ -28,6 +30,8 @@ char* generate_sd_seed();
 char *get_time_str();
 
 gchar *load_lora_triggers(const char *triggers_file_path);
+
+char *normalize_word(const char *word);
 
 gboolean seed_entry_get_value(GtkEditable *editable, gint64 *out_value);
 

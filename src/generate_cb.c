@@ -5,6 +5,7 @@
 #include "file_utils.h"
 #include "structs.h"
 #include "str_utils.h"
+#include "toast_notification.h"
 #include "widgets_cb.h"
 
 static void start_generation(gpointer user_data);
@@ -381,8 +382,9 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	GenerationSnapshotData *data = user_data;
 	AppStartData *app_data = data->app_data;
 	*data->sdpid = 0;
-	const char *icon_n = gtk_button_get_icon_name (GTK_BUTTON(data->preview_image_toggle_visibility_btn));
-	
+	const char *icon_n = gtk_button_get_icon_name(GTK_BUTTON(data->preview_image_toggle_visibility_btn));
+	gboolean is_preview_enabled = g_strcmp0(icon_n, "view-conceal-symbolic") == 0 ? FALSE : TRUE;
+
 	char *result_img_path;
 	
 	if (data->batch_count_value > 1) {
@@ -401,24 +403,24 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 			data->preview_label_string, data->preview_image_files,
 			data->preview_image_index, data->total_time);
 		
-		if (data->preview_image_files->len > 0) {
-			if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
-				gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), result_img_path);
-			} else {
-				gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), EMPTY_IMG_PATH);
-			}
+		if (is_preview_enabled && data->preview_image_files->len > 0) {
+			gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), result_img_path);
+		} else if (data->preview_image_files->len > 0) {
+			gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), EMPTY_IMG_PATH);
 		} else {
-			g_printerr("No images in 'outputs' directory.\n");
+			g_printerr("[E] No images in 'outputs' directory.\n");
 			gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
 		}
 		
 		gtk_label_set_label(GTK_LABEL(data->preview_label), data->preview_label_string->str);
 	} else {
-		g_printerr(
-			"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
-			result_img_path
-		);
-		gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
+		show_toast_notification(GTK_OVERLAY(data->main_overlay), "Generation Interrupted/Failed!");
+		g_printerr("[E] Image generation ended without producing an image.\n");
+		if (is_preview_enabled) {
+			if (data->preview_image_files->len < 1) gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), DEFAULT_IMG_PATH);
+		} else {
+			gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), EMPTY_IMG_PATH);
+		}
 	}
 	
 	if (gtk_drop_down_get_selected(GTK_DROP_DOWN(data->checkpoint_dd)) == 0) {
@@ -725,6 +727,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->cancel_all_btn = data->cancel_all_btn;
 	snapshot_data->gen_btn = gen_btn;
 	snapshot_data->halt_btn = data->halt_btn;
+	snapshot_data->main_overlay = data->main_overlay;
 	snapshot_data->win = data->win;
 	snapshot_data->app_data = app_data;
 	

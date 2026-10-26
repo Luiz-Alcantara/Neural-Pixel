@@ -653,6 +653,15 @@ void on_swap_dimensions_btn_destroy (GtkWidget *wgt, gpointer user_data)
 	g_free(data);
 }
 
+void on_text_view_destroy(GtkWidget *wgt, gpointer user_data)
+{
+	SpellCheckData *data = user_data;
+	if (data == NULL) return;
+	if (data->dict == NULL) return;
+	g_hash_table_destroy(data->dict);
+	data->dict = NULL;
+}
+
 void quit_btn_callback (GtkWidget *wgt, GtkWidget *win)
 {
 	gtk_window_close(GTK_WINDOW(win));

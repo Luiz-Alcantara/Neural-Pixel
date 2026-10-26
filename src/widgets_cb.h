@@ -83,6 +83,8 @@ void on_set_img2img_from_preview_btn_destroy (GtkWidget* wgt, gpointer user_data
 
 void on_swap_dimensions_btn_destroy (GtkWidget *wgt, gpointer user_data);
 
+void on_text_view_destroy(GtkWidget *wgt, gpointer user_data);
+
 void quit_btn_callback (GtkWidget *wgt, GtkWidget *win);
 
 void reload_dropdown(GtkWidget* wgt, gpointer user_data);

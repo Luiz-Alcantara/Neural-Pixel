@@ -158,6 +158,7 @@ typedef struct {
 	GtkWidget *preview_label;
 	GtkWidget *preview_image_toggle_visibility_btn;
 	GtkWidget *queue_size_label;
+	GtkWidget *main_overlay;
 	GtkWidget *win;
 } GenerationData;
 
@@ -209,6 +210,7 @@ typedef struct {
 	GtkWidget *preview_image_widget;
 	GtkWidget *preview_label;
 	GtkWidget *queue_size_label;
+	GtkWidget *main_overlay;
 	GtkWidget *win;
 	int batch_count_value;
 	int clip_skip_value;
@@ -472,6 +474,13 @@ typedef struct {
 	GtkWidget *img_index_label;
 	GtkWidget *to_trash_btn;
 } SendTrashData;
+
+typedef struct {
+	GHashTable *dict;
+	GtkTextTag *error_tag;
+	GtkTextMark *cursor_mark;
+	gboolean needs_full_check;
+} SpellCheckData;
 
 typedef struct {
 	int sd_pid;

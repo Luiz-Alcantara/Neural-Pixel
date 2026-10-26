@@ -124,6 +124,14 @@ gboolean check_prompt_contains_lora(const char *prompt_string, const char *lora_
 	return result;
 }
 
+gboolean check_word_contains_num(const char *word)
+{
+	for (int i = 0; word[i] != '\0'; i++) {
+		if (g_ascii_isdigit(word[i])) return TRUE;
+	}
+	return FALSE;
+}
+
 int compare_strings(const void *a, const void *b)
 {
 	return strcasecmp(*(const char **)a, *(const char **)b);
@@ -343,6 +351,18 @@ gchar *load_lora_triggers(char *triggers_file_path)
 	}
 
 	return file_cont;
+}
+
+char *normalize_word(const char *word)
+{
+	char *word_lowercase = g_utf8_strdown(word, -1);
+	GString *final_word = g_string_new(NULL);
+	for (const char *char_ptr = word_lowercase; *char_ptr; char_ptr = g_utf8_next_char(char_ptr)) {
+		gunichar fixed_char = g_utf8_get_char(char_ptr);
+		g_string_append_unichar(final_word, fixed_char == 0x2019 ? '\'' : fixed_char);
+	}
+	g_free(word_lowercase);
+	return g_string_free(final_word, FALSE);
 }
 
 gboolean seed_entry_get_value(GtkEditable *editable, gint64 *out_value)
