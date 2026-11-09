@@ -1,6 +1,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <gtk/gtk.h>
+
 extern const char* APP_NAME_VERSION;
 extern const char* APP_AUTHOR;
 extern const char* APP_DESC;
@@ -18,6 +20,7 @@ extern const char* NP_GITHUB;
 extern const char* SDCPP_GITHUB;
 
 extern const char* CACHE_PATH;
+extern const char* FAVORITES_PATH;
 extern const char* LORA_TRIGGERS_PATH;
 extern const char* MODELS_PATH;
 extern const char* CHECKPOINTS_PATH;

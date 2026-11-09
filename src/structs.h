@@ -1,6 +1,8 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+#include <gtk/gtk.h>
+
 typedef struct {
 	GtkApplication *app;
 	GString *checkpoint_string;
@@ -296,6 +298,7 @@ typedef struct {
 
 typedef struct {
 	LoadPNGData *load_png_info_d;
+	GdkTexture *empty_texture;
 	GtkStringList *store;
 	GtkWidget *stack;
 	gboolean modified;
@@ -306,11 +309,6 @@ typedef struct {
 	GtkWidget *main_overlay;
 	GtkWidget *win;
 } ManageTriggersData;
-
-typedef struct {
-	GtkWidget *main_win;
-	GString *img2img_file_path;
-} MaskWinData;
 
 typedef struct {
 	GtkWidget *main_overlay;

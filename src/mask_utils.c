@@ -4,23 +4,48 @@
 #include <stdint.h>
 #include <string.h>
 #include "constants.h"
+#include "mask_utils.h"
 #include "png_utils.h"
 #include "structs.h"
 #include "toast_notification.h"
 #include "widgets_cb.h"
 
 
-static void draw_brush(double x, double y, double line_width, gpointer user_data)
+static void draw_brush(double x, double y, double line_width, gpointer user_data);
+
+static void mask_data_free(gpointer user_data)
 {
 	MaskData *data = (MaskData *)user_data;
 	if (!data) return;
+	if (data->surface) {
+		cairo_surface_destroy(data->surface);
+		data->surface = NULL;
+	}
+	g_free(data);
+}
+
+static void drag_begin_cb(GtkGestureDrag *g, double x, double y, gpointer user_data)
+{
+	MaskData *data = (MaskData *)user_data;
+	if (!data) return;
+	double brush_width = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->brush_width_spin));
+	draw_brush(x, y, brush_width, user_data);
+}
+
+
+static void draw_brush(double x, double y, double line_width, gpointer user_data)
+{
+	MaskData *data = (MaskData *)user_data;
+	if (!data || !data->surface) return;
+	
 	cairo_t *cr = cairo_create(data->surface);
-	cairo_set_source_rgb(cr, 247, 0, 255);
+	cairo_set_source_rgb(cr, 247.0 / 255.0, 0.0, 255.0);
 	cairo_set_line_width(cr, line_width);
 	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+	cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
 
 	if (data->last_x < 0) {
-		cairo_arc(cr, x, y, 1.5, 0, 2 * G_PI);
+		cairo_arc(cr, x, y, line_width / 2.0, 0, 2 * G_PI);
 		cairo_fill(cr);
 	} else {
 		cairo_move_to(cr, data->last_x, data->last_y);
@@ -123,7 +148,7 @@ static void save_png_mask(GtkButton *btn, gpointer user_data)
 }
 
 
-void show_mask_area (GtkWidget *wgt, gpointer user_data)
+void show_mask_area(GtkWidget *wgt, gpointer user_data)
 {
 	LoadImg2ImgData *data = (LoadImg2ImgData *)user_data;
 	
@@ -146,10 +171,11 @@ void show_mask_area (GtkWidget *wgt, gpointer user_data)
 	GtkWidget *mask_win = gtk_window_new();
 	gtk_window_set_title(GTK_WINDOW(mask_win), "Mask Tool");
 	gtk_window_set_transient_for(GTK_WINDOW(mask_win), GTK_WINDOW(data->win));
-	gtk_window_set_resizable (GTK_WINDOW(mask_win), TRUE);
-	gtk_window_set_deletable (GTK_WINDOW(mask_win), TRUE);
-	gtk_window_set_decorated (GTK_WINDOW(mask_win), TRUE);
-	gtk_window_set_destroy_with_parent (GTK_WINDOW(mask_win), TRUE);
+	gtk_window_set_modal(GTK_WINDOW(mask_win), TRUE);
+	gtk_window_set_resizable(GTK_WINDOW(mask_win), TRUE);
+	gtk_window_set_deletable(GTK_WINDOW(mask_win), TRUE);
+	gtk_window_set_decorated(GTK_WINDOW(mask_win), TRUE);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(mask_win), TRUE);
 
 	GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	gtk_widget_add_css_class(main_box, "left_box");
@@ -197,7 +223,6 @@ void show_mask_area (GtkWidget *wgt, gpointer user_data)
 	
 	GtkWidget *overlay = gtk_overlay_new();
 	gtk_widget_set_size_request(overlay, w, h);
-
 	
 	GtkWidget *picture = gtk_picture_new_for_filename(data->img2img_file_path->str);
 	gtk_picture_set_content_fit(GTK_PICTURE(picture), GTK_CONTENT_FIT_SCALE_DOWN);
@@ -234,13 +259,13 @@ void show_mask_area (GtkWidget *wgt, gpointer user_data)
 
 	GtkGesture *drag = gtk_gesture_drag_new();
 	gtk_widget_add_controller(drawing_area, GTK_EVENT_CONTROLLER(drag));
+	g_signal_connect(drag, "drag-begin", G_CALLBACK(drag_begin_cb), mask_data);
 	g_signal_connect(drag, "drag-update", G_CALLBACK(drag_update_cb), mask_data);
 	g_signal_connect(drag, "drag-end", G_CALLBACK(drag_end_cb), mask_data);
 	g_signal_connect(save_btn, "clicked", G_CALLBACK(save_png_mask), mask_data);
 	g_signal_connect(clear_btn, "clicked", G_CALLBACK(clear_canvas), mask_data);
 	g_signal_connect(done_btn, "clicked", G_CALLBACK(quit_btn_callback), mask_win);
-	g_signal_connect (mask_win, "close-request", G_CALLBACK (on_mask_area_destroy), mask_data);
-
+	g_object_set_data_full(G_OBJECT(mask_win), "mask-data", mask_data, mask_data_free);
 	gtk_window_present(GTK_WINDOW(mask_win));
 }
 

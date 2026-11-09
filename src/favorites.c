@@ -2,6 +2,7 @@
 #include <gio/gio.h>
 #include <string.h>
 #include "constants.h"
+#include "favorites.h"
 #include "file_utils.h"
 #include "png_utils.h"
 #include "structs.h"
@@ -14,6 +15,22 @@ static void load_scaled_image_thread(GTask *task, gpointer source_obj, gpointer 
 static void on_delete_favorite(GtkButton *btn, gpointer user_data);
 static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer user_data);
 static void save_favorites(GtkStringList *store);
+
+static GdkTexture *texture_from_pixbuf(GdkPixbuf *pixbuf)
+{
+	GBytes *bytes = gdk_pixbuf_read_pixel_bytes(pixbuf);
+
+	GdkTexture *texture = gdk_memory_texture_new(
+		gdk_pixbuf_get_width(pixbuf),
+		gdk_pixbuf_get_height(pixbuf),
+		gdk_pixbuf_get_has_alpha(pixbuf) ? GDK_MEMORY_R8G8B8A8 : GDK_MEMORY_R8G8B8,
+		bytes,
+		gdk_pixbuf_get_rowstride(pixbuf)
+	);
+
+	g_bytes_unref(bytes);
+	return texture;
+}
 
 static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer user_data)
 {
@@ -114,7 +131,7 @@ static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkLis
 
 static void favorites_factory_bind_cb(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer user_data)
 {
-	GdkTexture *empty_texture = GDK_TEXTURE(user_data);
+	FavoritesWindowData *favorites_d = user_data;
 	GtkStringObject *obj = gtk_list_item_get_item(item);
 	if (obj == NULL) return;
 	
@@ -122,7 +139,7 @@ static void favorites_factory_bind_cb(GtkSignalListItemFactory *factory, GtkList
 	GtkWidget *fav_card = gtk_list_item_get_child(item);
 	GtkWidget *fav_image = g_object_get_data(G_OBJECT(fav_card), "fav-image");
 
-	gtk_picture_set_paintable(GTK_PICTURE(fav_image), GDK_PAINTABLE(empty_texture));
+	gtk_picture_set_paintable(GTK_PICTURE(fav_image), favorites_d->empty_texture ? GDK_PAINTABLE(favorites_d->empty_texture) : NULL);
 	g_object_set_data_full(G_OBJECT(fav_image), "image-path", path ? g_strdup(path) : NULL, g_free);
 
 	GCancellable *old_can = g_object_get_data(G_OBJECT(item), "load-cancellable");
@@ -156,6 +173,7 @@ static void favorites_factory_unbind_cb(GtkSignalListItemFactory *factory, GtkLi
 		GtkWidget *fav_image = g_object_get_data(G_OBJECT(fav_card), "fav-image");
 		if (fav_image) {
 			gtk_picture_set_paintable(GTK_PICTURE(fav_image), NULL);
+			g_object_set_data(G_OBJECT(fav_image), "image-path", NULL);
 		}
 	}
 }
@@ -175,9 +193,9 @@ static GtkStringList *load_favorites()
 	GtkStringList *store = gtk_string_list_new(NULL);
 	gchar *contents = NULL;
 
-	check_file_exists(".cache/favorites", 1);
+	check_file_exists(FAVORITES_PATH, 1);
 
-	if (!g_file_get_contents(".cache/favorites", &contents, NULL, NULL)) return store;
+	if (!g_file_get_contents(FAVORITES_PATH, &contents, NULL, NULL)) return store;
 
 	gchar **lines = g_strsplit(contents, "\n", -1);
 
@@ -205,21 +223,25 @@ static void load_scaled_image_thread(GTask *task, gpointer source_obj, gpointer 
 
 	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(path, IMG_DIMENSION, IMG_DIMENSION, TRUE, &error);
 	if (!pixbuf) { g_task_return_error(task, error); return; }
-	g_task_return_pointer(task, pixbuf, g_object_unref);
+
+	GdkTexture *texture = texture_from_pixbuf(pixbuf);
+	g_object_unref(pixbuf);
+	
+	g_task_return_pointer(task, texture, g_object_unref);
 }
 
 static void on_delete_favorite(GtkButton *btn, gpointer user_data)
 {
 	GtkListItem *item = GTK_LIST_ITEM(user_data);
 	FavoritesWindowData *favorites_d = g_object_get_data(G_OBJECT(btn), "favorites_d");
-	LoadPNGData *load_png_info_d = favorites_d->load_png_info_d;
-
+	if (!favorites_d || !item) return;
+	
 	guint pos = gtk_list_item_get_position(item);
 	if (pos == GTK_INVALID_LIST_POSITION) return;
 
 	gtk_string_list_remove(favorites_d->store, pos);
-	show_toast_notification(GTK_OVERLAY(load_png_info_d->main_overlay), "Favorite removed.");
-	favorites_d->modified = TRUE;
+	save_favorites(favorites_d->store);
+	show_toast_notification(GTK_OVERLAY(favorites_d->load_png_info_d->main_overlay), "Favorite removed.");
 }
 
 static void on_favorites_changed(GListModel *model, guint position, guint removed, guint added, gpointer user_data)
@@ -237,11 +259,19 @@ static gboolean on_favorites_window_close_request(GtkWindow *window, gpointer us
 	return FALSE;
 }
 
-static void on_favorites_window_destroy (gpointer user_data)
+static void on_favorites_window_destroy(gpointer user_data)
 {
-    FavoritesWindowData *data = user_data;
-    g_object_unref(data->store);
-    g_free(data);
+	FavoritesWindowData *data = (FavoritesWindowData *)user_data;
+	if (!data) return;
+	
+	if (data->modified) {
+		save_favorites(data->store);
+	}
+	
+	g_signal_handlers_disconnect_by_func(data->store, G_CALLBACK(on_favorites_changed), data);
+	if (data->empty_texture) g_object_unref(data->empty_texture);
+	g_object_unref(data->store);
+	g_free(data);
 }
 
 static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer user_data)
@@ -250,7 +280,7 @@ static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer 
 	const char *img_path = g_task_get_task_data(G_TASK(res));
 	GError *error = NULL;
 
-	GdkPixbuf *pixbuf = g_task_propagate_pointer(G_TASK(res), &error);
+	GdkTexture *texture = g_task_propagate_pointer(G_TASK(res), &error);
 
 	GtkStringObject *current_obj = gtk_list_item_get_item(item);
 	gboolean is_same_row = FALSE;
@@ -264,10 +294,8 @@ static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer 
 	GtkWidget *fav_image = fav_card ? g_object_get_data(G_OBJECT(fav_card), "fav-image") : NULL;
 
 	if (is_same_row && fav_image) {
-		if (pixbuf) {
-			GdkTexture *texture = gdk_texture_new_for_pixbuf(pixbuf);
+		if (texture) {
 			gtk_picture_set_paintable(GTK_PICTURE(fav_image), GDK_PAINTABLE(texture));
-			g_object_unref(texture);
 		} else {
 			gtk_picture_set_filename(GTK_PICTURE(fav_image), EMPTY_IMG_PATH);
 			if (error && !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
@@ -276,7 +304,7 @@ static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer 
 		}
 	}
 
-	if (pixbuf) g_object_unref(pixbuf);
+	if (texture) g_clear_object(&texture);
 	if (error) g_clear_error(&error);
 }
 
@@ -291,8 +319,8 @@ static void save_favorites(GtkStringList *store)
 	}
 
 	GError *error = NULL;
-	if (!g_file_set_contents(".cache/favorites", out->str, -1, &error)) {
-		g_warning("Could not write %s: %s", ".cache/favorites", error->message);
+	if (!g_file_set_contents(FAVORITES_PATH, out->str, -1, &error)) {
+		g_warning("Could not write %s: %s", FAVORITES_PATH, error->message);
 		g_clear_error(&error);
 	}
 
@@ -302,14 +330,13 @@ static void save_favorites(GtkStringList *store)
 void show_favorites_manager(GtkButton *btn, gpointer user_data)
 {
 	LoadPNGData *data = user_data;
-
+	GError *error = NULL;
 	FavoritesWindowData *favorites_d = g_new0(FavoritesWindowData, 1);
 	favorites_d->load_png_info_d = data;
 	favorites_d->store = load_favorites();
+	favorites_d->empty_texture = gdk_texture_new_from_filename(EMPTY_IMG_PATH, &error);
 
-	GError *error = NULL;
-	GdkTexture *empty_texture = gdk_texture_new_from_filename(EMPTY_IMG_PATH, &error);
-	if (!empty_texture) { g_printerr("Failed to load placeholder: %s\n", error->message); g_clear_error(&error); }
+	if (!favorites_d->empty_texture) { g_printerr("Failed to load placeholder: %s\n", error->message); g_clear_error(&error); }	
 
 	GtkWidget *favorites_win = gtk_window_new();
 	gtk_widget_add_css_class(favorites_win, "info_box");
@@ -326,12 +353,12 @@ void show_favorites_manager(GtkButton *btn, gpointer user_data)
 
 	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
 	g_signal_connect(factory, "setup", G_CALLBACK(favorites_factory_setup_cb), favorites_d);
-	g_signal_connect_data(factory, "bind", G_CALLBACK(favorites_factory_bind_cb), empty_texture, (GClosureNotify)g_object_unref, 0);
+	g_signal_connect(factory, "bind", G_CALLBACK(favorites_factory_bind_cb), favorites_d);
 	g_signal_connect(factory, "unbind", G_CALLBACK(favorites_factory_unbind_cb), NULL);
 
 	GtkNoSelection *selection = gtk_no_selection_new(G_LIST_MODEL(g_object_ref(favorites_d->store)));
-
 	GtkWidget *list_view = gtk_list_view_new(GTK_SELECTION_MODEL(selection), factory);
+	
 	gtk_widget_add_css_class(list_view, "favorites_listview");
 	gtk_orientable_set_orientation(GTK_ORIENTABLE(list_view), GTK_ORIENTATION_HORIZONTAL);
 

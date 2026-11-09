@@ -427,21 +427,6 @@ void navigate_10_img_next(GtkButton* btn, gpointer user_data)
 	navigate_images((PreviewImageData*)user_data, 10);
 }
 
-void on_mask_area_destroy (GtkWindow *win, gpointer user_data)
-{
-	MaskData *data = (MaskData *)user_data;
-	
-	if (data->surface) {
-		cairo_surface_destroy(data->surface);
-		data->surface = NULL;
-	}
-	
-	g_free(data);
-	
-	//TODO: Search for better fix
-	gtk_window_destroy(win);
-}
-
 void on_boxr_img_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	PreviewBoxScrollData *data = user_data;

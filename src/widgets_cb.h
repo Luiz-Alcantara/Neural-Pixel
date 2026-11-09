@@ -1,6 +1,8 @@
 #ifndef WIDGETS_CB_H
 #define WIDGETS_CB_H
 
+#include <gtk/gtk.h>
+
 void show_simple_message(GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
 
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
@@ -44,8 +46,6 @@ void navigate_img_prev(GtkButton* btn, gpointer user_data);
 void navigate_img_next(GtkButton* btn, gpointer user_data);
 
 void navigate_10_img_next(GtkButton* btn, gpointer user_data);
-
-void on_mask_area_destroy (GtkWindow *win, gpointer user_data);
 
 void on_boxr_img_destroy (GtkWidget* wgt, gpointer user_data);
 
