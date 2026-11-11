@@ -40,7 +40,7 @@ Even with newer models that use LLM text encoders (like Flux), English prompts r
 - Vulkan backend (Optional): Vulkan driver/loader/tools & >= 2GB of VRAM.
 
 ### 2. How to Run
-- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.6-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.6/NeuralPixel-Linux_v0.9.6.zip)
+- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.7-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.7/NeuralPixel-Linux_v0.9.7.zip)
 - Extract the archive and execute the `run_neural_pixel` file.
 - Tip: For debugging, launch from a terminal and enable Terminal Verbose under Extra Options.
 
@@ -50,7 +50,7 @@ Even with newer models that use LLM text encoders (like Flux), English prompts r
 - A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
 ### 2. How to Run
-- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.6-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.6/NeuralPixel-Windows_v0.9.6.zip)
+- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.7-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.7/NeuralPixel-Windows_v0.9.7.zip)
 - Extract the archive and execute the `neural_pixel.bat` file.
 
 ## Recommended checkpoints
@@ -115,6 +115,11 @@ To build on Windows follow [Windows Build](./docs/windows_build.md).
 ## Build Stable-Diffusion.cpp
 
 To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
+
+## To contributors
+
+- Plain C, follow my existing code style.
+- No new external dependencies.
 
 ## Credits
 
