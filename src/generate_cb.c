@@ -10,6 +10,14 @@
 
 static void start_generation(gpointer user_data);
 
+static char *get_dd_selected_strdup(GtkDropDown *dd, const char *fallback)
+{
+	GObject *sel = gtk_drop_down_get_selected_item(dd);
+
+	if (sel && GTK_IS_STRING_OBJECT(sel)) return g_strdup(gtk_string_object_get_string(GTK_STRING_OBJECT(sel)));
+	return g_strdup(fallback);
+}
+
 static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_data)
 {
 	SDProcessErrorData *data = user_data;
@@ -92,11 +100,12 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		g_string_append_len(data->stdout_string, data->read_buffer, bytes_read);
 
 		gsize r = 0, w = 0;
-		
+
 		while (r < data->stdout_string->len) {
-			if (data->stdout_string->str[r] != '\0') { data->stdout_string->str[w++] = data->stdout_string->str[r]; r++; }
+			if (data->stdout_string->str[r] != '\0') { data->stdout_string->str[w++] = data->stdout_string->str[r]; }
+			r++;
 		}
-		
+
 		data->stdout_string->len = w;
 		data->stdout_string->str[w] = '\0';
 
@@ -380,6 +389,8 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointer user_data)
 {
 	GenerationSnapshotData *data = user_data;
+	if (data == NULL) return;
+	
 	AppStartData *app_data = data->app_data;
 	*data->sdpid = 0;
 	const char *icon_n = gtk_button_get_icon_name(GTK_BUTTON(data->preview_image_toggle_visibility_btn));
@@ -401,7 +412,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 		
 		set_current_image_index(result_img_path + 2,
 			data->preview_label_string, data->preview_image_files,
-			data->preview_image_index, data->total_time);
+			data->preview_image_index, app_data->total_time);
 		
 		if (is_preview_enabled && data->preview_image_files->len > 0) {
 			gtk_picture_set_filename(GTK_PICTURE(data->preview_image_widget), result_img_path);
@@ -429,25 +440,11 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 		gtk_button_set_label(GTK_BUTTON(data->gen_btn), "Add to Queue");
 		gtk_widget_set_sensitive(GTK_WIDGET(data->gen_btn), TRUE);
 	}
+	g_free(result_img_path);
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
 	g_ptr_array_set_size(data->sd_cmd_array, 0);
-	g_free(result_img_path);
-	g_free(data->output_path);
-	g_free(data->img2img_file_path);
-	g_free(data->detector_negative_prompt);
-	g_free(data->detector_positive_prompt);
-	g_free(data->positive_prompt);
-	g_free(data->negative_prompt);
-	g_free(data->checkpoint_filename);
-	g_free(data->detector_filename);
-	g_free(data->vae_filename);
-	g_free(data->cnet_filename);
-	g_free(data->upscaler_filename);
-	g_free(data->clip_l_filename);
-	g_free(data->clip_g_filename);
-	g_free(data->text_enc_filename);
 	
-	if (!g_queue_is_empty(app_data->job_queue)) {
+	if (app_data->job_queue != NULL && !g_queue_is_empty(app_data->job_queue)) {
 		GenerationSnapshotData *next_job = g_queue_pop_head(app_data->job_queue);
 		int queue_size = g_queue_get_length(app_data->job_queue);
 		if (queue_size == 0) {
@@ -458,7 +455,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 			gtk_label_set_text(GTK_LABEL(data->queue_size_label), label_text);
 			g_free(label_text);
 		}
-		g_free(data);
+		generation_snapshot_free(data);
 		if (source_object) g_object_unref(source_object);
 		start_generation(next_job);
 	} else {
@@ -466,7 +463,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 		gtk_widget_set_sensitive(GTK_WIDGET(data->cancel_all_btn), FALSE);
 		gtk_widget_set_visible(data->queue_size_label, FALSE);
 		app_data->is_generating = FALSE;
-		g_free(data);
+		generation_snapshot_free(data);
 		if (source_object) g_object_unref(source_object);
 	}
 }
@@ -503,15 +500,10 @@ static void start_generation(gpointer user_data)
 {
 	GenerationSnapshotData *data = user_data;
 	if (data == NULL) {
-		g_printerr("Error: Data used to generate the images is corrupted.\n");
-		
-		show_simple_message(data->win,
-		"Error reading generation data",
-		"Error reading generation data;\ntry restarting the app or deleting the \".cache\" folder.", 1);
-		
-		on_subprocess_end(NULL, NULL, user_data);
+		g_printerr("[E] Data used to generate the images is corrupted.\nTry restarting the app or deleting the \".cache\" folder.");
+		return;
 	}
-	gtk_label_set_text (GTK_LABEL(data->generation_label), "Loading Files...");
+	gtk_label_set_text(GTK_LABEL(data->generation_label), "Loading Files...");
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), TRUE);
 
 	gen_sd_string(data);
@@ -531,7 +523,7 @@ static void start_generation(gpointer user_data)
 		
 		on_subprocess_end(NULL, NULL, user_data);
 	} else {
-		data->total_time = 0;
+		data->app_data->total_time = 0;
 		const gchar* sd_pid = g_subprocess_get_identifier(sd_process);
 		char *endptr;
 		int npid = strtol(sd_pid, &endptr, 10);
@@ -566,7 +558,7 @@ static void start_generation(gpointer user_data)
 		output_d->is_upscaling = 0;
 		output_d->n_current_upscale = 0;
 		output_d->verbose_enabled = data->verbose_enabled;
-		output_d->total_time = &data->total_time;
+		output_d->total_time = &data->app_data->total_time;
 		output_d->sdpid = data->sdpid;
 		output_d->generation_label = data->generation_label;
 		output_d->button = data->gen_btn;
@@ -593,6 +585,23 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 {
 	GenerationData *data = user_data;
 	AppStartData *app_data = data->app_data;
+
+	if (data == NULL || app_data == NULL) {
+		g_printerr("[E] Data used to generate the images is corrupted.\nTry restarting the app or deleting the \".cache\" folder.");
+		return;
+	}
+
+	char *ckpt_str = get_dd_selected_strdup(GTK_DROP_DOWN(data->checkpoint_dd), "None");
+
+	if (strcmp(ckpt_str, "None") == 0) {
+		g_free(ckpt_str);
+		g_warning("[W] No base model selected; generation cannot proceed\n");
+		show_simple_message(data->win,
+			"No base model selected",
+			"No base model selected; generation cannot proceed!", 1
+		);
+		return;
+	}
 	
 	GenerationSnapshotData *snapshot_data = g_new0 (GenerationSnapshotData, 1);
 	
@@ -633,41 +642,25 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	GtkTextIter nei;
 	gtk_text_buffer_get_bounds (neg_tb, &nsi, &nei);
 	snapshot_data->negative_prompt = gtk_text_buffer_get_text(neg_tb, &nsi, &nei, FALSE);
-	
+
 	snapshot_data->checkpoint_dd = data->checkpoint_dd;
-	
-	snapshot_data->checkpoint_filename = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->checkpoint_dd))))
-	);
-	
-	snapshot_data->detector_filename = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->detector_dd))))
-	);
-	
-	snapshot_data->vae_filename = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->vae_dd))))
-	);
-	
-	snapshot_data->cnet_filename = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->cnet_dd))))
-	);
-	
-	snapshot_data->upscaler_filename = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->upscaler_dd))))
-	);
-	
-	snapshot_data->clip_l_filename = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->clip_l_dd))))
-	);
-	
-	snapshot_data->clip_g_filename  = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->clip_g_dd))))
-	);
-	
-	snapshot_data->text_enc_filename  = g_strdup(
-		gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(data->text_enc_dd))))
-	);
-	
+
+	snapshot_data->checkpoint_filename = ckpt_str;
+
+	snapshot_data->detector_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->detector_dd), "None");
+
+	snapshot_data->vae_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->vae_dd), "None");
+
+	snapshot_data->cnet_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->cnet_dd), "None");
+
+	snapshot_data->upscaler_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->upscaler_dd), "None");
+
+	snapshot_data->clip_l_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->clip_l_dd), "None");
+
+	snapshot_data->clip_g_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->clip_g_dd), "None");
+
+	snapshot_data->text_enc_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->text_enc_dd), "None");
+
 	snapshot_data->hires_upscaler_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->hires_upscaler_dd));
 	snapshot_data->detector_confidence_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_confidence_spin));
 	snapshot_data->detector_denoise_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_denoise_spin));
@@ -700,6 +693,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->cnet_strength_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->cnet_strength_spin));
 	snapshot_data->vae_tiling_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->vae_tiling_dd));
 	snapshot_data->flash_attn_value = app_data->flash_attn_value;
+	
 	snapshot_data->model_runtime_backend_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->model_runtime_backend_dd));
 	snapshot_data->model_param_backend_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->model_parameter_backend_dd));
 	snapshot_data->te_runtime_backend_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->te_runtime_backend_dd));
@@ -712,7 +706,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->upscaler_param_backend_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->upscaler_parameter_backend_dd));
 	snapshot_data->detector_runtime_backend_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->detector_runtime_backend_dd));
 	snapshot_data->detector_param_backend_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->detector_parameter_backend_dd));
-	snapshot_data->total_time = 0;
+	
 	snapshot_data->sdpid = &app_data->sdpid;
 	snapshot_data->preview_image_index = &app_data->preview_image_index;
 	snapshot_data->preview_label_string = app_data->preview_label_string;

@@ -9,6 +9,13 @@
 #include "str_utils.h"
 #include "widgets_cb.h"
 
+static int sanitize_backend_selection(int selected_index)
+{
+	if (selected_index >= 0 && selected_index < LIST_BACKENDS_COUNT - 1) return selected_index;
+	g_warning("[W] Invalid backend index %d; falling back to default backend (index 0)\n", selected_index);
+	return 0;
+}
+
 void gen_sd_string(GenerationSnapshotData *data)
 {
 	g_ptr_array_set_size(data->sd_cmd_array, 0);
@@ -219,9 +226,18 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	if (!data->chroma_dit_mask_enabled || data->qwen_zero_cond_t_enabled) {
+		GString *model_args = g_string_new(NULL);
+
+		if (!data->chroma_dit_mask_enabled) g_string_append(model_args, "chroma_use_dit_mask=false");
+
+		if (data->qwen_zero_cond_t_enabled) {
+			if (model_args->len > 0) g_string_append_c(model_args, ',');
+			g_string_append(model_args, "qwen_image_zero_cond_t=true");
+		}
+
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--model-args"));
-		if (!data->chroma_dit_mask_enabled) g_ptr_array_add(data->sd_cmd_array, g_strdup("chroma_use_dit_mask=false"));
-		if (data->qwen_zero_cond_t_enabled) g_ptr_array_add(data->sd_cmd_array, g_strdup("qwen_image_zero_cond_t=true"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup(model_args->str));
+		g_string_free(model_args, TRUE);
 	}
 
 	if (data->positive_prompt != NULL) {
@@ -235,20 +251,20 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	char *runtime_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s,detector=%s",
-	LIST_BACKENDS[(data->model_runtime_backend_index)],
-	LIST_BACKENDS[(data->te_runtime_backend_index)],
-	LIST_BACKENDS[(data->vae_runtime_backend_index)],
-	LIST_BACKENDS[(data->cnet_runtime_backend_index)],
-	LIST_BACKENDS[(data->upscaler_runtime_backend_index)],
-	LIST_BACKENDS[(data->detector_runtime_backend_index)]);
+	LIST_BACKENDS[sanitize_backend_selection(data->model_runtime_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->te_runtime_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->vae_runtime_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->cnet_runtime_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->upscaler_runtime_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->detector_runtime_backend_index)]);
 
 	char *parameter_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s,detector=%s",
-	LIST_BACKENDS[(data->model_param_backend_index)],
-	LIST_BACKENDS[(data->te_param_backend_index)],
-	LIST_BACKENDS[(data->vae_param_backend_index)],
-	LIST_BACKENDS[(data->cnet_param_backend_index)],
-	LIST_BACKENDS[(data->upscaler_param_backend_index)],
-	LIST_BACKENDS[(data->detector_param_backend_index)]);
+	LIST_BACKENDS[sanitize_backend_selection(data->model_param_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->te_param_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->vae_param_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->cnet_param_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->upscaler_param_backend_index)],
+	LIST_BACKENDS[sanitize_backend_selection(data->detector_param_backend_index)]);
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--backend"));
 	g_ptr_array_add(data->sd_cmd_array, runtime_backend_str);

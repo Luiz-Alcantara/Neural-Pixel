@@ -235,7 +235,6 @@ typedef struct {
 	int step_count_value;
 	int te_param_backend_index;
 	int te_runtime_backend_index;
-	int total_time;
 	int upscale_passes_value;
 	int upscaler_param_backend_index;
 	int upscaler_runtime_backend_index;

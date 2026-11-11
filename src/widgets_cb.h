@@ -3,6 +3,8 @@
 
 #include <gtk/gtk.h>
 
+void generation_snapshot_free(GenerationSnapshotData *job);
+
 void show_simple_message(GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
 
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
@@ -11,7 +13,7 @@ void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpoi
 
 void add_image_to_favorites(GtkWidget *btn, gpointer user_data);
 
-void app_start_data_free (gpointer user_data);
+void app_start_data_free(gpointer user_data);
 
 void array_strings_free(const char **list);
 
@@ -21,7 +23,7 @@ void clear_mask_btn_cb (GtkButton *btn, gpointer user_data);
 
 void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
 
-gboolean close_app_callback (GtkWindow *win, gpointer user_data);
+gboolean close_app_callback(GtkWindow *win, gpointer user_data);
 
 void donate_btn_callback(GtkButton *btn, gpointer user_data);
 
@@ -35,7 +37,7 @@ guint get_dd_item_count(GtkDropDown *dropdown);
 
 void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
 
-void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data);
+void kill_cancel_all_btn_cb(GtkButton *btn, gpointer user_data);
 
 void manage_lora_triggers (GtkButton *btn, gpointer user_data);
 

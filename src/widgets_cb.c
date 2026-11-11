@@ -11,10 +11,30 @@
 #include "structs.h"
 #include "toast_notification.h"
 
+void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
 static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
 static void show_lora_triggers(GtkWidget *main_win, GtkWidget *main_overlay, char *path);
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
 void show_simple_message (GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
+
+void generation_snapshot_free(GenerationSnapshotData *job)
+{
+	g_free(job->output_path);
+	g_free(job->img2img_file_path);
+	g_free(job->detector_negative_prompt);
+	g_free(job->detector_positive_prompt);
+	g_free(job->positive_prompt);
+	g_free(job->negative_prompt);
+	g_free(job->checkpoint_filename);
+	g_free(job->detector_filename);
+	g_free(job->vae_filename);
+	g_free(job->cnet_filename);
+	g_free(job->upscaler_filename);
+	g_free(job->clip_l_filename);
+	g_free(job->clip_g_filename);
+	g_free(job->text_enc_filename);
+	g_free(job);
+}
 
 void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
 {
@@ -78,27 +98,20 @@ void add_image_to_favorites(GtkWidget *btn, gpointer user_data)
 	}
 }
 
-void app_start_data_free (gpointer user_data)
+void app_start_data_free(gpointer user_data)
 {
 	if (user_data == NULL) return;
 	AppStartData *data = user_data;
 
 	GenerationSnapshotData *left_jobs;
 	while ((left_jobs = g_queue_pop_head(data->job_queue)) != NULL) {
-		g_free(left_jobs->output_path);
-		g_free(left_jobs->img2img_file_path);
-		g_free(left_jobs->positive_prompt);
-		g_free(left_jobs->negative_prompt);
-		g_free(left_jobs->checkpoint_filename);
-		g_free(left_jobs->detector_filename);
-		g_free(left_jobs->vae_filename);
-		g_free(left_jobs->cnet_filename);
-		g_free(left_jobs->upscaler_filename);
-		g_free(left_jobs->clip_l_filename);
-		g_free(left_jobs->clip_g_filename);
-		g_free(left_jobs->text_enc_filename);
-		g_free(left_jobs);
+		generation_snapshot_free(left_jobs);
 	}
+
+	if (data->sdpid > 0) {
+		kill_stable_diffusion_process(NULL, &data->sdpid);
+	}
+
 	g_queue_free(data->job_queue);
 	
 	if (data->checkpoint_string != NULL) {
@@ -205,7 +218,7 @@ void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data)
 	show_toast_notification(GTK_OVERLAY(data->main_overlay), "Input image cleared.");
 }
 
-gboolean close_app_callback (GtkWindow *win, gpointer user_data)
+gboolean close_app_callback(GtkWindow *win, gpointer user_data)
 {
 	app_start_data_free(user_data);
 	gtk_window_destroy (win);
@@ -292,10 +305,10 @@ guint get_dd_item_count(GtkDropDown *dropdown)
 	return g_list_model_get_n_items(model);
 }
 
-void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
+void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data)
 {
 	int *sdpid = (int *)user_data;
-	gtk_widget_set_sensitive(GTK_WIDGET(btn), FALSE);
+	if (btn != NULL) gtk_widget_set_sensitive(GTK_WIDGET(btn), FALSE);
 	
 	if (*sdpid > 0) {
 		#ifdef _WIN32
@@ -324,24 +337,12 @@ void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
 	}
 }
 
-void kill_cancel_all_btn_cb (GtkButton *btn, gpointer user_data)
+void kill_cancel_all_btn_cb(GtkButton *btn, gpointer user_data)
 {
 	CancelAllData *data = user_data;
 	GenerationSnapshotData *left_jobs;
 	while ((left_jobs = g_queue_pop_head(data->job_queue)) != NULL) {
-		g_free(left_jobs->output_path);
-		g_free(left_jobs->img2img_file_path);
-		g_free(left_jobs->positive_prompt);
-		g_free(left_jobs->negative_prompt);
-		g_free(left_jobs->checkpoint_filename);
-		g_free(left_jobs->detector_filename);
-		g_free(left_jobs->vae_filename);
-		g_free(left_jobs->cnet_filename);
-		g_free(left_jobs->upscaler_filename);
-		g_free(left_jobs->clip_l_filename);
-		g_free(left_jobs->clip_g_filename);
-		g_free(left_jobs->text_enc_filename);
-		g_free(left_jobs);
+		generation_snapshot_free(left_jobs);
 	}
 
 	kill_stable_diffusion_process(GTK_BUTTON(data->halt_btn), data->sdpid);
