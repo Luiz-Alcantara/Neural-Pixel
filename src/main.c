@@ -113,6 +113,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *clip_l_lab, *clip_l_dd;
 	GtkWidget *clip_g_lab, *clip_g_dd;
 	GtkWidget *box_text_encoder, *box_text_encoder_buttons, *text_enc_lab, *text_enc_dd, *llm_check;
+	GtkWidget *llm_vision_lab, *llm_vision_dd, *tokenizer_lab, *tokenizer_dd;
 	
 	GtkWidget *box_params;
 	GtkWidget *box_params_row1, *box_params_row1_col1, *box_params_row1_col2;
@@ -819,6 +820,27 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(llm_check), app_data->llm_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(llm_check), "Enables LLM-based text encoding instead of the default diffusion-model text encoder.");
 	gtk_box_append (GTK_BOX (box_text_encoder_buttons), llm_check);
+	
+	//Set LLM Vision Model Widgets
+	
+	llm_vision_lab = gtk_label_new ("LLM Vision Model");
+	gtk_widget_set_halign(llm_vision_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(llm_vision_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_addons_inner), llm_vision_lab);
+	
+	llm_vision_dd = gen_path_dd(LLM_VISION_PATH, NULL, 0, app_data->llm_vision_string, NULL, app, 0);
+	gtk_box_append (GTK_BOX (box_addons_inner), llm_vision_dd);
+	
+	//Set Tokenizer Widgets
+	
+	tokenizer_lab = gtk_label_new ("Tokenizer");
+	gtk_widget_set_halign(tokenizer_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(tokenizer_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_addons_inner), tokenizer_lab);
+	
+	tokenizer_dd = gen_path_dd(TOKENIZER_PATH, NULL, 0, app_data->tokenizer_string, NULL, app, 0);
+	gtk_widget_set_margin_bottom (tokenizer_dd, MEDIUM_SPACING);
+	gtk_box_append (GTK_BOX (box_addons_inner), tokenizer_dd);
 	
 	//Set Model adapters Widgets
 	
@@ -1870,6 +1892,8 @@ app_activate (GApplication *app, gpointer user_data)
 	reload_d->clip_l_dd = clip_l_dd;
 	reload_d->clip_g_dd = clip_g_dd;
 	reload_d->text_enc_dd = text_enc_dd;
+	reload_d->llm_vision_dd = llm_vision_dd;
+	reload_d->tokenizer_dd = tokenizer_dd;
 	reload_d->lora_dd = lora_dd;
 	reload_d->embedding_dd = embedding_dd;
 	g_signal_connect (reload_btn, "clicked", G_CALLBACK (reload_dropdown), reload_d);
@@ -1893,6 +1917,8 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->clip_l_dd = clip_l_dd;
 	reset_d->clip_g_dd = clip_g_dd;
 	reset_d->text_enc_dd = text_enc_dd;
+	reset_d->llm_vision_dd = llm_vision_dd;
+	reset_d->tokenizer_dd = tokenizer_dd;
 	reset_d->cfg_spin = cfg_spin;
 	reset_d->cnet_strength_spin = cnet_strength_spin;
 	reset_d->denoise_spin = denoise_spin;
@@ -2088,6 +2114,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->cnet_dd = cnet_dd;
 	gen_d->detector_dd = detector_dd;
 	gen_d->text_enc_dd = text_enc_dd;
+	gen_d->llm_vision_dd = llm_vision_dd;
+	gen_d->tokenizer_dd = tokenizer_dd;
 	gen_d->upscaler_dd = upscaler_dd;
 	gen_d->vae_dd = vae_dd;
 	gen_d->halt_btn = sd_halt_btn;
@@ -2128,6 +2156,8 @@ main (int argc, char **argv)
 	data->clip_l_string = NULL;
 	data->clip_g_string = NULL;
 	data->text_enc_string = NULL;
+	data->llm_vision_string = NULL;
+	data->tokenizer_string = NULL;
 	data->img2img_file_path = NULL;
 	
 	data->checkpoint_string = g_string_new("None");
@@ -2174,6 +2204,18 @@ main (int argc, char **argv)
 	
 	data->text_enc_string = g_string_new("None");
 	if (data->text_enc_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->llm_vision_string = g_string_new("None");
+	if (data->llm_vision_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->tokenizer_string = g_string_new("None");
+	if (data->tokenizer_string == NULL) {
 		g_error("Failed to allocate GString.");
 		return 1;
 	}

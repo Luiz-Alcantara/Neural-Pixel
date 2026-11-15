@@ -106,6 +106,8 @@ static void create_default_files(const char *file_path, GError **error)
 		fprintf(cf, "clip_l=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "clip_g=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "text_enc=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "llm_vision=%s\n", OPTIONAL_ITEMS);
+		fprintf(cf, "tokenizer=%s\n", OPTIONAL_ITEMS);
 		fprintf(cf, "sampler_index=%d\n", DEFAULT_SAMPLER);
 		fprintf(cf, "scheduler_index=%d\n", DEFAULT_SCHEDULER);
 		fprintf(cf, "img_width_index=%d\n", DEFAULT_SIZE);

@@ -33,6 +33,8 @@ void generation_snapshot_free(GenerationSnapshotData *job)
 	g_free(job->clip_l_filename);
 	g_free(job->clip_g_filename);
 	g_free(job->text_enc_filename);
+	g_free(job->llm_vision_filename);
+	g_free(job->tokenizer_filename);
 	g_free(job);
 }
 
@@ -152,6 +154,16 @@ void app_start_data_free(gpointer user_data)
 	if (data->text_enc_string != NULL) {
 		g_string_free(data->text_enc_string, TRUE);
 		data->text_enc_string = NULL;
+	}
+	
+	if (data->llm_vision_string != NULL) {
+		g_string_free(data->llm_vision_string, TRUE);
+		data->llm_vision_string = NULL;
+	}
+	
+	if (data->tokenizer_string != NULL) {
+		g_string_free(data->tokenizer_string, TRUE);
+		data->tokenizer_string = NULL;
 	}
 	
 	if (data->img2img_file_path != NULL) {
@@ -663,6 +675,8 @@ void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_l_dd), data->app);
 	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_g_dd), data->app);
 	dropdown_items_update(TEXT_ENCODERS_PATH, GTK_WIDGET(data->text_enc_dd), data->app);
+	dropdown_items_update(LLM_VISION_PATH, GTK_WIDGET(data->llm_vision_dd), data->app);
+	dropdown_items_update(TOKENIZER_PATH, GTK_WIDGET(data->tokenizer_dd), data->app);
 	dropdown_items_update(LORAS_PATH, GTK_WIDGET(data->lora_dd), data->app);
 	dropdown_items_update(EMBEDDINGS_PATH, GTK_WIDGET(data->embedding_dd), data->app);
 }
@@ -700,6 +714,12 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	
 	GtkWidget *text_enc_dd = data->text_enc_dd;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(text_enc_dd), DEFAULT_MODELS);
+	
+	GtkWidget *llm_vision_dd = data->llm_vision_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(llm_vision_dd), DEFAULT_MODELS);
+	
+	GtkWidget *tokenizer_dd = data->tokenizer_dd;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(tokenizer_dd), DEFAULT_MODELS);
 
 	GtkWidget *cfg_spin = data->cfg_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), DEFAULT_CFG);

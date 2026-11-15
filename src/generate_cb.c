@@ -661,6 +661,10 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 
 	snapshot_data->text_enc_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->text_enc_dd), "None");
 
+	snapshot_data->llm_vision_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->llm_vision_dd), "None");
+
+	snapshot_data->tokenizer_filename = get_dd_selected_strdup(GTK_DROP_DOWN(data->tokenizer_dd), "None");
+
 	snapshot_data->hires_upscaler_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->hires_upscaler_dd));
 	snapshot_data->detector_confidence_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_confidence_spin));
 	snapshot_data->detector_denoise_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->detector_denoise_spin));

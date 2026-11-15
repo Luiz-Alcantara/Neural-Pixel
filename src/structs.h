@@ -13,6 +13,8 @@ typedef struct {
 	GString *clip_l_string;
 	GString *clip_g_string;
 	GString *text_enc_string;
+	GString *llm_vision_string;
+	GString *tokenizer_string;
 	GString *preview_label_string;
 	GString *img2img_file_path;
 	GPtrArray *preview_image_files;
@@ -153,6 +155,8 @@ typedef struct {
 	GtkWidget *cnet_dd;
 	GtkWidget *detector_dd;
 	GtkWidget *text_enc_dd;
+	GtkWidget *llm_vision_dd;
+	GtkWidget *tokenizer_dd;
 	GtkWidget *upscaler_dd;
 	GtkWidget *vae_dd;
 	GtkWidget *halt_btn;
@@ -178,6 +182,8 @@ typedef struct {
 	char *output_path;
 	char *positive_prompt;
 	char *text_enc_filename;
+	char *llm_vision_filename;
+	char *tokenizer_filename;
 	char *upscaler_filename;
 	char *vae_filename;
 	double cfg_scale_value;
@@ -358,6 +364,8 @@ typedef struct {
 	GtkWidget* clip_l_dd;
 	GtkWidget* clip_g_dd;
 	GtkWidget* text_enc_dd;
+	GtkWidget* llm_vision_dd;
+	GtkWidget* tokenizer_dd;
 	GtkWidget* lora_dd;
 	GtkWidget* embedding_dd;
 } ReloadDropDownData;
@@ -373,6 +381,8 @@ typedef struct {
 	GtkWidget *clip_l_dd;
 	GtkWidget *clip_g_dd;
 	GtkWidget *text_enc_dd;
+	GtkWidget *llm_vision_dd;
+	GtkWidget *tokenizer_dd;
 	GtkWidget *cfg_spin;
 	GtkWidget *cnet_strength_spin;
 	GtkWidget *denoise_spin;

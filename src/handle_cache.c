@@ -60,6 +60,8 @@ void load_cache_fallback(gpointer user_data)
 	g_string_assign(data->clip_l_string, OPTIONAL_ITEMS);
 	g_string_assign(data->clip_g_string, OPTIONAL_ITEMS);
 	g_string_assign(data->text_enc_string, OPTIONAL_ITEMS);
+	g_string_assign(data->llm_vision_string, OPTIONAL_ITEMS);
+	g_string_assign(data->tokenizer_string, OPTIONAL_ITEMS);
 	
 	data->sampler_index = DEFAULT_SAMPLER;
 	data->scheduler_index = DEFAULT_SCHEDULER;
@@ -170,6 +172,20 @@ void load_cache(gpointer user_data)
 			g_string_assign(data->text_enc_string, text_enc_str);
 		} else {
 			g_string_assign(data->text_enc_string, OPTIONAL_ITEMS);
+		}
+		
+		char *llm_vision_str = ini_file_get_value(cache_filename, "llm_vision");
+		if (llm_vision_str) {
+			g_string_assign(data->llm_vision_string, llm_vision_str);
+		} else {
+			g_string_assign(data->llm_vision_string, OPTIONAL_ITEMS);
+		}
+		
+		char *tokenizer_str = ini_file_get_value(cache_filename, "tokenizer");
+		if (tokenizer_str) {
+			g_string_assign(data->tokenizer_string, tokenizer_str);
+		} else {
+			g_string_assign(data->tokenizer_string, OPTIONAL_ITEMS);
 		}
 
 		char *sampler_index_str = ini_file_get_value(cache_filename, "sampler_index");
@@ -586,6 +602,8 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "clip_l=%s\n", data->clip_l_filename);
 	fprintf(cf, "clip_g=%s\n", data->clip_g_filename);
 	fprintf(cf, "text_enc=%s\n", data->text_enc_filename);
+	fprintf(cf, "llm_vision=%s\n", data->llm_vision_filename);
+	fprintf(cf, "tokenizer=%s\n", data->tokenizer_filename);
 	fprintf(cf, "sampler_index=%d\n", data->sampler_index);
 	fprintf(cf, "scheduler_index=%d\n", data->scheduler_index);
 	fprintf(cf, "img_width_index=%d\n", data->width_index);
