@@ -165,6 +165,16 @@ void gen_sd_string(GenerationSnapshotData *data)
 		}
 	}
 
+	if (data->llm_vision_filename != NULL && strcmp(data->llm_vision_filename, "None") != 0) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--llm_vision"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/llm_vision/%s", data->llm_vision_filename));
+	}
+
+	if (data->tokenizer_filename != NULL && strcmp(data->tokenizer_filename, "None") != 0) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--tokenizer"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/tokenizer/%s", data->tokenizer_filename));
+	}
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
 	g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->denoise_strength_value));
 

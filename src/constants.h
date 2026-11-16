@@ -30,6 +30,8 @@ extern const char* DETECTOR_PATH;
 extern const char* EMBEDDINGS_PATH;
 extern const char* LORAS_PATH;
 extern const char* TEXT_ENCODERS_PATH;
+extern const char* LLM_VISION_PATH;
+extern const char* TOKENIZER_PATH;
 extern const char* UNET_PATH;
 extern const char* UPSCALES_PATH;
 extern const char* VAES_PATH;
