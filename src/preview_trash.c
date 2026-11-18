@@ -120,7 +120,7 @@ static void on_preview_image_loaded_cb(GObject *source_obj, GAsyncResult *res, g
 	if (error) g_clear_error(&error);
 }
 
-static void preview_load_current_image(PreviewImageData *data)
+static void preview_load_current_image(PreviewImageData *data, gboolean update_label)
 {
 	if (!data || !data->image_files || !data->image_widget) return;
 
@@ -130,7 +130,7 @@ static void preview_load_current_image(PreviewImageData *data)
 		gtk_button_set_icon_name(GTK_BUTTON(data->hide_img_btn), "view-reveal-symbolic");
 	}
 
-	update_preview_label(data);
+	if (update_label) update_preview_label(data);
 
 	if (data->image_files->len == 0) {
 		gtk_picture_set_filename(GTK_PICTURE(data->image_widget), DEFAULT_IMG_PATH);
@@ -164,7 +164,7 @@ void preview_image_visibility_toggle(GtkButton *btn, gpointer user_data)
 		preview_set_empty_placeholder(data->image_widget, data->empty_texture);
 	} else {
 		gtk_button_set_icon_name (btn, "view-reveal-symbolic");
-		preview_load_current_image(data);
+		preview_load_current_image(data, FALSE);
 	}
 }
 
@@ -193,7 +193,7 @@ void navigate_preview(PreviewImageData *data, int offset)
 	}
 
 	*data->current_image_index = new_index;
-	preview_load_current_image(data);
+	preview_load_current_image(data, TRUE);
 }
 
 static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, gpointer user_data)
@@ -241,7 +241,7 @@ static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, g
 						update_preview_label(data);
 					} else {
 						*data->current_image_index = 0;
-						preview_load_current_image(data);
+						preview_load_current_image(data, TRUE);
 					}
 				}
 			}
@@ -258,12 +258,12 @@ static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, g
 
 				if (data->image_files->len == 0) {
 					*data->current_image_index = 0;
-					preview_load_current_image(data);
+					preview_load_current_image(data, TRUE);
 				} else if (was_current) {
 					if ((guint)*data->current_image_index >= data->image_files->len) {
 						*data->current_image_index = (gint)data->image_files->len - 1;
 					}
-					preview_load_current_image(data);
+					preview_load_current_image(data, TRUE);
 				} else {
 					if ((gint)stale_idx < *data->current_image_index) (*data->current_image_index)--;
 					update_preview_label(data);
@@ -305,7 +305,7 @@ void send_to_trash(gpointer user_data)
 		*data->current_image_index = (gint)data->image_files->len - 1;
 	}
 
-	preview_load_current_image(data);
+	preview_load_current_image(data, TRUE);
 
 	if (!exists) {
 		g_printerr("Error: File not found: '%s'.\n", file_to_trash_path);
