@@ -16,6 +16,15 @@ static void on_delete_favorite(GtkButton *btn, gpointer user_data);
 static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer user_data);
 static void save_favorites(GtkStringList *store);
 
+static void set_empty_placeholder(GtkWidget *fav_image, FavoritesWindowData *data)
+{
+	if (data && data->empty_texture) {
+		gtk_picture_set_paintable(GTK_PICTURE(fav_image), GDK_PAINTABLE(data->empty_texture));
+	} else {
+		gtk_picture_set_filename(GTK_PICTURE(fav_image), EMPTY_IMG_PATH);
+	}
+}
+
 static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer user_data)
 {
 	FavoritesWindowData *favorites_d = user_data;
@@ -130,8 +139,8 @@ static void favorites_factory_bind_cb(GtkSignalListItemFactory *factory, GtkList
 	if (old_can) g_cancellable_cancel(old_can);
 	g_object_set_data(G_OBJECT(item), "load-cancellable", NULL);
 
-	if (!path || !check_file_exists(path, 0)) {
-		g_printerr("Failed to load file: '%s'.\n", path ? path : "(null)");
+	if (!path) {
+		set_empty_placeholder(fav_image, favorites_d);
 		return;
 	}
 
@@ -233,28 +242,14 @@ static void on_favorites_changed(GListModel *model, guint position, guint remove
 	favorites_window_update(user_data);
 }
 
-static gboolean on_favorites_window_close_request(GtkWindow *window, gpointer user_data)
-{
-	FavoritesWindowData *favorites_d = user_data;
-	if (favorites_d->modified) {
-		save_favorites(favorites_d->store);
-		favorites_d->modified = FALSE;
-	}
-	return FALSE;
-}
-
 static void on_favorites_window_destroy(gpointer user_data)
 {
 	FavoritesWindowData *data = (FavoritesWindowData *)user_data;
 	if (!data) return;
 
-	if (data->modified) {
-		save_favorites(data->store);
-	}
-
 	g_signal_handlers_disconnect_by_func(data->store, G_CALLBACK(on_favorites_changed), data);
-	if (data->empty_texture) g_clear_object(&data->empty_texture);
-	if (data->loading_texture) g_clear_object(&data->loading_texture);
+	g_clear_object(&data->empty_texture);
+	g_clear_object(&data->loading_texture);
 	g_object_unref(data->store);
 	g_free(data);
 }
@@ -266,6 +261,11 @@ static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer 
 	GError *error = NULL;
 
 	GdkTexture *texture = g_task_propagate_pointer(G_TASK(res), &error);
+
+	if (error && g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+		g_clear_error(&error);
+		return;
+	}
 
 	GtkStringObject *current_obj = gtk_list_item_get_item(item);
 	gboolean is_same_row = FALSE;
@@ -283,11 +283,7 @@ static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer 
 			gtk_picture_set_paintable(GTK_PICTURE(fav_image), GDK_PAINTABLE(texture));
 		} else {
 			FavoritesWindowData *data = (FavoritesWindowData *)user_data;
-			if (data && data->empty_texture) {
-				gtk_picture_set_paintable(GTK_PICTURE(fav_image), GDK_PAINTABLE(data->empty_texture));
-			} else {
-				gtk_picture_set_filename(GTK_PICTURE(fav_image), EMPTY_IMG_PATH);
-			}
+			set_empty_placeholder(fav_image, data);
 			if (error && !g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
 				g_printerr("Failed to load file: '%s'. Error: %s\n", img_path, error->message);
 			}
@@ -372,7 +368,6 @@ void show_favorites_manager(GtkButton *btn, gpointer user_data)
 	favorites_window_update(favorites_d);
 
 	g_signal_connect(favorites_d->store, "items-changed", G_CALLBACK(on_favorites_changed), favorites_d);
-	g_signal_connect(favorites_win, "close-request", G_CALLBACK(on_favorites_window_close_request), favorites_d);
 
 	gtk_window_set_child(GTK_WINDOW(favorites_win), favorites_d->stack);
 	gtk_window_present(GTK_WINDOW(favorites_win));

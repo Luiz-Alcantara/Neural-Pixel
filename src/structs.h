@@ -307,7 +307,6 @@ typedef struct {
 	GdkTexture *loading_texture;
 	GtkStringList *store;
 	GtkWidget *stack;
-	gboolean modified;
 } FavoritesWindowData;
 
 typedef struct {
