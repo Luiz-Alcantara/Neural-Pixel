@@ -297,6 +297,7 @@ void free_preview_data (gpointer data)
 	}
 
 	g_clear_object(&preview_d->empty_texture);
+	g_clear_object(&preview_d->loading_texture);
 	g_free(preview_d);
 }
 

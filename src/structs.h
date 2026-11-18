@@ -304,6 +304,7 @@ typedef struct {
 typedef struct {
 	LoadPNGData *load_png_info_d;
 	GdkTexture *empty_texture;
+	GdkTexture *loading_texture;
 	GtkStringList *store;
 	GtkWidget *stack;
 	gboolean modified;
