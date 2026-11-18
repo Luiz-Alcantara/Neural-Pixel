@@ -40,7 +40,7 @@ Even with newer models that use LLM text encoders (like Flux), English prompts r
 - Vulkan backend (Optional): Vulkan driver/loader/tools & >= 2GB of VRAM.
 
 ### 2. How to Run
-- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.7-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.7/NeuralPixel-Linux_v0.9.7.zip)
+- Download the [![Linux bundle](https://img.shields.io/badge/Linux-v0.9.8-orange?style=flat-square&logo=linux)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.8/NeuralPixel-Linux_v0.9.8.zip)
 - Extract the archive and execute the `run_neural_pixel` file.
 - Tip: For debugging, launch from a terminal and enable Terminal Verbose under Extra Options.
 
@@ -50,7 +50,7 @@ Even with newer models that use LLM text encoders (like Flux), English prompts r
 - A GPU or iGPU with at least 2GB of VRAM for Vulkan.
 
 ### 2. How to Run
-- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.7-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.7/NeuralPixel-Windows_v0.9.7.zip)
+- Download the [![Windows bundle](https://img.shields.io/badge/Windows-v0.9.8-blue?style=flat-square&logo=windows)](https://github.com/Luiz-Alcantara/Neural-Pixel/releases/download/v0.9.8/NeuralPixel-Windows_v0.9.8.zip)
 - Extract the archive and execute the `neural_pixel.bat` file.
 
 ## Recommended checkpoints
