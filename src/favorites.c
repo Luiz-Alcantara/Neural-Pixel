@@ -16,22 +16,6 @@ static void on_delete_favorite(GtkButton *btn, gpointer user_data);
 static void on_image_loaded_cb(GObject *source_obj, GAsyncResult *res, gpointer user_data);
 static void save_favorites(GtkStringList *store);
 
-static GdkTexture *texture_from_pixbuf(GdkPixbuf *pixbuf)
-{
-	GBytes *bytes = gdk_pixbuf_read_pixel_bytes(pixbuf);
-
-	GdkTexture *texture = gdk_memory_texture_new(
-		gdk_pixbuf_get_width(pixbuf),
-		gdk_pixbuf_get_height(pixbuf),
-		gdk_pixbuf_get_has_alpha(pixbuf) ? GDK_MEMORY_R8G8B8A8 : GDK_MEMORY_R8G8B8,
-		bytes,
-		gdk_pixbuf_get_rowstride(pixbuf)
-	);
-
-	g_bytes_unref(bytes);
-	return texture;
-}
-
 static void favorites_factory_setup_cb(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer user_data)
 {
 	FavoritesWindowData *favorites_d = user_data;
@@ -224,7 +208,7 @@ static void load_scaled_image_thread(GTask *task, gpointer source_obj, gpointer 
 	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(path, IMG_DIMENSION, IMG_DIMENSION, TRUE, &error);
 	if (!pixbuf) { g_task_return_error(task, error); return; }
 
-	GdkTexture *texture = texture_from_pixbuf(pixbuf);
+	GdkTexture *texture = get_texture_from_pixbuf(pixbuf);
 	g_object_unref(pixbuf);
 	
 	g_task_return_pointer(task, texture, g_object_unref);

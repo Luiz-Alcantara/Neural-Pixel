@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <gio/gio.h>
 #include <glib/gstdio.h>
 #include <ctype.h>
 #include <errno.h>
@@ -7,6 +8,7 @@
 #endif
 #include "constants.h"
 #include "file_utils.h"
+#include "preview_trash.h"
 #include "str_utils.h"
 #include "structs.h"
 #include "toast_notification.h"
@@ -281,6 +283,20 @@ void dropdown_items_update (const char *path, GtkWidget *dd, GApplication *app)
 void free_preview_data (gpointer data)
 {
 	PreviewImageData *preview_d = (PreviewImageData *)data;
+	if (preview_d == NULL) return;
+
+	if (preview_d->image_widget != NULL) {
+		g_object_set_data(G_OBJECT(preview_d->image_widget), "preview-data", NULL);
+		g_object_remove_weak_pointer(G_OBJECT(preview_d->image_widget), (gpointer *)&preview_d->image_widget);
+		preview_d->image_widget = NULL;
+	}
+
+	if (preview_d->load_cancellable != NULL) {
+		g_cancellable_cancel(preview_d->load_cancellable);
+		g_clear_object(&preview_d->load_cancellable);
+	}
+
+	g_clear_object(&preview_d->empty_texture);
 	g_free(preview_d);
 }
 
@@ -390,60 +406,36 @@ void manage_lora_triggers (GtkButton *btn, gpointer user_data)
 
 }
 
-static void navigate_images(PreviewImageData *data, int offset)
-{
-	gsize img_count = data->image_files->len;
-
-	if (img_count <= 0) {
-		g_printerr("Error: No images found.\n");
-		return;
-	}
-
-	if (g_strcmp0 (gtk_button_get_icon_name(GTK_BUTTON(data->hide_img_btn)), "view-conceal-symbolic") == 0) {
-		gtk_button_set_icon_name (GTK_BUTTON(data->hide_img_btn), "view-reveal-symbolic");
-	}
-
-	int new_index = (*data->current_image_index + offset) % (int)img_count;
-
-	if (new_index < 0) {
-		new_index += img_count;
-	}
-
-	*data->current_image_index = new_index;
-
-	const gchar *current_image_path = g_ptr_array_index(data->image_files, *data->current_image_index);
-
-	g_string_erase(data->img_index_string, 0, -1);
-	g_string_append_printf(data->img_index_string, "(%d / %d) %s", *data->current_image_index + 1, (int)img_count, current_image_path + 8);
-
-	gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
-	gtk_picture_set_filename(GTK_PICTURE(data->image_widget), current_image_path);
-}
-
 void navigate_10_img_prev(GtkButton* btn, gpointer user_data)
 {
-	navigate_images((PreviewImageData*)user_data, -10);
+	navigate_preview((PreviewImageData*)user_data, -10);
 }
 
 void navigate_img_prev(GtkButton* btn, gpointer user_data)
 {
-	navigate_images((PreviewImageData*)user_data, -1);
+	navigate_preview((PreviewImageData*)user_data, -1);
 }
 
 void navigate_img_next(GtkButton* btn, gpointer user_data)
 {
-	navigate_images((PreviewImageData*)user_data, 1);
+	navigate_preview((PreviewImageData*)user_data, 1);
 }
 
 void navigate_10_img_next(GtkButton* btn, gpointer user_data)
 {
-	navigate_images((PreviewImageData*)user_data, 10);
+	navigate_preview((PreviewImageData*)user_data, 10);
 }
 
 void on_boxr_img_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	PreviewBoxScrollData *data = user_data;
 	if (data == NULL) return;
+
+	if (data->debounce_id != 0) {
+		g_source_remove(data->debounce_id);
+		data->debounce_id = 0;
+	}
+
 	g_free(data);
 }
 
@@ -542,9 +534,7 @@ static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer
 
 void on_hide_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
-	PreviewImageData *data = user_data;
-	if (data == NULL) return;
-	g_free(data);
+	free_preview_data(user_data);
 }
 
 void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
@@ -564,7 +554,11 @@ void on_lora_triggers_btn_destroy (GtkWidget* wgt, gpointer user_data)
 static gboolean on_preview_box_scroll_timeout (gpointer user_data)
 {
 	PreviewBoxScrollData *data = user_data;
-	navigate_images((PreviewImageData*)data->preview_d, data->scroll_steps);
+
+	if (data->scroll_steps != 0) {
+		navigate_preview((PreviewImageData*)data->preview_d, data->scroll_steps);
+	}
+
 	data->scroll_steps = 0;
 	data->debounce_id = 0;
 	return G_SOURCE_REMOVE;
@@ -589,10 +583,10 @@ gboolean on_main_win_key_pressed (GtkEventControllerKey *controller, guint keyv,
 	switch (keyv)
 	{
 		case GDK_KEY_Left:
-			navigate_images((PreviewImageData*)data->preview_d, -1);
+			navigate_preview((PreviewImageData*)data->preview_d, -1);
 			break;
 		case GDK_KEY_Right:
-			navigate_images((PreviewImageData*)data->preview_d, 1);
+			navigate_preview((PreviewImageData*)data->preview_d, 1);
 			break;
 		default:
 			return FALSE;
@@ -911,76 +905,10 @@ void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, 
 	}
 }
 
-static void on_send_to_trash_finish(GObject* source_object, GAsyncResult* res, gpointer user_data)
+void send_to_trash_cb(GtkWidget* btn, gpointer user_data)
 {
-	SendTrashData *data = user_data;
-	GFile *file = G_FILE(source_object);
-	GError *error = NULL;
-
-	if (!g_file_trash_finish(file, res, &error)) {
-		g_printerr("Error trashing file: %s\n", error->message);
-		g_error_free(error);
-	} else {
-		get_png_files(data->image_files);
-		set_current_image_index(data->new_img_path, data->img_index_string, data->image_files, data->current_image_index, -1);
-
-		gtk_label_set_label(GTK_LABEL(data->img_index_label), data->img_index_string->str);
-
-		if (data->image_files->len > 0) {
-			gtk_picture_set_filename(GTK_PICTURE(data->image_widget), data->new_img_path);
-		} else {
-			g_printerr("No images in 'outputs' directory.\n");
-			gtk_picture_set_filename(GTK_PICTURE(data->image_widget), DEFAULT_IMG_PATH);
-		}
-		printf("File moved to trash successfully.\n");
-	}
-	gtk_widget_set_sensitive(data->to_trash_btn, TRUE);
-	g_free(data->new_img_path);
-	g_free(data);
-}
-
-void send_to_trash(GtkWidget* btn, gpointer user_data)
-{
-	PreviewImageData *data = user_data;
-	gsize img_count = data->image_files->len;
-	
-	if (img_count > 0) {
-		gchar *file_to_trash_path = g_ptr_array_index(data->image_files, *data->current_image_index);
-
-		if (check_file_exists(file_to_trash_path, 0) == 1) {
-			gtk_widget_set_sensitive(GTK_WIDGET(btn), FALSE);
-
-			char *new_img_path = NULL;
-
-			if (img_count > 1) {
-				gint new_index = *data->current_image_index + 1 == img_count ?
-					*data->current_image_index - 1 :
-					*data->current_image_index + 1;
-
-				gchar *new_img_path_ptr = g_ptr_array_index(data->image_files, new_index);
-				new_img_path = g_strdup(new_img_path_ptr);
-			}
-
-			GFile *file_to_trash = g_file_new_for_path(file_to_trash_path);
-
-			SendTrashData *trash_d = g_new0 (SendTrashData, 1);
-			trash_d->new_img_path = new_img_path;
-			trash_d->current_image_index = data->current_image_index;
-			trash_d->image_files = data->image_files;
-			trash_d->img_index_string = data->img_index_string;
-			trash_d->hide_img_btn = data->hide_img_btn;
-			trash_d->image_widget = data->image_widget;
-			trash_d->img_index_label = data->img_index_label;
-			trash_d->to_trash_btn = btn;
-
-			g_file_trash_async(file_to_trash, G_PRIORITY_DEFAULT, NULL, (GAsyncReadyCallback)on_send_to_trash_finish, trash_d);
-			g_object_unref(file_to_trash);
-		} else {
-			g_printerr("Error: File not found.\n");
-		}
-	} else {
-		g_printerr("Error: There are no images in the 'output' directory.\n");
-	}
+	if (user_data == NULL) return;
+	send_to_trash(user_data);
 }
 
 void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
@@ -1280,21 +1208,10 @@ void random_seed_btn_toggle(GtkWidget *entry_wgt, GtkEntryIconPosition position,
 	}
 }
 
-void hide_img_btn_cb (GtkButton *btn, gpointer user_data)
+void hide_img_btn_cb(GtkButton *btn, gpointer user_data)
 {
-	PreviewImageData *data = user_data;
-	GtkPicture *img = GTK_PICTURE(data->image_widget);
-	if (g_strcmp0 (gtk_button_get_icon_name(btn), "view-reveal-symbolic") == 0) {
-		gtk_button_set_icon_name (btn, "view-conceal-symbolic");
-		gtk_picture_set_filename(img, EMPTY_IMG_PATH);
-	} else {
-		gtk_button_set_icon_name (btn, "view-reveal-symbolic");
-		if (data->image_files->len > 0) {
-			gtk_picture_set_filename(img, g_ptr_array_index(data->image_files, *data->current_image_index));
-		} else {
-			gtk_picture_set_filename(img, DEFAULT_IMG_PATH);
-		}
-	}
+	if (user_data == NULL) return;
+	preview_image_visibility_toggle(btn, user_data);
 }
 
 void toggle_img2img_mode(GtkWidget *btn, gpointer user_data)

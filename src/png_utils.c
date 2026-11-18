@@ -45,6 +45,22 @@ int get_png_dimensions(const char *filename, uint32_t *w, uint32_t *h)
 	return 0;
 }
 
+GdkTexture *get_texture_from_pixbuf(GdkPixbuf *pixbuf)
+{
+	GBytes *bytes = gdk_pixbuf_read_pixel_bytes(pixbuf);
+
+	GdkTexture *texture = gdk_memory_texture_new(
+		gdk_pixbuf_get_width(pixbuf),
+		gdk_pixbuf_get_height(pixbuf),
+		gdk_pixbuf_get_has_alpha(pixbuf) ? GDK_MEMORY_R8G8B8A8 : GDK_MEMORY_R8G8B8,
+		bytes,
+		gdk_pixbuf_get_rowstride(pixbuf)
+	);
+
+	g_bytes_unref(bytes);
+	return texture;
+}
+
 static void set_png_metadata(gchar *path, int copy_info, gpointer user_data)
 {
 	gboolean set_widgets = TRUE;

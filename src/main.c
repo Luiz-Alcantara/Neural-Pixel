@@ -1974,6 +1974,26 @@ app_activate (GApplication *app, gpointer user_data)
 	preview_d->main_overlay = main_overlay;
 	preview_d->image_widget = preview_img;
 	preview_d->img_index_label = img_index_label;
+
+	GError *empty_tex_err = NULL;
+	preview_d->empty_texture = gdk_texture_new_from_filename(EMPTY_IMG_PATH, &empty_tex_err);
+
+	if (!preview_d->empty_texture) {
+		g_printerr("Failed to load placeholder: '%s' - %s\n", EMPTY_IMG_PATH, empty_tex_err ? empty_tex_err->message : "Unknown error.");
+		g_clear_error(&empty_tex_err);
+	}
+
+	GError *loading_tex_err = NULL;
+	preview_d->loading_texture = gdk_texture_new_from_filename(LOADING_IMG_PATH, &loading_tex_err);
+
+	if (!preview_d->loading_texture) {
+		g_printerr("Failed to load placeholder: '%s' - %s\n", LOADING_IMG_PATH, loading_tex_err ? loading_tex_err->message : "Unknown error.");
+		g_clear_error(&loading_tex_err);
+	}
+
+	g_object_set_data(G_OBJECT(preview_img), "preview-data", preview_d);
+	g_object_add_weak_pointer(G_OBJECT(preview_img), (gpointer *)&preview_d->image_widget);
+
 	g_signal_connect (prev_10_img_button, "clicked", G_CALLBACK (navigate_10_img_prev), preview_d);
 	g_signal_connect (prev_img_button, "clicked", G_CALLBACK (navigate_img_prev), preview_d);
 	g_signal_connect (next_img_button, "clicked", G_CALLBACK (navigate_img_next), preview_d);
@@ -1981,7 +2001,7 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (add_favorite_btn, "clicked", G_CALLBACK (add_image_to_favorites), preview_d);
 	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
 	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
-	g_signal_connect (to_trash_btn, "clicked", G_CALLBACK (send_to_trash), preview_d);
+	g_signal_connect (to_trash_btn, "clicked", G_CALLBACK (send_to_trash_cb), preview_d);
 
 	manage_triggers_d = g_new0 (ManageTriggersData, 1);
 	manage_triggers_d->lora_dd = lora_dd;

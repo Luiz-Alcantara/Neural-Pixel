@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* APP_NAME_VERSION = "Neural Pixel v0.9.7";
+const char* APP_NAME_VERSION = "Neural Pixel v0.9.8";
 const char* APP_AUTHOR = "Copyright © 2024-2026, Luiz Alcantara";
 const char* APP_DESC = "\nA free and simple GTK4 frontend for stable-diffusion.cpp";
 const char* APP_DESC2 = "This application includes 'stable-diffusion.cpp'\n created by @leejet";
@@ -65,6 +65,7 @@ const char* DETECTOR_NEGATIVE_PROMPT = "deformed face";
 const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const char* EMPTY_IMG_PATH = "./resources/empty.png";
+const char* LOADING_IMG_PATH = "./resources/loading.png";
 const char* MASK_IMG_PATH = ".cache/mask.png";
 const int DEFAULT_BACKEND = 0;
 const int DEFAULT_MODELS = 0;

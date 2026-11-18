@@ -342,6 +342,9 @@ typedef struct {
 	GtkWidget *main_overlay;
 	GtkWidget *image_widget;
 	GtkWidget *img_index_label;
+	GdkTexture *empty_texture;
+	GdkTexture *loading_texture;
+	GCancellable *load_cancellable;
 } PreviewImageData;
 
 typedef struct {
@@ -472,14 +475,9 @@ typedef struct {
 } SDProcessErrorData;
 
 typedef struct {
-	gchar *new_img_path;
-	gint *current_image_index;
-	GPtrArray *image_files;
-	GString *img_index_string;
+	gchar *trashed_file_path;
+	PreviewImageData *preview_d;
 	GtkWidget *hide_img_btn;
-	GtkWidget *image_widget;
-	GtkWidget *img_index_label;
-	GtkWidget *to_trash_btn;
 } SendTrashData;
 
 typedef struct {

@@ -1,7 +1,11 @@
 #ifndef PNG_UTILS_H
 #define PNG_UTILS_H
 
+#include <gtk/gtk.h>
+
 int get_png_dimensions(const char *filename, uint32_t *w, uint32_t *h);
+
+GdkTexture *get_texture_from_pixbuf(GdkPixbuf *pixbuf);
 
 void load_metadata_from_favorites(GtkWidget *btn, gpointer user_data);
 
