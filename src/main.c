@@ -159,7 +159,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *fa_separator;
 	GtkWidget *fa_toggle_lab;
 	GtkWidget *box_fa_toggle;
-	GtkWidget *fa_off_btn, *fa_diffusion_btn, *fa_full_btn;
+	GtkWidget *fa_auto_btn, *fa_diffusion_btn, *fa_full_btn;
 	GtkWidget *miscellaneous_lab, *mmap_check, *taesd_check, *update_cache_check, *verbose_check;
 	
 	GtkWidget *vae_tiling_separator;
@@ -1346,10 +1346,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_set_homogeneous (GTK_BOX (box_fa_toggle), TRUE);
 	gtk_box_append (GTK_BOX (box_extra_opts_inner), box_fa_toggle);
 	
-	fa_off_btn = gtk_toggle_button_new_with_label("Disabled");
-	gtk_widget_add_css_class(fa_off_btn, "toggle_btn");
-	gtk_widget_set_hexpand(fa_off_btn, TRUE);
-	gtk_widget_set_vexpand(fa_off_btn, FALSE);
+	fa_auto_btn = gtk_toggle_button_new_with_label("Auto");
+	gtk_widget_add_css_class(fa_auto_btn, "toggle_btn");
+	gtk_widget_set_hexpand(fa_auto_btn, TRUE);
+	gtk_widget_set_vexpand(fa_auto_btn, FALSE);
 	
 	fa_diffusion_btn = gtk_toggle_button_new_with_label("Diffusion");
 	gtk_widget_add_css_class(fa_diffusion_btn, "toggle_btn");
@@ -1361,22 +1361,22 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_hexpand(fa_full_btn, TRUE);
 	gtk_widget_set_vexpand(fa_full_btn, FALSE);
 	
-	gtk_toggle_button_set_group(GTK_TOGGLE_BUTTON(fa_diffusion_btn), GTK_TOGGLE_BUTTON(fa_off_btn));
-	gtk_toggle_button_set_group(GTK_TOGGLE_BUTTON(fa_full_btn), GTK_TOGGLE_BUTTON(fa_off_btn));
+	gtk_toggle_button_set_group(GTK_TOGGLE_BUTTON(fa_diffusion_btn), GTK_TOGGLE_BUTTON(fa_auto_btn));
+	gtk_toggle_button_set_group(GTK_TOGGLE_BUTTON(fa_full_btn), GTK_TOGGLE_BUTTON(fa_auto_btn));
 	
 	if (app_data->flash_attn_value == 2) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_full_btn), TRUE);
 	} else if (app_data->flash_attn_value == 1) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_diffusion_btn), TRUE);
 	} else {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_off_btn), TRUE);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_auto_btn), TRUE);
 	}
 	
-	g_signal_connect(fa_off_btn, "toggled", G_CALLBACK(toggle_fa_options), &app_data->flash_attn_value);
+	g_signal_connect(fa_auto_btn, "toggled", G_CALLBACK(toggle_fa_options), &app_data->flash_attn_value);
 	g_signal_connect(fa_diffusion_btn, "toggled", G_CALLBACK(toggle_fa_options), &app_data->flash_attn_value);
 	g_signal_connect(fa_full_btn, "toggled", G_CALLBACK(toggle_fa_options), &app_data->flash_attn_value);
 	
-	gtk_box_append(GTK_BOX(box_fa_toggle), fa_off_btn);
+	gtk_box_append(GTK_BOX(box_fa_toggle), fa_auto_btn);
 	gtk_box_append(GTK_BOX(box_fa_toggle), fa_diffusion_btn);
 	gtk_box_append(GTK_BOX(box_fa_toggle), fa_full_btn);
 	
@@ -1942,7 +1942,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->sd_based_check = sd_based_check;
 	reset_d->llm_check = llm_check;
 	reset_d->mmap_check = mmap_check;
-	reset_d->fa_off_btn = fa_off_btn;
+	reset_d->fa_auto_btn = fa_auto_btn;
 	reset_d->taesd_check = taesd_check;
 	reset_d->update_cache_check = update_cache_check;
 	reset_d->chroma_dit_mask_check = chroma_dit_mask_check;

@@ -415,7 +415,7 @@ typedef struct {
 	GtkWidget *sd_based_check;
 	GtkWidget *llm_check;
 	GtkWidget *mmap_check;
-	GtkWidget *fa_off_btn;
+	GtkWidget *fa_auto_btn;
 	GtkWidget *taesd_check;
 	GtkWidget *update_cache_check;
 	GtkWidget *chroma_dit_mask_check;

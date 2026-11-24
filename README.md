@@ -15,7 +15,7 @@ Neural Pixel is a fast, Vulkan-powered image generation tool that runs on almost
 
 ## Compatibility
 
-- The current validated stable-diffusion.cpp commit is: [`a1ded76`](https://github.com/leejet/stable-diffusion.cpp/releases/tag/master-945-a1ded76).
+- The current validated stable-diffusion.cpp commit is: [`5dcfa79`](https://github.com/leejet/stable-diffusion.cpp/releases/tag/master-1104-5dcfa79).
 - Neural Pixel supports leading image generation models such as SDXL and FLUX, plus a broad range of community models, extensions, and runtimes.
 - For more information about `ADetailer` and how to convert the files, check [this](https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/adetailer.md).
 - By default, the release ZIP packages include support for Vulkan and CPU inference only.

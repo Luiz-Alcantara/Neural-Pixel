@@ -796,8 +796,8 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *mmap_check = data->mmap_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(mmap_check), DISABLED_OPT == 1 ? TRUE : FALSE);
 	
-	GtkWidget *fa_off_btn = data->fa_off_btn;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_off_btn), ENABLED_OPT == 1 ? TRUE : FALSE);
+	GtkWidget *fa_auto_btn = data->fa_auto_btn;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fa_auto_btn), ENABLED_OPT == 1 ? TRUE : FALSE);
 	
 	GtkWidget *taesd_check = data->taesd_check;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(taesd_check), DISABLED_OPT == 1 ? TRUE : FALSE);

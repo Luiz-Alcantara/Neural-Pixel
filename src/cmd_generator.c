@@ -183,7 +183,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	if (data->taesd_enabled) {
-		if (check_file_exists(".models/vae/taesd_decoder.safetensors", 0) == 1) {
+		if (check_file_exists("./models/vae/taesd_decoder.safetensors", 0) == 1) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--taesd"));
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(".models/vae/taesd_decoder.safetensors"));
 		} else {
@@ -230,9 +230,14 @@ void gen_sd_string(GenerationSnapshotData *data)
 	}
 
 	if (data->flash_attn_value == 2) {
-		g_ptr_array_add(data->sd_cmd_array, g_strdup("--fa"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--flash-attn"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("on"));
 	} else if (data->flash_attn_value == 1) {
-		g_ptr_array_add(data->sd_cmd_array, g_strdup("--diffusion-fa"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--flash-attn"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("off,diffusion=on"));
+	} else if (data->flash_attn_value == 0) {
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("--flash-attn"));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup("auto"));
 	}
 
 	if (!data->chroma_dit_mask_enabled || data->qwen_zero_cond_t_enabled) {
