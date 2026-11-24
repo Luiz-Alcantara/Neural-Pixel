@@ -308,14 +308,14 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 						float time_or_speed;
 						char unit_part1[10], unit_part2[10];
 						
-						if (sscanf(last_pipe + 1, " %d/%d - %f%9[^/]/%9[ -~]",
-						&step, &steps, &time_or_speed, unit_part1, unit_part2) == 5
+						int matched_end = 0;
+						if (sscanf(last_pipe + 1, " %d/%d - %f%9[^/]/%9[!-~] - ETA %*d:%*d%n",
+						&step, &steps, &time_or_speed, unit_part1, unit_part2, &matched_end) == 5 && matched_end > 0
 						&& (g_strcmp0(unit_part1, "it") == 0 || g_strcmp0(unit_part2, "it") == 0)) {
-							
 							int percentage = (int)(((float)step / steps) * 100 + 0.5f);
 							char progress_label[96];
 							int written = 0;
-							
+
 							if (data->is_img2img_encoding) {
 								written = snprintf(progress_label, sizeof(progress_label),
 									"Encoding %d%% (1/1) @ %.1f%s/%s",
@@ -341,7 +341,7 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 									percentage, data->n_current_upscale, data->n_total_images,
 									time_or_speed, unit_part1, unit_part2);
 							}
-							
+
 							if (written > 0) {
 								gtk_label_set_text(GTK_LABEL(data->generation_label), progress_label);
 							} else {
