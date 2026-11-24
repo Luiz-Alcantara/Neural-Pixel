@@ -481,13 +481,6 @@ typedef struct {
 } SendTrashData;
 
 typedef struct {
-	GHashTable *dict;
-	GtkTextTag *error_tag;
-	GtkTextMark *cursor_mark;
-	gboolean needs_full_check;
-} SpellCheckData;
-
-typedef struct {
 	int sd_pid;
 	gint stdout_fd;
 	char* cmd;

@@ -1,10 +1,18 @@
 #ifndef SPELL_CHECK_H
 #define SPELL_CHECK_H
 
-void spell_check_buffer_full(GtkTextBuffer *tb, SpellCheckData *data);
+#include <gtk/gtk.h>
 
-void tv_enable_spell_check(GtkTextView *tv, SpellCheckData *data);
+typedef struct SpellDict SpellDict;
 
-SpellCheckData *spell_checker_new(const char *dict_path);
+SpellDict *spell_dict_new(const char *dict_path);
 
-#endif // SPELL_CHECK_H
+SpellDict *spell_dict_ref(SpellDict *dict);
+
+void spell_dict_unref(SpellDict *dict);
+
+void tv_enable_spell_check(GtkTextView *tv, SpellDict *dict);
+
+void tv_disable_spell_check(GtkTextView *tv);
+
+#endif

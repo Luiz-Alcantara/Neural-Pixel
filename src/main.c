@@ -36,10 +36,7 @@ app_activate (GApplication *app, gpointer user_data)
 	preview_d->current_image_index = &app_data->preview_image_index;
 
 	// Start spell checker
-	SpellCheckData *detector_pos_spell_checker = spell_checker_new("resources/dictionary.txt");
-	SpellCheckData *detector_neg_spell_checker = spell_checker_new("resources/dictionary.txt");
-	SpellCheckData *prompt_pos_spell_checker = spell_checker_new("resources/dictionary.txt");
-	SpellCheckData *prompt_neg_spell_checker = spell_checker_new("resources/dictionary.txt");
+	SpellDict *spell_dict = spell_dict_new("resources/dictionary.txt");
 
 	//Defining GTK Widgets
 	GtkWidget *win;
@@ -435,9 +432,8 @@ app_activate (GApplication *app, gpointer user_data)
 	load_prompt_text(detector_pos_tb, ".cache/detector_pp_cache", DETECTOR_POSITIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (detector_pos_tv), GTK_WRAP_WORD_CHAR);
 
-	if (detector_pos_spell_checker != NULL) {
-		tv_enable_spell_check(GTK_TEXT_VIEW(detector_pos_tv), detector_pos_spell_checker);
-		g_signal_connect(detector_pos_tv, "destroy", G_CALLBACK(on_text_view_destroy), detector_pos_spell_checker);
+	if (spell_dict != NULL) {
+		tv_enable_spell_check(GTK_TEXT_VIEW(detector_pos_tv), spell_dict);
 	}
 	
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (detector_pos_scr), detector_pos_tv);
@@ -465,9 +461,8 @@ app_activate (GApplication *app, gpointer user_data)
 	load_prompt_text(detector_neg_tb, ".cache/detector_np_cache", DETECTOR_NEGATIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (detector_neg_tv), GTK_WRAP_WORD_CHAR);
 
-	if (detector_neg_spell_checker != NULL) {
-		tv_enable_spell_check(GTK_TEXT_VIEW(detector_neg_tv), detector_neg_spell_checker);
-		g_signal_connect(detector_neg_tv, "destroy", G_CALLBACK(on_text_view_destroy), detector_neg_spell_checker);	
+	if (spell_dict != NULL) {
+		tv_enable_spell_check(GTK_TEXT_VIEW(detector_neg_tv), spell_dict);
 	}
 
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (detector_neg_scr), detector_neg_tv);
@@ -662,9 +657,8 @@ app_activate (GApplication *app, gpointer user_data)
 	load_prompt_text(pos_tb, ".cache/pp_cache", POSITIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (pos_tv), GTK_WRAP_WORD_CHAR);
 
-	if (prompt_pos_spell_checker != NULL) {
-		tv_enable_spell_check(GTK_TEXT_VIEW(pos_tv), prompt_pos_spell_checker);
-		g_signal_connect(pos_tv, "destroy", G_CALLBACK(on_text_view_destroy), prompt_pos_spell_checker);	
+	if (spell_dict != NULL) {
+		tv_enable_spell_check(GTK_TEXT_VIEW(pos_tv), spell_dict);
 	}
 
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (pos_scr), pos_tv);
@@ -687,9 +681,9 @@ app_activate (GApplication *app, gpointer user_data)
 	load_prompt_text(neg_tb, ".cache/np_cache", NEGATIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (neg_tv), GTK_WRAP_WORD_CHAR);
 
-	if (prompt_neg_spell_checker != NULL) {
-		tv_enable_spell_check(GTK_TEXT_VIEW(neg_tv), prompt_neg_spell_checker);
-		g_signal_connect(neg_tv, "destroy", G_CALLBACK(on_text_view_destroy), prompt_neg_spell_checker);
+	if (spell_dict != NULL) {
+		tv_enable_spell_check(GTK_TEXT_VIEW(neg_tv), spell_dict);
+		spell_dict_unref(spell_dict);
 	}
 
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (neg_scr), neg_tv);
