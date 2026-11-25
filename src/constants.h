@@ -97,6 +97,7 @@ extern const double DEFAULT_CNET_STRENGTH;
 extern const double DEFAULT_DENOISE;
 extern const double DEFAULT_DETECTOR_CONFIDENCE;
 extern const double DEFAULT_DETECTOR_DENOISE;
+extern const double DEFAULT_FLOW_SHIFT;
 extern const double DEFAULT_HIRES_SCALE;
 extern const double DEFAULT_HIRES_DENOISE_STR;
 

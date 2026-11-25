@@ -97,5 +97,6 @@ const double DEFAULT_CNET_STRENGTH = 0.90;
 const double DEFAULT_DENOISE = 0.75;
 const double DEFAULT_DETECTOR_CONFIDENCE = 0.30;
 const double DEFAULT_DETECTOR_DENOISE = 0.40;
+const double DEFAULT_FLOW_SHIFT = 0.0;
 const double DEFAULT_HIRES_SCALE = 1.50;
 const double DEFAULT_HIRES_DENOISE_STR = 0.4;

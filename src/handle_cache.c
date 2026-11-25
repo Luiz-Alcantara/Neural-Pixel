@@ -88,6 +88,7 @@ void load_cache_fallback(gpointer user_data)
 	data->cfg_value = DEFAULT_CFG;
 	data->cnet_value = DEFAULT_CNET_STRENGTH;
 	data->denoise_value = DEFAULT_DENOISE;
+	data->flow_shift_value = DEFAULT_FLOW_SHIFT;
 	data->clip_skip_value = DEFAULT_CLIP_SKIP;
 	data->up_repeat_value = DEFAULT_RP_UPSCALE;
 	data->detector_confidence_value = DEFAULT_DETECTOR_CONFIDENCE;
@@ -518,6 +519,14 @@ void load_cache(gpointer user_data)
 		} else {
 			data->denoise_value = DEFAULT_DENOISE;
 		}
+
+		char *flow_shift_str = ini_file_get_value(cache_filename, "flow_shift");
+		if (flow_shift_str) {
+			char *endptr;
+			data->flow_shift_value = g_ascii_strtod(flow_shift_str, &endptr);
+		} else {
+			data->flow_shift_value = DEFAULT_FLOW_SHIFT;
+		}
 		
 		char *clip_skip_str = ini_file_get_value(cache_filename, "clip_skip");
 		if (clip_skip_str) {
@@ -649,6 +658,7 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(cf, "cfg_scale=%.1f\n", data->cfg_scale_value);
 	fprintf(cf, "cnet_strength=%.2f\n", data->cnet_strength_value);
 	fprintf(cf, "denoise_strength=%.2f\n", data->denoise_strength_value);
+	fprintf(cf, "flow_shift=%.1f\n", data->flow_shift_value);
 	fprintf(cf, "clip_skip=%.1f\n", (float)data->clip_skip_value);
 	fprintf(cf, "repeat_upscale=%.1f\n", (float)data->upscale_passes_value);
 	fclose(cf);

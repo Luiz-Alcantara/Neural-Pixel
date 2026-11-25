@@ -119,7 +119,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_params_row4, *box_params_row4_col1, *box_params_row4_col2;
 	GtkWidget *box_params_row5;
 	GtkWidget *box_params_row6, *box_params_row6_col1, *box_params_row6_col2;
-	GtkWidget *box_params_row7;
+	GtkWidget *box_params_row7, *box_params_row7_col1, *box_params_row7_col2;
 	
 	GtkWidget *box_model_adapters;
 	GtkWidget *lora_lab;
@@ -142,6 +142,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *clip_skip_lab, *clip_skip_spin;
 	GtkWidget *upscale_passes_str_lab, *upscale_passes_spin;
 	GtkWidget *cnet_strength_lab, *cnet_strength_spin;
+	GtkWidget *flow_shift_lab, *flow_shift_spin;
 	
 	GtkWidget *box_hires;
 	GtkWidget *box_hires_col1, *box_hires_col2;
@@ -1131,16 +1132,26 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_params_row6_col2), upscale_passes_spin);
 	
 	//Set Parameters Seventh Row Widgets
-	
-	box_params_row7 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+
+	box_params_row7 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX (box_params_row7), TRUE);
+	gtk_widget_set_margin_end (box_params_row7, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (box_params_row7, MEDIUM_SPACING);
+	gtk_widget_set_hexpand (box_params_row7, TRUE);
 	gtk_box_append (GTK_BOX (box_params), box_params_row7);
+
+	box_params_row7_col1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_params_row7), box_params_row7_col1);
+
+	box_params_row7_col2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_box_append (GTK_BOX (box_params_row7), box_params_row7_col2);
 	
 	//Set Control Net Strength Widgets
 
 	cnet_strength_lab = gtk_label_new ("ControlNet Str");
 	gtk_widget_set_halign(cnet_strength_lab, LABEL_ALIGNMENT);
 	gtk_widget_add_css_class(cnet_strength_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_params_row7), cnet_strength_lab);
+	gtk_box_append (GTK_BOX (box_params_row7_col1), cnet_strength_lab);
 	
 	cnet_strength_spin = gtk_spin_button_new_with_range (0, 1.0, 0.05);
 	gtk_widget_add_css_class(cnet_strength_spin, "custom_spin");
@@ -1152,7 +1163,26 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(cnet_strength_spin),
 	"Adjusts how strongly the ControlNet influences the image.\nValues near '1' force the output to match the control map strictly.\nValues near '0' allow the prompt more creative freedom.");
 	stop_spinbutton_scroll(cnet_strength_spin, properties_scrollable);
-	gtk_box_append (GTK_BOX (box_params_row7), cnet_strength_spin);
+	gtk_box_append (GTK_BOX (box_params_row7_col1), cnet_strength_spin);
+
+	//Set Flow Shift Widgets
+
+	flow_shift_lab = gtk_label_new ("Flow Shift");
+	gtk_widget_set_halign(flow_shift_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(flow_shift_lab, "param_label");
+	gtk_box_append (GTK_BOX (box_params_row7_col2), flow_shift_lab);
+	
+	flow_shift_spin = gtk_spin_button_new_with_range (0, 15.0, 0.1);
+	gtk_widget_add_css_class(flow_shift_spin, "custom_spin");
+	gtk_widget_set_margin_end (flow_shift_spin, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (flow_shift_spin, MEDIUM_SPACING);
+	gtk_widget_set_margin_bottom (flow_shift_spin, LARGE_SPACING);
+	gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(flow_shift_spin), TRUE);
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(flow_shift_spin), app_data->flow_shift_value);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(flow_shift_spin),
+	"Adjusts the timestep schedule for Flow models (SD 3.x, WAN, etc.).\nHigher values favor composition; lower values favor fine detail.\nSet to 0 (Auto) to use the model's default.");
+	stop_spinbutton_scroll(flow_shift_spin, properties_scrollable);
+	gtk_box_append (GTK_BOX (box_params_row7_col2), flow_shift_spin);
 	
 	//Set Hires Widgets
 	
@@ -1915,6 +1945,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->tokenizer_dd = tokenizer_dd;
 	reset_d->cfg_spin = cfg_spin;
 	reset_d->cnet_strength_spin = cnet_strength_spin;
+	reset_d->flow_shift_spin = flow_shift_spin;
 	reset_d->denoise_spin = denoise_spin;
 	reset_d->seed_entry = seed_entry;
 	reset_d->upscale_passes_spin = upscale_passes_spin;
@@ -2119,6 +2150,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->clip_skip_spin = clip_skip_spin;
 	gen_d->upscale_passes_spin = upscale_passes_spin;
 	gen_d->cnet_strength_spin = cnet_strength_spin;
+	gen_d->flow_shift_spin = flow_shift_spin;
 	gen_d->hires_scale_spin = hires_scale_spin;
 	gen_d->hires_steps_spin = hires_steps_spin;
 	gen_d->hires_denoise_spin = hires_denoise_spin;

@@ -683,6 +683,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	snapshot_data->scheduler_index = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(data->scheduler_dd));
 	snapshot_data->cfg_scale_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->cfg_spin));
 	snapshot_data->denoise_strength_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->denoise_spin));
+	snapshot_data->flow_shift_value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->flow_shift_spin));
 
 	GtkEditable *seed_entry_editable = gtk_editable_get_delegate(GTK_EDITABLE(data->seed_entry));
 

@@ -213,6 +213,13 @@ void gen_sd_string(GenerationSnapshotData *data)
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--steps"));
 	g_ptr_array_add(data->sd_cmd_array, data->step_count_value ? g_strdup_printf("%d", data->step_count_value) : g_strdup_printf("%d", DEFAULT_N_STEPS));
 
+	if (!data->sd_based_enabled) {
+		if (data->flow_shift_value && data->flow_shift_value > 0.0) {
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--flow-shift"));
+			g_ptr_array_add(data->sd_cmd_array, data->flow_shift_value ? g_strdup_printf("%.1f", data->flow_shift_value) : g_strdup_printf("%.1f", DEFAULT_FLOW_SHIFT));
+		}
+	}
+
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--batch-count"));
 	g_ptr_array_add(data->sd_cmd_array, data->batch_count_value ? g_strdup_printf("%d", data->batch_count_value) : g_strdup_printf("%d", DEFAULT_BATCH_COUNT));
 

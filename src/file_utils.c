@@ -153,6 +153,7 @@ static void create_default_files(const char *file_path, GError **error)
 		fprintf(cf, "cfg_scale=%.1f\n", DEFAULT_CFG);
 		fprintf(cf, "cnet_strength=%.2f\n", DEFAULT_CNET_STRENGTH);
 		fprintf(cf, "denoise_strength=%.2f\n", DEFAULT_DENOISE);
+		fprintf(cf, "flow_shift=%.1f\n", DEFAULT_FLOW_SHIFT);
 		fprintf(cf, "clip_skip=%d\n", DEFAULT_CLIP_SKIP);
 		fprintf(cf, "repeat_upscale=%d.0\n", DEFAULT_RP_UPSCALE);
 		fclose(cf);

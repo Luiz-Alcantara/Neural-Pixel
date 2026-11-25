@@ -57,6 +57,7 @@ typedef struct {
 	long long int seed_value;
 	double cfg_value;
 	double cnet_value;
+	double flow_shift_value;
 	double denoise_value;
 	double detector_confidence_value;
 	double detector_denoise_value;
@@ -146,6 +147,7 @@ typedef struct {
 	GtkWidget *clip_skip_spin;
 	GtkWidget *upscale_passes_spin;
 	GtkWidget *cnet_strength_spin;
+	GtkWidget *flow_shift_spin;
 	GtkWidget *hires_scale_spin;
 	GtkWidget *hires_steps_spin;
 	GtkWidget *hires_denoise_spin;
@@ -188,6 +190,7 @@ typedef struct {
 	char *vae_filename;
 	double cfg_scale_value;
 	double cnet_strength_value;
+	double flow_shift_value;
 	double denoise_strength_value;
 	double detector_confidence_value;
 	double detector_denoise_value;
@@ -388,6 +391,7 @@ typedef struct {
 	GtkWidget *tokenizer_dd;
 	GtkWidget *cfg_spin;
 	GtkWidget *cnet_strength_spin;
+	GtkWidget *flow_shift_spin;
 	GtkWidget *denoise_spin;
 	GtkWidget *seed_entry;
 	GtkWidget *upscale_passes_spin;

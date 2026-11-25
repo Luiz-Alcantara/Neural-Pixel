@@ -725,6 +725,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 	GtkWidget *cnet_strength_spin = data->cnet_strength_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(cnet_strength_spin), DEFAULT_CNET_STRENGTH);
 
+	GtkWidget *flow_shift_spin = data->flow_shift_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(flow_shift_spin), DEFAULT_FLOW_SHIFT);
+
 	GtkWidget *denoise_spin = data->denoise_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), DEFAULT_DENOISE);
 
