@@ -2,6 +2,7 @@
 #define PNG_UTILS_H
 
 #include <gtk/gtk.h>
+#include <stdint.h>
 
 int get_png_dimensions(const char *filename, uint32_t *w, uint32_t *h);
 

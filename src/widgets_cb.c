@@ -458,6 +458,12 @@ void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	LoadImg2ImgData *data = user_data;
 	if (data == NULL) return;
+
+	if (data->cancellable) {
+		g_cancellable_cancel(data->cancellable);
+		g_clear_object(&data->cancellable);
+	}
+
 	g_free(data);
 }
 
@@ -542,6 +548,12 @@ void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	LoadPNGData *data = user_data;
 	if (data == NULL) return;
+
+	if (data->cancellable) {
+		g_cancellable_cancel(data->cancellable);
+		g_clear_object(&data->cancellable);
+	}
+
 	g_free(data);
 }
 

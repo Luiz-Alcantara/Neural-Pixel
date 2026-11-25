@@ -66,19 +66,23 @@ int check_list_contains_item(const char* const* list, const char* item)
 	return 0;
 }
 
-int check_gtk_list_contains_item(GtkStringList *list, const char* item)
+int check_gtk_list_contains_item(GtkStringList *list, const char *item)
 {
-	if (G_IS_LIST_MODEL(list)) {
-		guint i = 0;
-		guint n = g_list_model_get_n_items((GListModel *)list);
-		while(i < n) {
-			const char *s = gtk_string_list_get_string(list, i);
-			if (strcmp(s, item) == 0) {
-				return i;
-			}
-			i++;
+	if (!G_IS_LIST_MODEL(list) || item == NULL) { return 0; }
+
+	gboolean has_ext = (strchr(item, '.') != NULL);
+	size_t item_len = strlen(item);
+	guint n = g_list_model_get_n_items(G_LIST_MODEL(list));
+
+	for (guint i = 0; i < n; i++) {
+		const char *s = gtk_string_list_get_string(list, i);
+		if (has_ext) {
+			if (strcmp(s, item) == 0) { return i; }
+		} else {
+			const char *dot = strrchr(s, '.');
+			size_t base_len = dot ? (size_t)(dot - s) : strlen(s);
+			if (base_len == item_len && strncmp(s, item, base_len) == 0) { return i; }
 		}
-		return 0;
 	}
 	return 0;
 }
