@@ -113,7 +113,7 @@ void load_cache(gpointer user_data)
 		get_png_files(data->preview_image_files);
 		
 		char *img_str = ini_file_get_value(cache_filename, "last_image_path");
-		if (img_str && check_file_exists(img_str, 1) == 1) {
+		if (img_str && check_file_exists(img_str, 0) == 1) {
 			set_current_image_index(img_str + 2, data->preview_label_string, data->preview_image_files, &data->preview_image_index, -1);
 		} else {
 			g_printerr("Error loading image: The file '%s' is missing, corrupted, or invalid.\n", img_str);
