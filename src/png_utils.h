@@ -18,4 +18,4 @@ void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data);
 
 void set_current_preview_to_img2img(GtkWidget *btn, gpointer user_data);
 
-#endif // PNG_UTILS_H
+#endif

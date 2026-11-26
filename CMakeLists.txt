@@ -14,9 +14,5 @@ add_executable(neural_pixel ${SOURCES})
 
 target_link_libraries(neural_pixel PRIVATE PkgConfig::GTK4 PNG::PNG)
 
-if (WIN32)
-	target_link_libraries(neural_pixel PRIVATE ws2_32)
-endif()
-
 file(COPY resources/ DESTINATION ${CMAKE_BINARY_DIR}/resources)
 
