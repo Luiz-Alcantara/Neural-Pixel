@@ -9,7 +9,7 @@ void load_cache_fallback(gpointer user_data);
 
 void load_cache(gpointer user_data);
 
-void load_prompt_text(GtkTextBuffer *text_buffer, const char *prompt_file_path, const char *default_prompt);
+void load_prompt_text(GtkTextBuffer *text_buffer, GtkWidget *box_model_adapters_cards, const char *prompt_file_path, const char *default_prompt, int negative);
 
 void update_cache(GenerationSnapshotData *data);
 

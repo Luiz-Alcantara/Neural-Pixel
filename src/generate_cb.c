@@ -10,6 +10,40 @@
 
 static void start_generation(gpointer user_data);
 
+static void get_adapters_strings(GtkWidget *adapter_box, char **pos_out, char **neg_out)
+{
+	GString *pos = g_string_new("");
+	GString *neg = g_string_new("");
+
+	for (GtkWidget *card = gtk_widget_get_first_child(adapter_box); card != NULL; card = gtk_widget_get_next_sibling(card)) {
+		const char *name = g_object_get_data(G_OBJECT(card), "adapter-name");
+		if (name == NULL) continue;
+
+		int adapter_type = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(card), "adapter-type"));
+
+		if (adapter_type == 1) {
+			GtkSpinButton *spin = g_object_get_data(G_OBJECT(card), "adapter-spin");
+			if (spin != NULL) {
+				g_string_append_printf(pos, " <lora:%s:%.2f>", name,
+				gtk_spin_button_get_value(spin));
+			}
+		} else if (adapter_type == 0) {
+			GtkButton *toggle_btn = g_object_get_data(G_OBJECT(card), "adapter-prompt-toggle-btn");
+			if (toggle_btn != NULL) {
+				const char *label = gtk_button_get_label(toggle_btn);
+				if (g_strcmp0(label, "PP") == 0) {
+					g_string_append_printf(pos, " (embedding:%s)", name);
+				} else if (g_strcmp0(label, "NP") == 0) {
+					g_string_append_printf(neg, " (embedding:%s)", name);
+				}
+			}
+		}
+	}
+
+	*pos_out = g_string_free(pos, FALSE);
+	*neg_out = g_string_free(neg, FALSE);
+}
+
 static char *get_dd_selected_strdup(GtkDropDown *dd, const char *fallback)
 {
 	GObject *sel = gtk_drop_down_get_selected_item(dd);
@@ -630,6 +664,15 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 	GtkTextIter dnei;
 	gtk_text_buffer_get_bounds (detector_neg_tb, &dnsi, &dnei);
 	snapshot_data->detector_negative_prompt = gtk_text_buffer_get_text(detector_neg_tb, &dnsi, &dnei, FALSE);
+
+	char *pos_adapters = NULL, *neg_adapters = NULL;
+	get_adapters_strings(data->box_model_adapters_cards, &pos_adapters, &neg_adapters);
+
+	snapshot_data->positive_adapters = pos_adapters;
+	snapshot_data->negative_adapters = neg_adapters;
+
+	if (pos_adapters) printf("LoRAs list: '%s'\n", pos_adapters);
+	if (neg_adapters) printf("Embeddings list: '%s'\n", neg_adapters);
 	
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;

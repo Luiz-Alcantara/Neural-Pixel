@@ -378,18 +378,24 @@ static void set_png_metadata(const gchar *path, MetadataTask copy_info, LoadPNGD
 			else end = neg_end ? neg_end : steps_end;
 
 			if (end && start < end) {
-				char pprompt[MAX_METADATA_PROMPT_LENGTH];
-				copy_utf8_bounded(start, (size_t)(end - start), pprompt, sizeof(pprompt));
+				char *p1 = g_strndup(start, (gsize)(end - start));
 
 				if (set_widgets && data->pos_tb) {
+					clear_adapter_cards(data->box_model_adapters_cards);
+					char *p2 = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards), 1, 0, p1);
+					char *pprompt = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards), 0, 0, p2);
 					gtk_text_buffer_set_text(data->pos_tb, pprompt, -1);
+
 					n_loaded++;
+					g_free(p2);
+					g_free(pprompt);
 				} else if (copy_all) {
-					g_string_append_printf(l2, "Prompt: %s\n", pprompt);
+					g_string_append_printf(l2, "Prompt: %s\n", p1);
 				} else if (copy_pp) {
-					set_clipboard_text_safe(data->win, pprompt);
+					set_clipboard_text_safe(data->win, p1);
 					copied_pp = TRUE;
 				}
+				g_free(p1);
 			} else {
 				fprintf(stderr, "Failed to parse positive prompt data.\n");
 				n_err++;
@@ -407,20 +413,23 @@ static void set_png_metadata(const gchar *path, MetadataTask copy_info, LoadPNGD
 			while (*start == ' ') start++;
 			const char *end = strstr(start, "\nSteps:");
 			if (end && start <= end) {
-				char nprompt[MAX_METADATA_PROMPT_LENGTH];
-				copy_utf8_bounded(start, (size_t)(end - start), nprompt, sizeof(nprompt));
+				char *p1 = g_strndup(start, (gsize)(end - start));
 
 				if (set_widgets && data->neg_tb) {
+					char *nprompt = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards), 0, 1, p1);
 					gtk_text_buffer_set_text(data->neg_tb, nprompt, -1);
+
 					n_loaded++;
+					g_free(nprompt);
 				} else if (copy_all) {
-					if (nprompt[0] != '\0') {
-						g_string_append_printf(l2, "Negative Prompt: %s\n", nprompt);
+					if (p1[0] != '\0') {
+						g_string_append_printf(l2, "Negative Prompt: %s\n", p1);
 					}
-				} else if (copy_np && nprompt[0] != '\0') {
-					set_clipboard_text_safe(data->win, nprompt);
+				} else if (copy_np && p1[0] != '\0') {
+					set_clipboard_text_safe(data->win, p1);
 					copied_np = TRUE;
 				}
+				g_free(p1);
 			} else {
 				fprintf(stderr, "Failed to parse negative prompt data.\n");
 				n_err++;

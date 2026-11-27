@@ -549,7 +549,7 @@ void load_cache(gpointer user_data)
 	}
 }
 
-void load_prompt_text(GtkTextBuffer *text_buffer, const char *prompt_file_path, const char *default_prompt)
+void load_prompt_text(GtkTextBuffer *text_buffer, GtkWidget *box_model_adapters_cards, const char *prompt_file_path, const char *default_prompt, int negative)
 {
 	gchar *file_cont = NULL;
 	gsize cont_len = 0;
@@ -557,15 +557,30 @@ void load_prompt_text(GtkTextBuffer *text_buffer, const char *prompt_file_path, 
 
 	if (check_file_exists(prompt_file_path, 1) && g_file_get_contents(prompt_file_path, &file_cont, &cont_len, &error)) {
 		if (g_utf8_validate(file_cont, cont_len, NULL)) {
-			gtk_text_buffer_set_text (text_buffer, file_cont, -1);
+			if (box_model_adapters_cards == NULL) {
+				gtk_text_buffer_set_text(text_buffer, file_cont, -1);
+			} else {
+				if (negative == 1) {
+					char *clean_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), 0, 1, file_cont);
+					gtk_text_buffer_set_text(text_buffer, clean_prompt, -1);
+					g_free(clean_prompt);
+				} else {
+					char *tmp_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), 1, 0, file_cont);
+					char *clean_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), 0, 0, tmp_prompt);
+					g_free(tmp_prompt);
+					
+					gtk_text_buffer_set_text(text_buffer, clean_prompt, -1);
+					g_free(clean_prompt);
+				}
+			}
 		} else {
 			g_printerr("File '%s' is not valid UTF-8.\n", prompt_file_path);
-			gtk_text_buffer_set_text (text_buffer, default_prompt, -1);
+			gtk_text_buffer_set_text(text_buffer, default_prompt, -1);
 		}
 		g_free(file_cont);
 	} else {
-		g_printerr("Failed to load '%s': %s.\n", prompt_file_path, error->message);
-		g_error_free(error);
+		if (error) g_printerr("Failed to load '%s': %s.\n", prompt_file_path, error->message);
+		g_clear_error(&error);
 		gtk_text_buffer_set_text (text_buffer, default_prompt, -1);
 	}
 }
@@ -578,6 +593,11 @@ void update_cache(GenerationSnapshotData *data)
 	FILE *ncf = g_fopen(".cache/np_cache", "wb");
 	FILE *cf = g_fopen(".cache/np_cache.ini", "wb");
 	if (dpcf == NULL || dncf == NULL || pcf == NULL || ncf == NULL || cf == NULL) {
+		if (dpcf) fclose(dpcf);
+		if (dncf) fclose(dncf);
+		if (pcf) fclose(pcf);
+		if (ncf) fclose(ncf);
+		if (cf) fclose(cf);
 		g_printerr("Error updating cache. If the error persists, try deleting the '.cache' directory.\n");
 		return;
 	}
@@ -588,10 +608,10 @@ void update_cache(GenerationSnapshotData *data)
 	fprintf(dncf, "%s", data->detector_negative_prompt);
 	fclose(dncf);
 
-	fprintf(pcf, "%s", data->positive_prompt);
+	fprintf(pcf, "%s%s", data->positive_prompt, data->positive_adapters);
 	fclose(pcf);
 
-	fprintf(ncf, "%s", data->negative_prompt);
+	fprintf(ncf, "%s%s", data->negative_prompt, data->negative_adapters);
 	fclose(ncf);
 
 	if (data->batch_count_value > 1) {

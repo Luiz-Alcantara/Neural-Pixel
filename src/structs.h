@@ -87,9 +87,9 @@ typedef struct {
 } DropDownModelsNameData;
 
 typedef struct {
-	int tb_type;
-	GtkTextBuffer *textbuffer;
-} DropDownTextBufferData;
+	int adapter_type;
+	GtkWidget *box_model_adapters_cards;
+} DropDownAdaptersData;
 
 typedef struct {
 	gchar *result_img_path;
@@ -166,6 +166,7 @@ typedef struct {
 	GtkWidget *preview_label;
 	GtkWidget *preview_image_toggle_visibility_btn;
 	GtkWidget *queue_size_label;
+	GtkWidget *box_model_adapters_cards;
 	GtkWidget *main_overlay;
 	GtkWidget *win;
 } GenerationData;
@@ -180,8 +181,10 @@ typedef struct {
 	char *detector_negative_prompt;
 	char *detector_positive_prompt;
 	char *img2img_file_path;
+	char *negative_adapters;
 	char *negative_prompt;
 	char *output_path;
+	char *positive_adapters;
 	char *positive_prompt;
 	char *text_enc_filename;
 	char *llm_vision_filename;
@@ -284,6 +287,7 @@ typedef struct {
 	gint *current_image_index;
 	GtkWidget *win;
 	GtkWidget *main_overlay;
+	GtkWidget *box_model_adapters_cards;
 	GtkTextBuffer *pos_tb;
 	GtkTextBuffer *neg_tb;
 	GtkWidget *steps_spin;
@@ -364,6 +368,7 @@ typedef struct {
 typedef struct {
 	GApplication* app;
 	GtkWidget* checkpoint_dd;
+	GtkWidget *detector_dd;
 	GtkWidget* vae_dd;
 	GtkWidget* cnet_dd;
 	GtkWidget* upscaler_dd;
@@ -377,8 +382,11 @@ typedef struct {
 } ReloadDropDownData;
 
 typedef struct {
+	GtkTextBuffer *detector_pos_tb;
+	GtkTextBuffer *detector_neg_tb;
 	GtkTextBuffer *pos_tb;
 	GtkTextBuffer *neg_tb;
+	GtkWidget *box_model_adapters_cards;
 	GtkWidget *checkpoint_dd;
 	GtkWidget *detector_dd;
 	GtkWidget *vae_dd;
@@ -393,6 +401,7 @@ typedef struct {
 	GtkWidget *cnet_strength_spin;
 	GtkWidget *flow_shift_spin;
 	GtkWidget *denoise_spin;
+	GtkWidget *clip_skip_spin;
 	GtkWidget *seed_entry;
 	GtkWidget *upscale_passes_spin;
 	GtkWidget *lora_dd;

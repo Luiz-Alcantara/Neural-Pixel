@@ -25,6 +25,8 @@ void generation_snapshot_free(GenerationSnapshotData *job)
 	g_free(job->img2img_file_path);
 	g_free(job->detector_negative_prompt);
 	g_free(job->detector_positive_prompt);
+	g_free(job->negative_adapters);
+	g_free(job->positive_adapters);
 	g_free(job->positive_prompt);
 	g_free(job->negative_prompt);
 	g_free(job->checkpoint_filename);
@@ -38,38 +40,6 @@ void generation_snapshot_free(GenerationSnapshotData *job)
 	g_free(job->llm_vision_filename);
 	g_free(job->tokenizer_filename);
 	g_free(job);
-}
-
-void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
-{
-	if (GTK_IS_DROP_DOWN(wgt)) {
-		DropDownTextBufferData *data = user_data;
-		GtkDropDown *dd = GTK_DROP_DOWN(wgt);
-
-		int tb_type = data->tb_type;
-		GtkTextBuffer *tv_tb = data->textbuffer;
-
-		GtkStringObject *selected_item = gtk_drop_down_get_selected_item(dd);
-		const char* item_string = gtk_string_object_get_string(selected_item);
-
-		if (strcmp(item_string, "None") != 0) {
-			GtkTextIter si;
-			GtkTextIter ei;
-			gtk_text_buffer_get_bounds (tv_tb, &si, &ei);
-			char *addon_string = format_lora_embedding_string(item_string, tb_type);
-
-			if (tb_type == 0) {
-				gtk_text_buffer_insert (tv_tb, &ei, addon_string, -1);
-			} else {
-				char *prompt_string = gtk_text_buffer_get_text(tv_tb, &si, &ei, FALSE);
-				if (!check_prompt_contains_lora(prompt_string, item_string)) {
-					gtk_text_buffer_insert (tv_tb, &si, addon_string, -1);
-				}
-				g_free(prompt_string);
-			}
-			g_free(addon_string);
-		}
-	}
 }
 
 void add_image_to_favorites(GtkWidget *btn, gpointer user_data)
@@ -196,6 +166,17 @@ void array_strings_free (const char **list)
 			free((char*)list[i]);
 		}
 		free(list);
+	}
+}
+
+void clear_adapter_cards(GtkWidget *box)
+{
+	GtkWidget *child = gtk_widget_get_first_child(box);
+
+	while (child != NULL) {
+		GtkWidget *next = gtk_widget_get_next_sibling(child);
+		gtk_box_remove(GTK_BOX(box), child);
+		child = next;
 	}
 }
 
@@ -476,7 +457,7 @@ void on_dd_const_destroy (GtkWidget* wgt, gpointer user_data)
 
 void on_dd_path_destroy (GtkWidget* wgt, gpointer user_data)
 {
-	DropDownTextBufferData *data = user_data;
+	DropDownAdaptersData *data = user_data;
 	if (data == NULL) return;
 	g_free(data);
 }
@@ -667,6 +648,7 @@ void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 {
 	ReloadDropDownData *data = user_data;
 	dropdown_items_update(CHECKPOINTS_PATH, GTK_WIDGET(data->checkpoint_dd), data->app);
+	dropdown_items_update(DETECTOR_PATH, GTK_WIDGET(data->detector_dd), data->app);
 	dropdown_items_update(VAES_PATH, GTK_WIDGET(data->vae_dd), data->app);
 	dropdown_items_update(CONTROLNET_PATH, GTK_WIDGET(data->cnet_dd), data->app);
 	dropdown_items_update(UPSCALES_PATH, GTK_WIDGET(data->upscaler_dd), data->app);
@@ -682,6 +664,14 @@ void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 {
 	ResetCbData *data = user_data;
+
+	clear_adapter_cards(data->box_model_adapters_cards);
+
+	GtkTextBuffer *detector_pos_tb = data->detector_pos_tb;
+	gtk_text_buffer_set_text (detector_pos_tb, DETECTOR_POSITIVE_PROMPT, -1);
+
+	GtkTextBuffer *detector_neg_tb = data->detector_neg_tb;
+	gtk_text_buffer_set_text (detector_neg_tb, DETECTOR_NEGATIVE_PROMPT, -1);
 
 	GtkTextBuffer *pos_tb = data->pos_tb;
 	gtk_text_buffer_set_text (pos_tb, POSITIVE_PROMPT, -1);
@@ -730,6 +720,9 @@ void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 
 	GtkWidget *denoise_spin = data->denoise_spin;
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON(denoise_spin), DEFAULT_DENOISE);
+
+	GtkWidget *clip_skip_spin = data->clip_skip_spin;
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON(clip_skip_spin), DEFAULT_CLIP_SKIP);
 
 	GtkWidget *seed_entry = data->seed_entry;
 	char seed_str[LONGLONG_STR_SIZE];

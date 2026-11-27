@@ -41,6 +41,7 @@ app_activate (GApplication *app, gpointer user_data)
 	//Defining GTK Widgets
 	GtkWidget *win;
 
+	GFile *css_file;
 	GtkCssProvider *css_provider;
 	
 	GtkWidget *titlebar;
@@ -101,10 +102,19 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_checkpoint, *box_checkpoint_buttons;
 	GtkWidget *generate_btn;
 	GtkWidget *checkpoint_lab, *checkpoint_dd, *sd_based_check;
-	GtkWidget *vae_lab, *vae_dd;
+
+	GtkWidget *model_adapters_visibility_toggle_btn;
+	GtkWidget *box_model_adapters, *box_model_adapters_inner, *box_model_adapters_cards;
+	GtkWidget *lora_lab;
+	GtkWidget *box_lora_widgets;
+	GtkWidget *lora_dd;
+	GtkWidget *lora_triggers_btn;
+	GtkWidget *embedding_lab, *embedding_dd;
+	GtkWidget *adapters_separator;
 
 	GtkWidget *addons_visibility_toggle_btn;
 	GtkWidget *box_addons, *box_addons_inner;
+	GtkWidget *vae_lab, *vae_dd;
 	GtkWidget *cnet_lab, *cnet_dd;
 	GtkWidget *upscaler_lab, *upscaler_dd;
 	GtkWidget *clip_l_lab, *clip_l_dd;
@@ -120,13 +130,6 @@ app_activate (GApplication *app, gpointer user_data)
 	GtkWidget *box_params_row5;
 	GtkWidget *box_params_row6, *box_params_row6_col1, *box_params_row6_col2;
 	GtkWidget *box_params_row7, *box_params_row7_col1, *box_params_row7_col2;
-	
-	GtkWidget *box_model_adapters;
-	GtkWidget *lora_lab;
-	GtkWidget *box_lora_widgets;
-	GtkWidget *lora_dd;
-	GtkWidget *lora_triggers_btn;
-	GtkWidget *embedding_lab, *embedding_dd;
 
 	GtkGesture *gesture_width_dd;
 	GtkWidget *width_lab, *width_dd;
@@ -241,8 +244,12 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	//Load css file 
 	css_provider = gtk_css_provider_new ();
-	gtk_css_provider_load_from_file (css_provider, g_file_new_for_path ("resources/styles.css"));
+	css_file = g_file_new_for_path("resources/styles.css");
+	gtk_css_provider_load_from_file (css_provider, css_file);
 	gtk_style_context_add_provider_for_display (gtk_widget_get_display (win), GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	
+	g_object_unref(css_file);
+	g_object_unref(css_provider);
 	
 	titlebar = gtk_header_bar_new ();
 	gtk_widget_add_css_class(titlebar, "titlebar");
@@ -430,7 +437,6 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	gtk_widget_set_hexpand (detector_pos_tv, TRUE);
 	gtk_widget_set_vexpand (detector_pos_tv, TRUE);
-	load_prompt_text(detector_pos_tb, ".cache/detector_pp_cache", DETECTOR_POSITIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (detector_pos_tv), GTK_WRAP_WORD_CHAR);
 
 	if (spell_dict != NULL) {
@@ -439,7 +445,9 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (detector_pos_scr), detector_pos_tv);
 
-	detector_pp_visibility_toggle_btn = gen_visibility_toggle_button("ADetailer Positive Prompt", "pos_prompt_label", detector_pos_scr);
+	detector_pp_visibility_toggle_btn = gen_visibility_toggle_button("ADetailer Positive Prompt (Optional)", "pos_prompt_label", detector_pos_scr);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_pp_visibility_toggle_btn),
+		"Leave empty to reuse the main prompt and active adapters.");
 	gtk_widget_set_margin_end (detector_pp_visibility_toggle_btn, MEDIUM_SPACING);
 	gtk_widget_set_margin_start (detector_pp_visibility_toggle_btn, MEDIUM_SPACING);
 
@@ -459,7 +467,6 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	gtk_widget_set_hexpand (detector_neg_tv, TRUE);
 	gtk_widget_set_vexpand (detector_neg_tv, TRUE);
-	load_prompt_text(detector_neg_tb, ".cache/detector_np_cache", DETECTOR_NEGATIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (detector_neg_tv), GTK_WRAP_WORD_CHAR);
 
 	if (spell_dict != NULL) {
@@ -468,7 +475,9 @@ app_activate (GApplication *app, gpointer user_data)
 
 	gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (detector_neg_scr), detector_neg_tv);
 
-	detector_np_visibility_toggle_btn = gen_visibility_toggle_button("ADetailer Negative Prompt", "neg_prompt_label", detector_neg_scr);
+	detector_np_visibility_toggle_btn = gen_visibility_toggle_button("ADetailer Negative Prompt (Optional)", "neg_prompt_label", detector_neg_scr);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(detector_np_visibility_toggle_btn),
+		"Leave empty to reuse the main prompt and active adapters.");
 	gtk_widget_set_margin_end (detector_np_visibility_toggle_btn, MEDIUM_SPACING);
 	gtk_widget_set_margin_start (detector_np_visibility_toggle_btn, MEDIUM_SPACING);
 
@@ -655,7 +664,6 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	gtk_widget_set_hexpand (pos_tv, TRUE);
 	gtk_widget_set_vexpand (pos_tv, TRUE);
-	load_prompt_text(pos_tb, ".cache/pp_cache", POSITIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (pos_tv), GTK_WRAP_WORD_CHAR);
 
 	if (spell_dict != NULL) {
@@ -679,7 +687,6 @@ app_activate (GApplication *app, gpointer user_data)
 	
 	gtk_widget_set_hexpand (neg_tv, TRUE);
 	gtk_widget_set_vexpand (neg_tv, TRUE);
-	load_prompt_text(neg_tb, ".cache/np_cache", NEGATIVE_PROMPT);
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (neg_tv), GTK_WRAP_WORD_CHAR);
 
 	if (spell_dict != NULL) {
@@ -724,7 +731,59 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd_based_check), app_data->sd_based_bool == 1 ? TRUE : FALSE);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(sd_based_check), "Uncheck for non Stable Diffusion based checkpoints\n(e.g., Flux, Chroma, Qwen).");
 	gtk_box_append (GTK_BOX (box_checkpoint_buttons), sd_based_check);
+
+	//Set Model Adapters Widgets
+	box_model_adapters = gtk_box_new(GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
+	gtk_box_set_homogeneous (GTK_BOX(box_model_adapters), FALSE);
+	gtk_widget_add_css_class(box_model_adapters, "inner_box");
+
+	box_model_adapters_inner = gtk_box_new(GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+	gtk_widget_set_margin_end(box_model_adapters_inner, MEDIUM_SPACING);
+	gtk_widget_set_margin_start(box_model_adapters_inner, MEDIUM_SPACING);
+	gtk_widget_set_visible(box_model_adapters_inner, TRUE);
+
+	box_model_adapters_cards = gtk_box_new(GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
+
+	model_adapters_visibility_toggle_btn = gen_visibility_toggle_button("Model Adapters", "param_label", box_model_adapters_inner);
+	gtk_box_append(GTK_BOX(box_model_adapters), model_adapters_visibility_toggle_btn);
+
+	gtk_box_append(GTK_BOX(box_model_adapters), box_model_adapters_inner);
+	gtk_box_append(GTK_BOX(box_properties), box_model_adapters);
+
+	//Set LoRA Widgets
+	lora_lab = gtk_label_new("Add LoRA");
+	gtk_widget_set_halign(lora_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(lora_lab, "param_label");
+	gtk_box_append(GTK_BOX(box_model_adapters_inner), lora_lab);
+
+	box_lora_widgets = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
+	gtk_box_set_homogeneous(GTK_BOX(box_lora_widgets), FALSE);
+	gtk_box_append(GTK_BOX(box_model_adapters_inner), box_lora_widgets);
 	
+	lora_dd = gen_path_dd(LORAS_PATH, box_model_adapters_cards, 1, NULL, NULL, app, 0);
+	gtk_widget_set_hexpand(lora_dd, TRUE);
+	gtk_box_append(GTK_BOX(box_lora_widgets), lora_dd);
+
+	lora_triggers_btn = gtk_button_new_from_icon_name("document-properties-symbolic");
+	gtk_widget_add_css_class(lora_triggers_btn, "custom_btn");
+	gtk_widget_set_tooltip_text(lora_triggers_btn, "Manage trigger words for the selected LoRA.");
+	gtk_box_append(GTK_BOX(box_lora_widgets), lora_triggers_btn);
+
+	//Set Embeddings Widgets
+	embedding_lab = gtk_label_new("Add Embedding");
+	gtk_widget_set_halign(embedding_lab, LABEL_ALIGNMENT);
+	gtk_widget_add_css_class(embedding_lab, "param_label");
+	gtk_box_append(GTK_BOX(box_model_adapters_inner), embedding_lab);
+
+	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, box_model_adapters_cards, 0, NULL, NULL, app, 0);
+	gtk_widget_set_margin_bottom(embedding_dd, LARGE_SPACING);
+	gtk_box_append(GTK_BOX(box_model_adapters_inner), embedding_dd);
+
+	adapters_separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_add_css_class(adapters_separator, "horiz_separator");
+	gtk_box_append(GTK_BOX(box_model_adapters_inner), adapters_separator);
+	gtk_box_append(GTK_BOX(box_model_adapters_inner), box_model_adapters_cards);
+
 	//Set add-ons Widgets
 
 	box_addons = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
@@ -836,48 +895,6 @@ app_activate (GApplication *app, gpointer user_data)
 	tokenizer_dd = gen_path_dd(TOKENIZER_PATH, NULL, 0, app_data->tokenizer_string, NULL, app, 0);
 	gtk_widget_set_margin_bottom (tokenizer_dd, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_addons_inner), tokenizer_dd);
-	
-	//Set Model adapters Widgets
-	
-	box_model_adapters = gtk_box_new (GTK_ORIENTATION_VERTICAL, SMALL_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (box_model_adapters), FALSE);
-	gtk_widget_add_css_class(box_model_adapters, "inner_box");
-	gtk_box_append (GTK_BOX (box_properties), box_model_adapters);
-
-	//Set LoRA Widgets
-
-	lora_lab = gtk_label_new ("Add LoRA");
-	gtk_widget_set_halign(lora_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(lora_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_model_adapters), lora_lab);
-
-	box_lora_widgets = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
-	gtk_widget_set_margin_end (box_lora_widgets, MEDIUM_SPACING);
-	gtk_widget_set_margin_start (box_lora_widgets, MEDIUM_SPACING);
-	gtk_box_set_homogeneous (GTK_BOX (box_lora_widgets), FALSE);
-	gtk_box_append (GTK_BOX (box_model_adapters), box_lora_widgets);
-	
-	lora_dd = gen_path_dd(LORAS_PATH, pos_tb, 1, NULL, NULL, app, 0);
-	gtk_widget_set_hexpand(lora_dd, TRUE);
-	gtk_box_append (GTK_BOX (box_lora_widgets), lora_dd);
-
-	lora_triggers_btn = gtk_button_new_from_icon_name("document-properties-symbolic");
-	gtk_widget_add_css_class(lora_triggers_btn, "custom_btn");
-	gtk_widget_set_tooltip_text(lora_triggers_btn, "Manage trigger words for the selected LoRA.");
-	gtk_box_append (GTK_BOX (box_lora_widgets), lora_triggers_btn);
-
-	//Set Embeddings Widgets
-
-	embedding_lab = gtk_label_new ("Add Embedding");
-	gtk_widget_set_halign(embedding_lab, LABEL_ALIGNMENT);
-	gtk_widget_add_css_class(embedding_lab, "param_label");
-	gtk_box_append (GTK_BOX (box_model_adapters), embedding_lab);
-
-	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, neg_tb, 0, NULL, NULL, app, 0);
-	gtk_widget_set_margin_end (embedding_dd, MEDIUM_SPACING);
-	gtk_widget_set_margin_start (embedding_dd, MEDIUM_SPACING);
-	gtk_widget_set_margin_bottom (embedding_dd, LARGE_SPACING);
-	gtk_box_append (GTK_BOX (box_model_adapters), embedding_dd);
 
 	//Set Parameters Widgets
 	box_params = gtk_box_new (GTK_ORIENTATION_VERTICAL, LARGE_SPACING);
@@ -1907,9 +1924,16 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_size_request(GTK_WIDGET(to_trash_btn), 48, -1);
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), to_trash_btn);
 
+	//Load prompts
+	load_prompt_text(detector_pos_tb, NULL, ".cache/detector_pp_cache", DETECTOR_POSITIVE_PROMPT, 0);
+	load_prompt_text(detector_neg_tb, NULL, ".cache/detector_np_cache", DETECTOR_NEGATIVE_PROMPT, 1);
+	load_prompt_text(pos_tb, box_model_adapters_cards, ".cache/pp_cache", POSITIVE_PROMPT, 0);
+	load_prompt_text(neg_tb, box_model_adapters_cards, ".cache/np_cache", NEGATIVE_PROMPT, 1);
+
 	reload_d = g_new0 (ReloadDropDownData, 1);
 	reload_d->app = app;
 	reload_d->checkpoint_dd = checkpoint_dd;
+	reload_d->detector_dd = detector_dd;
 	reload_d->vae_dd = vae_dd;
 	reload_d->cnet_dd = cnet_dd;
 	reload_d->upscaler_dd = upscaler_dd;
@@ -1931,8 +1955,11 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (height_dd, "destroy", G_CALLBACK (on_swap_dimensions_btn_destroy), swap_dimensions_d);
 
 	reset_d = g_new0 (ResetCbData, 1);
+	reset_d->detector_pos_tb = detector_pos_tb;
+	reset_d->detector_neg_tb = detector_neg_tb;
 	reset_d->pos_tb = pos_tb;
 	reset_d->neg_tb = neg_tb;
+	reset_d->box_model_adapters_cards = box_model_adapters_cards;
 	reset_d->checkpoint_dd = checkpoint_dd;
 	reset_d->detector_dd = detector_dd;
 	reset_d->vae_dd = vae_dd;
@@ -1947,6 +1974,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->cnet_strength_spin = cnet_strength_spin;
 	reset_d->flow_shift_spin = flow_shift_spin;
 	reset_d->denoise_spin = denoise_spin;
+	reset_d->clip_skip_spin = clip_skip_spin;
 	reset_d->seed_entry = seed_entry;
 	reset_d->upscale_passes_spin = upscale_passes_spin;
 	reset_d->lora_dd = lora_dd;
@@ -2040,6 +2068,7 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->current_image_index = &app_data->preview_image_index;
 	load_png_info_d->win = win;
 	load_png_info_d->main_overlay = main_overlay;
+	load_png_info_d->box_model_adapters_cards = box_model_adapters_cards;
 	load_png_info_d->pos_tb = pos_tb;
 	load_png_info_d->neg_tb = neg_tb;
 	load_png_info_d->steps_spin = steps_spin;
@@ -2169,6 +2198,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->preview_label = img_index_label;
 	gen_d->preview_image_toggle_visibility_btn = hide_img_btn;
 	gen_d->queue_size_label = queue_size_label;
+	gen_d->box_model_adapters_cards = box_model_adapters_cards;
 	gen_d->main_overlay = main_overlay;
 	gen_d->win = win;
 	g_signal_connect (generate_btn, "clicked", G_CALLBACK (prepare_gen_data), gen_d);

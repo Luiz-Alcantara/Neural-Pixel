@@ -9,19 +9,19 @@ void show_simple_message(GtkWidget *win, char *msg_title_text, char *msg_text, i
 
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
 
-void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
-
 void add_image_to_favorites(GtkWidget *btn, gpointer user_data);
 
 void app_start_data_free(gpointer user_data);
 
 void array_strings_free(const char **list);
 
+void clear_adapter_cards(GtkWidget *box);
+
 void clear_img2img_overlay(GtkOverlay *overlay);
 
 void clear_mask_btn_cb (GtkButton *btn, gpointer user_data);
 
-void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
+void clear_img2img_btn_cb (GtkButton *btn, gpointer user_data);
 
 gboolean close_app_callback(GtkWindow *win, gpointer user_data);
 
@@ -91,7 +91,7 @@ void reload_dropdown(GtkWidget* wgt, gpointer user_data);
 
 void reset_default_btn_cb (GtkWidget* btn, gpointer user_data);
 
-gboolean seed_entry_int_filter(GtkEditable *editable, gpointer user_data);
+void seed_entry_int_filter(GtkEditable *editable, const char *text, int length, int *position, gpointer user_data);
 
 void send_to_trash_cb(GtkWidget* btn, gpointer user_data);
 

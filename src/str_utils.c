@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -11,6 +12,7 @@
 	#include <unistd.h>
 #endif
 #include "constants.h"
+#include "custom_widgets.h"
 
 gchar *ascii_format_double(const char *format, double value)
 {
@@ -85,47 +87,6 @@ int check_gtk_list_contains_item(GtkStringList *list, const char *item)
 		}
 	}
 	return 0;
-}
-
-gboolean check_prompt_contains_lora(const char *prompt_string, const char *lora_name)
-{
-	if (!prompt_string || !lora_name) {
-		return FALSE;
-	}
-
-	GRegex *regex;
-	GMatchInfo *match_info = NULL;
-	gboolean result = FALSE;
-	char *base_name;
-	char *escaped_name;
-	char *pattern;
-
-	char *dot = strrchr(lora_name, '.');
-	if (dot != NULL) {
-		gsize len = dot - lora_name;
-		base_name = g_strndup(lora_name, len);
-	} else {
-		base_name = g_strdup(lora_name);
-	}
-
-	escaped_name = g_regex_escape_string(base_name, -1);
-	pattern = g_strdup_printf("<lora:%s:-?[0-9]+(\\.[0-9]+)?>", escaped_name);
-	g_free(base_name);
-	g_free(escaped_name);
-
-	GError *error = NULL;
-	regex = g_regex_new(pattern, 0, 0, &error);
-	if (regex != NULL) {
-		result = g_regex_match(regex, prompt_string, 0, &match_info);
-		g_match_info_free(match_info);
-		g_regex_unref(regex);
-	} else {
-		g_warning("Failed to compile lora regex: %s", error->message);
-		g_error_free(error);
-	}
-	
-	g_free(pattern);
-	return result;
 }
 
 gboolean check_word_contains_num(const char *word)
@@ -209,54 +170,82 @@ char *convert_long_long_int_to_string(long long int x)
 	return str;
 }
 
-char *format_lora_embedding_string(const gchar* item, int tb_type)
+#include <math.h>
+
+char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, int adapter_type, int negative_embedding, const char *prompt)
 {
-	if (item == NULL) return NULL;
+	if (prompt == NULL) return NULL;
+	if (box_model_adapters_cards == NULL) return g_strdup(prompt);
 
-	char *n_item = strdup(item); 
-	if (n_item == NULL) return NULL;
+	const char *open_tag = adapter_type ? "<lora:" : "(embedding:";
+	const char close_chr = adapter_type ? '>' : ')';
+	const size_t open_len = strlen(open_tag);
 
-	char *dot = strrchr(n_item, '.'); 
-	if (dot != NULL) {
-		*dot = '\0'; 
+	GString *out = g_string_new(NULL);
+	const char *p = prompt;
+	const char *tag;
+
+	while ((tag = strstr(p, open_tag)) != NULL) {
+		const char *start = tag + open_len;
+		const char *end = strchr(start, close_chr);
+		if (end == NULL) break;
+
+		g_string_append_len(out, p, tag - p);
+
+		while (out->len > 0 && g_ascii_isspace(out->str[out->len - 1])) {
+			g_string_truncate(out, out->len - 1);
+		}
+		gboolean had_before = out->len > 0;
+		gboolean comma_before = had_before && out->str[out->len - 1] == ',';
+
+		const char *colon = memchr(start, ':', end - start);
+		const char *name_end = colon ? colon : end;
+
+		g_autofree char *name = g_strndup(start, name_end - start);
+		g_strstrip(name);
+
+		double value = 1.0;
+		if (colon != NULL) {
+			char *num_end;
+			double v = g_ascii_strtod(colon + 1, &num_end);
+			if (num_end != colon + 1 && isfinite(v)) value = v;
+		}
+
+		if (*name != '\0') {
+			if (!adapter_exists(GTK_WIDGET(box_model_adapters_cards), name, adapter_type)) {
+				add_adapter_card(box_model_adapters_cards, name, value, adapter_type, negative_embedding);
+			}
+		}
+
+		p = end + 1;
+
+		const char *next = p;
+		while (*next != '\0' && g_ascii_isspace(*next)) next++;
+		gboolean at_end = (*next == '\0');
+		gboolean comma_after = (*next == ',');
+
+		if (comma_before && comma_after) p = next + 1;
+
+		if (had_before && !at_end && !(comma_before) && *next != ',') {
+			g_string_append_c(out, ' ');
+		} else if (comma_before && !at_end && !comma_after) {
+			g_string_append_c(out, ' ');
+		}
+
+		while (*p != '\0' && g_ascii_isspace(*p)) p++;
 	}
 
-	int t_len[2];
+	g_string_append(out, p);
 
-	if (tb_type == 0) {
-		t_len[0] = 3;
-		t_len[1] = 4;
-	} else {
-		t_len[0] = 7;
-		t_len[1] = 5;
+	while (out->len > 0 && (g_ascii_isspace(out->str[out->len - 1]) || out->str[out->len - 1] == ',')) {
+		g_string_truncate(out, out->len - 1);
 	}
 
-	char text_pf[t_len[0]];
-	char text_sf[t_len[1]];
+	gsize lead = 0;
+	while (lead < out->len && (g_ascii_isspace(out->str[lead]) || out->str[lead] == ',')) lead++;
+	if (lead > 0) g_string_erase(out, 0, lead);
 
-	if (tb_type == 0) {
-		strcpy(text_pf, ", (embedding:");
-		strcpy(text_sf, ")");
-	} else {
-		strcpy(text_pf, "<lora:");
-		strcpy(text_sf, ":1> ");
-	}
-
-
-	int f_len = strlen(n_item) + strlen(text_pf) + strlen(text_sf) + 1;
-	char *f_str = malloc(f_len);
-	if (f_str == NULL) {
-		free(n_item);
-		return NULL;
-	}
-	f_str[0] = '\0';
-	strcat(f_str, text_pf);
-	strcat(f_str, n_item);
-	strcat(f_str, text_sf);
-	f_str[f_len -1] = '\0';
-	free(n_item);
-
-	return f_str;
+	return g_string_free(out, FALSE);
 }
 
 char* generate_sd_seed()
@@ -336,7 +325,17 @@ char *get_time_str()
 	return t;
 }
 
-gchar *load_lora_triggers(char *triggers_file_path)
+gboolean is_string_blank(const gchar *str)
+{
+	if (str == NULL) return TRUE;
+
+	for (const gchar *p = str; *p != '\0'; p++) {
+		if (!g_ascii_isspace(*p)) { return FALSE; }
+	}
+	return TRUE;
+}
+
+gchar *load_lora_triggers(const char *triggers_file_path)
 {
 	gchar *file_cont = NULL;
 	gsize cont_len = 0;
@@ -389,4 +388,37 @@ gboolean seed_entry_get_value(GtkEditable *editable, gint64 *out_value)
 gboolean string_equal(gconstpointer a, gconstpointer b)
 {
 	return g_strcmp0(a, b) == 0;
+}
+
+char *strip_model_extension(const char *filename)
+{
+	static const char *model_exts[] = {
+		".safetensors",
+		".sft",
+		".ckpt",
+		".pt",
+		".pth",
+		".bin",
+		".gguf",
+		".onnx",
+		".pkl",
+		".vae",
+		NULL
+	};
+
+	char *result = g_strdup(filename);
+	if (result == NULL) return NULL;
+
+	gsize len = strlen(result);
+
+	for (int i = 0; model_exts[i] != NULL; i++) {
+		gsize ext_len = strlen(model_exts[i]);
+
+		if (len > ext_len && g_ascii_strcasecmp(result + len - ext_len, model_exts[i]) == 0) {
+			result[len - ext_len] = '\0';
+			break;
+		}
+	}
+
+	return result;
 }

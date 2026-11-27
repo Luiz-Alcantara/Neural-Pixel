@@ -30,7 +30,9 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--mode"));
 	
-	if (data->detector_enabled && data->img2img_file_path != NULL && strcmp(data->img2img_file_path, "None") != 0) {
+	if (data->detector_enabled && data->img2img_file_path != NULL &&
+	strcmp(data->img2img_file_path, "None") != 0 && data->detector_filename != NULL &&
+	strcmp(data->detector_filename, "None") != 0 && data->cnet_filename != NULL && strcmp(data->cnet_filename, "None") == 0) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("adetailer"));
 	} else {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("img_gen"));
@@ -76,16 +78,14 @@ void gen_sd_string(GenerationSnapshotData *data)
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-model"));
 				g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/detectors/%s", data->detector_filename));
 
-				if (data->detector_positive_prompt && strcmp(data->detector_positive_prompt, "") != 0 &&
-					strcmp(data->detector_positive_prompt, " ") != 0) {
+				if (!is_string_blank(data->detector_positive_prompt)) {
 					g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-prompt"));
-					g_ptr_array_add(data->sd_cmd_array, g_strdup(data->detector_positive_prompt));
+					g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%s%s", data->detector_positive_prompt, data->positive_adapters));
 				}
 
-				if (data->detector_negative_prompt && strcmp(data->detector_negative_prompt, "") != 0 &&
-					strcmp(data->detector_negative_prompt, " ") != 0) {
+				if (!is_string_blank(data->detector_negative_prompt)) {
 					g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-negative-prompt"));
-					g_ptr_array_add(data->sd_cmd_array, g_strdup(data->detector_negative_prompt));
+					g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%s%s", data->detector_negative_prompt, data->negative_adapters));
 				}
 
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--extra-ad-args"));
@@ -185,7 +185,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 	if (data->taesd_enabled) {
 		if (check_file_exists("./models/vae/taesd_decoder.safetensors", 0) == 1) {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--taesd"));
-			g_ptr_array_add(data->sd_cmd_array, g_strdup(".models/vae/taesd_decoder.safetensors"));
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("./models/vae/taesd_decoder.safetensors"));
 		} else {
 			g_printerr("Error loading file '.models/vae/taesd_decoder.safetensors'. The file must be located in this exact path and have the correct name.\n");
 		}
@@ -264,12 +264,12 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	if (data->positive_prompt != NULL) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--prompt"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->positive_prompt));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%s%s", data->positive_prompt, data->positive_adapters));
 	}
 
-	if (data->negative_prompt && strcmp(data->negative_prompt, "") != 0 && strcmp(data->negative_prompt, " ") != 0) {
+	if (!is_string_blank(data->negative_prompt) || !is_string_blank(data->negative_adapters)) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--negative-prompt"));
-		g_ptr_array_add(data->sd_cmd_array, g_strdup(data->negative_prompt));
+		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("%s%s", data->negative_prompt, data->negative_adapters));
 	}
 
 	char *runtime_backend_str = g_strdup_printf("diffusion=%s,te=%s,vae=%s,controlnet=%s,upscaler=%s,detector=%s",
