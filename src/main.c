@@ -1925,10 +1925,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (boxr_bottom_right_box), to_trash_btn);
 
 	//Load prompts
-	load_prompt_text(detector_pos_tb, NULL, ".cache/detector_pp_cache", DETECTOR_POSITIVE_PROMPT, 0);
-	load_prompt_text(detector_neg_tb, NULL, ".cache/detector_np_cache", DETECTOR_NEGATIVE_PROMPT, 1);
-	load_prompt_text(pos_tb, box_model_adapters_cards, ".cache/pp_cache", POSITIVE_PROMPT, 0);
-	load_prompt_text(neg_tb, box_model_adapters_cards, ".cache/np_cache", NEGATIVE_PROMPT, 1);
+	load_prompt_text(detector_pos_tb, NULL, lora_dd, embedding_dd, ".cache/detector_pp_cache", DETECTOR_POSITIVE_PROMPT, 0);
+	load_prompt_text(detector_neg_tb, NULL, lora_dd, embedding_dd, ".cache/detector_np_cache", DETECTOR_NEGATIVE_PROMPT, 1);
+	load_prompt_text(pos_tb, box_model_adapters_cards, lora_dd, embedding_dd, ".cache/pp_cache", POSITIVE_PROMPT, 0);
+	load_prompt_text(neg_tb, box_model_adapters_cards, lora_dd, embedding_dd, ".cache/np_cache", NEGATIVE_PROMPT, 1);
 
 	reload_d = g_new0 (ReloadDropDownData, 1);
 	reload_d->app = app;
@@ -2079,6 +2079,8 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->width_dd = width_dd;
 	load_png_info_d->height_dd = height_dd;
 	load_png_info_d->checkpoint_dd = checkpoint_dd;
+	load_png_info_d->lora_dd = lora_dd;
+	load_png_info_d->embedding_dd = embedding_dd;
 	load_png_info_d->vae_dd = vae_dd;
 	load_png_info_d->sampler_dd = sampler_dd;
 	load_png_info_d->scheduler_dd = scheduler_dd;

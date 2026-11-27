@@ -549,7 +549,7 @@ void load_cache(gpointer user_data)
 	}
 }
 
-void load_prompt_text(GtkTextBuffer *text_buffer, GtkWidget *box_model_adapters_cards, const char *prompt_file_path, const char *default_prompt, int negative)
+void load_prompt_text(GtkTextBuffer *text_buffer, GtkWidget *box_model_adapters_cards, GtkWidget *lora_dd, GtkWidget *embedding_dd, const char *prompt_file_path, const char *default_prompt, int negative)
 {
 	gchar *file_cont = NULL;
 	gsize cont_len = 0;
@@ -561,12 +561,12 @@ void load_prompt_text(GtkTextBuffer *text_buffer, GtkWidget *box_model_adapters_
 				gtk_text_buffer_set_text(text_buffer, file_cont, -1);
 			} else {
 				if (negative == 1) {
-					char *clean_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), 0, 1, file_cont);
+					char *clean_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), embedding_dd, 0, 1, file_cont);
 					gtk_text_buffer_set_text(text_buffer, clean_prompt, -1);
 					g_free(clean_prompt);
 				} else {
-					char *tmp_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), 1, 0, file_cont);
-					char *clean_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), 0, 0, tmp_prompt);
+					char *tmp_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), lora_dd, 1, 0, file_cont);
+					char *clean_prompt = extract_adapters_from_prompt(GTK_BOX(box_model_adapters_cards), embedding_dd, 0, 0, tmp_prompt);
 					g_free(tmp_prompt);
 					
 					gtk_text_buffer_set_text(text_buffer, clean_prompt, -1);

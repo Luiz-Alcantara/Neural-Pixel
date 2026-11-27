@@ -13,6 +13,7 @@
 #endif
 #include "constants.h"
 #include "custom_widgets.h"
+#include "widgets_cb.h"
 
 gchar *ascii_format_double(const char *format, double value)
 {
@@ -86,7 +87,7 @@ int check_gtk_list_contains_item(GtkStringList *list, const char *item)
 			if (base_len == item_len && strncmp(s, item, base_len) == 0) { return i; }
 		}
 	}
-	return 0;
+	return -1;
 }
 
 gboolean check_word_contains_num(const char *word)
@@ -172,16 +173,18 @@ char *convert_long_long_int_to_string(long long int x)
 
 #include <math.h>
 
-char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, int adapter_type, int negative_embedding, const char *prompt)
+char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, GtkWidget *adapter_dd, int adapter_type, int negative_embedding, const char *prompt)
 {
 	if (prompt == NULL) return NULL;
-	if (box_model_adapters_cards == NULL) return g_strdup(prompt);
+	if (box_model_adapters_cards == NULL || adapter_dd == NULL) return g_strdup(prompt);
 
 	const char *open_tag = adapter_type ? "<lora:" : "(embedding:";
 	const char close_chr = adapter_type ? '>' : ')';
 	const size_t open_len = strlen(open_tag);
 
 	GString *out = g_string_new(NULL);
+	GString *missing_adapters_list = g_string_new(NULL);
+	gboolean missing_adapters = FALSE;
 	const char *p = prompt;
 	const char *tag;
 
@@ -212,8 +215,18 @@ char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, int adapter
 		}
 
 		if (*name != '\0') {
-			if (!adapter_exists(GTK_WIDGET(box_model_adapters_cards), name, adapter_type)) {
-				add_adapter_card(box_model_adapters_cards, name, value, adapter_type, negative_embedding);
+			if (!adapter_exists(GTK_WIDGET(box_model_adapters_cards), name, adapter_type) && adapter_dd) {
+				GListModel *dd_model = gtk_drop_down_get_model(GTK_DROP_DOWN(adapter_dd));
+				if (GTK_IS_STRING_LIST(dd_model)) {
+					int list_item_pos = check_gtk_list_contains_item(GTK_STRING_LIST(dd_model), name);
+					if (list_item_pos >= 0) {
+						add_adapter_card(box_model_adapters_cards, name, value, adapter_type, negative_embedding);
+					} else {
+						g_string_append_printf(missing_adapters_list,
+							"%s: '%s' is missing.\n", adapter_type == 1 ? "LoRA" : "Embedding", name);
+						missing_adapters = TRUE;
+					}
+				}
 			}
 		}
 
@@ -244,6 +257,14 @@ char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, int adapter
 	gsize lead = 0;
 	while (lead < out->len && (g_ascii_isspace(out->str[lead]) || out->str[lead] == ',')) lead++;
 	if (lead > 0) g_string_erase(out, 0, lead);
+
+	if (missing_adapters && adapter_dd) {
+		GtkRoot *root = gtk_widget_get_root(adapter_dd);
+		GtkWindow *win = GTK_WINDOW(root);
+		if (win) show_simple_message(GTK_WIDGET(win), "Missing Model Adapters", missing_adapters_list->str, 0);
+		printf("Missing Model Adapters:\n%s", missing_adapters_list->str);
+	}
+	g_string_free(missing_adapters_list, TRUE);
 
 	return g_string_free(out, FALSE);
 }

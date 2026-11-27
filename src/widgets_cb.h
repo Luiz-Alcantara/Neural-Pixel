@@ -2,10 +2,11 @@
 #define WIDGETS_CB_H
 
 #include <gtk/gtk.h>
+#include "structs.h"
 
 void generation_snapshot_free(GenerationSnapshotData *job);
 
-void show_simple_message(GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
+void show_simple_message(GtkWidget *win, const char *msg_title_text, const char *msg_text, int is_error);
 
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
 

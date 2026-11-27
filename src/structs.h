@@ -298,6 +298,8 @@ typedef struct {
 	GtkWidget *width_dd;
 	GtkWidget *height_dd;
 	GtkWidget *checkpoint_dd;
+	GtkWidget *lora_dd;
+	GtkWidget *embedding_dd;
 	GtkWidget *vae_dd;
 	GtkWidget *sampler_dd;
 	GtkWidget *scheduler_dd;

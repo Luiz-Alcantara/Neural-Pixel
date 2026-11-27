@@ -17,7 +17,7 @@ void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data);
 static void on_get_backend_info_end(GObject *source, GAsyncResult *res, gpointer user_data);
 static void show_lora_triggers(GtkWidget *main_win, GtkWidget *main_overlay, char *path);
 void show_info_message (GtkWidget *wgt, GtkWidget *main_win);
-void show_simple_message (GtkWidget *win, char *msg_title_text, char *msg_text, int is_error);
+void show_simple_message(GtkWidget *win, const char *msg_title_text, const char *msg_text, int is_error);
 
 void generation_snapshot_free(GenerationSnapshotData *job)
 {
@@ -1155,26 +1155,51 @@ void show_no_models_message(GtkWidget *main_win)
 	gtk_window_present (GTK_WINDOW(info_win));
 }
 
-void show_simple_message (GtkWidget *win, char *msg_title_text, char *msg_text, int is_error)
+void show_simple_message(GtkWidget *win, const char *msg_title_text, const char *msg_text, int is_error)
 {
-	#if GTK_CHECK_VERSION(4, 10, 0)
-		GtkAlertDialog *simple_dialog = gtk_alert_dialog_new ("%s", msg_title_text);
-		gtk_alert_dialog_set_detail (simple_dialog, msg_text);
-		gtk_alert_dialog_show (simple_dialog, GTK_WINDOW(win));
-		g_object_unref(simple_dialog);
-	#else
-		GtkWidget *simple_dialog = gtk_message_dialog_new(
-		GTK_WINDOW(win),
-		GTK_DIALOG_MODAL,
-		is_error ? GTK_MESSAGE_ERROR : GTK_MESSAGE_INFO,
-		GTK_BUTTONS_CLOSE,
-		"%s", msg_title_text
-		);
+	GtkWidget *message_win = gtk_window_new ();
+	gtk_widget_add_css_class (message_win, "info_box");
+	gtk_window_set_transient_for (GTK_WINDOW(message_win), GTK_WINDOW(win));
+	gtk_window_set_title (GTK_WINDOW(message_win), is_error ? "Error" : "Info");
+	gtk_window_set_default_size (GTK_WINDOW(message_win), 500, 100);
+	gtk_window_set_modal(GTK_WINDOW(message_win), TRUE);
+	gtk_window_set_resizable (GTK_WINDOW(message_win), TRUE);
+	gtk_window_set_deletable (GTK_WINDOW(message_win), TRUE);
+	gtk_window_set_decorated (GTK_WINDOW(message_win), TRUE);
+	gtk_window_set_destroy_with_parent (GTK_WINDOW(message_win), TRUE);
+	
+	GtkWidget *message_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, ZERO_SPACING);
+	gtk_widget_set_margin_bottom (message_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_end (message_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_start (message_box, MEDIUM_SPACING);
+	gtk_widget_set_margin_top (message_box, MEDIUM_SPACING);
+	gtk_widget_add_css_class(message_box, "info_box");
 
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(simple_dialog), "%s", msg_text);
-		g_signal_connect (simple_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
-		gtk_widget_show(simple_dialog);
-	#endif
+	GtkWidget *title_label = gtk_label_new(NULL);
+	char *markup = g_markup_printf_escaped("<b>%s</b>", msg_title_text);
+	gtk_widget_add_css_class(title_label, "info_label");
+	gtk_label_set_markup(GTK_LABEL(title_label), markup);
+	g_free(markup);
+	gtk_label_set_justify(GTK_LABEL(title_label), GTK_JUSTIFY_CENTER);
+	gtk_widget_set_halign(title_label, GTK_ALIGN_CENTER);
+	gtk_box_append(GTK_BOX(message_box), title_label);
+
+	GtkWidget *body_label = gtk_label_new(msg_text);
+	gtk_widget_add_css_class(body_label, "info_label");
+	gtk_label_set_wrap(GTK_LABEL(body_label), TRUE);
+	gtk_label_set_max_width_chars(GTK_LABEL(body_label), 45);
+	gtk_label_set_justify(GTK_LABEL(body_label), GTK_JUSTIFY_CENTER);
+	gtk_widget_set_halign(body_label, GTK_ALIGN_CENTER);
+	gtk_box_append(GTK_BOX(message_box), body_label);
+
+	GtkWidget *close_window_btn = gtk_button_new_with_label ("Close");
+	gtk_widget_add_css_class(close_window_btn, "custom_btn");
+	gtk_widget_set_hexpand(close_window_btn, TRUE);
+	g_signal_connect_swapped(close_window_btn, "clicked", G_CALLBACK (gtk_window_destroy), message_win);
+	gtk_box_append(GTK_BOX(message_box), close_window_btn);
+
+	gtk_window_set_child (GTK_WINDOW(message_win), message_box);
+	gtk_window_present(GTK_WINDOW(message_win));
 }
 
 void stop_spinbutton_scroll(GtkWidget *btn, GtkWidget *properties_scrollable)

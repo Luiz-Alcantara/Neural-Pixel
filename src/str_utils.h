@@ -23,7 +23,7 @@ char *convert_double_to_string(double n, char *str_format);
 
 char *convert_long_long_int_to_string(long long int x);
 
-char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, int adapter_type, int negative_embedding, const char *prompt);
+char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, GtkWidget *adapter_dd, int adapter_type, int negative_embedding, const char *prompt);
 
 char* generate_sd_seed();
 

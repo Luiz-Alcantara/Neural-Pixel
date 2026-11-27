@@ -670,9 +670,6 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 
 	snapshot_data->positive_adapters = pos_adapters;
 	snapshot_data->negative_adapters = neg_adapters;
-
-	if (pos_adapters) printf("LoRAs list: '%s'\n", pos_adapters);
-	if (neg_adapters) printf("Embeddings list: '%s'\n", neg_adapters);
 	
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;
@@ -732,7 +729,7 @@ void prepare_gen_data(GtkWidget *gen_btn, gpointer user_data)
 
 	gint64 seed_value;
 	if (!seed_entry_get_value (seed_entry_editable, &seed_value)) {
-		g_printerr ("[ERROR] Seed entry had an invalid value at read time, using default value.\n");
+		g_printerr ("[E] Seed entry had an invalid value at read time, using default value.\n");
 	}
 	snapshot_data->seed_value = seed_value;
 

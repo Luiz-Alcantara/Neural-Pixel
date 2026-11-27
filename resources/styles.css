@@ -278,22 +278,6 @@ TODO: Create the greenish color palette and more
 }
 
 
-/* Dialog messages */
-.dialog, .dialog-vbox, .dialog-action-box {
-	background-color: @primary-color;
-}
-
-.dialog-action-area > button {
-	background-image: none;
-	background-color: @primary-color-dark;
-	color: white;
-}
-
-.dialog-action-area > button:hover {
-	background-color: @primary-color-light;
-}
-
-
 /* Left Window Inner Boxes */
 .inner_box {
 	border: 2px solid @separator;
