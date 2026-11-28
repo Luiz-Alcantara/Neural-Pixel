@@ -72,7 +72,17 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->cnet_strength_value));
 		} else {
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled ? "--ref-image" : "--init-img"));
+			if (data->kontext_enabled || data->qwen_zero_cond_t_enabled) {
+				g_ptr_array_add(data->sd_cmd_array, g_strdup("--ref-image"));
+			} else {
+				g_ptr_array_add(data->sd_cmd_array, g_strdup("--init-img"));
+			}
 			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->img2img_file_path));
+
+			if (data->sd_based_enabled && !data->kontext_enabled && !data->qwen_zero_cond_t_enabled) {
+				g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
+				g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->denoise_strength_value));
+			}
 
 			if (data->detector_enabled && data->detector_filename != NULL && strcmp(data->detector_filename, "None") != 0) {
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--ad-model"));
@@ -175,8 +185,14 @@ void gen_sd_string(GenerationSnapshotData *data)
 		g_ptr_array_add(data->sd_cmd_array, g_strdup_printf("./models/tokenizer/%s", data->tokenizer_filename));
 	}
 
-	g_ptr_array_add(data->sd_cmd_array, g_strdup("--strength"));
-	g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->denoise_strength_value));
+	if (!data->sd_based_enabled) {
+		if (data->flow_shift_value && data->flow_shift_value > 0.0) {
+			g_ptr_array_add(data->sd_cmd_array, g_strdup("--flow-shift"));
+			g_ptr_array_add(data->sd_cmd_array, data->flow_shift_value ?
+				g_strdup_printf("%.1f", data->flow_shift_value) :
+				g_strdup_printf("%.1f", DEFAULT_FLOW_SHIFT));
+		}
+	}
 
 	if (data->mmap_enabled) {
 		g_ptr_array_add(data->sd_cmd_array, g_strdup("--mmap"));
@@ -212,13 +228,6 @@ void gen_sd_string(GenerationSnapshotData *data)
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--steps"));
 	g_ptr_array_add(data->sd_cmd_array, data->step_count_value ? g_strdup_printf("%d", data->step_count_value) : g_strdup_printf("%d", DEFAULT_N_STEPS));
-
-	if (!data->sd_based_enabled) {
-		if (data->flow_shift_value && data->flow_shift_value > 0.0) {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup("--flow-shift"));
-			g_ptr_array_add(data->sd_cmd_array, data->flow_shift_value ? g_strdup_printf("%.1f", data->flow_shift_value) : g_strdup_printf("%.1f", DEFAULT_FLOW_SHIFT));
-		}
-	}
 
 	g_ptr_array_add(data->sd_cmd_array, g_strdup("--batch-count"));
 	g_ptr_array_add(data->sd_cmd_array, data->batch_count_value ? g_strdup_printf("%d", data->batch_count_value) : g_strdup_printf("%d", DEFAULT_BATCH_COUNT));
