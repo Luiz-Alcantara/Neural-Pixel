@@ -24,8 +24,9 @@ static void get_adapters_strings(GtkWidget *adapter_box, char **pos_out, char **
 		if (adapter_type == 1) {
 			GtkSpinButton *spin = g_object_get_data(G_OBJECT(card), "adapter-spin");
 			if (spin != NULL) {
-				g_string_append_printf(pos, " <lora:%s:%.2f>", name,
-				gtk_spin_button_get_value(spin));
+				gchar spin_value_buf[G_ASCII_DTOSTR_BUF_SIZE];
+				g_ascii_formatd(spin_value_buf, sizeof(spin_value_buf), "%.2f", gtk_spin_button_get_value(spin));
+				g_string_append_printf(pos, " <lora:%s:%s>", name, spin_value_buf);
 			}
 		} else if (adapter_type == 0) {
 			GtkButton *toggle_btn = g_object_get_data(G_OBJECT(card), "adapter-prompt-toggle-btn");

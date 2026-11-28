@@ -12,6 +12,7 @@
 #include "generate_cb.h"
 #include "handle_cache.h"
 #include "mask_utils.h"
+#include "model_adapters.h"
 #include "png_utils.h"
 #include "spell_check.h"
 #include "str_utils.h"
@@ -491,7 +492,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_set_margin_bottom (box_detector_widgets, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_img2img_inner), box_detector_widgets);
 
-	detector_dd = gen_path_dd(DETECTOR_PATH, NULL, 0, app_data->detector_string, NULL, app, 0);
+	detector_dd = gen_models_dd(DETECTOR_PATH, app_data->detector_string);
+	if (detector_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_widget_set_hexpand (detector_dd, TRUE);
 	gtk_box_append (GTK_BOX (box_detector_widgets), detector_dd);
 
@@ -722,7 +724,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(generate_btn, "gen_btn");
 	gtk_widget_set_focusable(generate_btn, FALSE);
 	
-	checkpoint_dd = gen_path_dd(CHECKPOINTS_PATH, NULL, 0, app_data->checkpoint_string, generate_btn, app, 1);
+	checkpoint_dd = gen_checkpoint_dd(CHECKPOINTS_PATH, app_data->checkpoint_string, generate_btn);
+	if (checkpoint_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_widget_set_hexpand (checkpoint_dd, TRUE);
 	gtk_box_append (GTK_BOX (box_checkpoint_buttons), checkpoint_dd);
 	
@@ -760,7 +763,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_set_homogeneous(GTK_BOX(box_lora_widgets), FALSE);
 	gtk_box_append(GTK_BOX(box_model_adapters_inner), box_lora_widgets);
 	
-	lora_dd = gen_path_dd(LORAS_PATH, box_model_adapters_cards, 1, NULL, NULL, app, 0);
+	lora_dd = gen_adapter_dd(LORAS_PATH, box_model_adapters_cards, ADAPTER_LORA);
+	if (lora_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_widget_set_hexpand(lora_dd, TRUE);
 	gtk_box_append(GTK_BOX(box_lora_widgets), lora_dd);
 
@@ -775,7 +779,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(embedding_lab, "param_label");
 	gtk_box_append(GTK_BOX(box_model_adapters_inner), embedding_lab);
 
-	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, box_model_adapters_cards, 0, NULL, NULL, app, 0);
+	embedding_dd = gen_adapter_dd(EMBEDDINGS_PATH, box_model_adapters_cards, ADAPTER_EMBEDDING);
+	if (embedding_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_widget_set_margin_bottom(embedding_dd, LARGE_SPACING);
 	gtk_box_append(GTK_BOX(box_model_adapters_inner), embedding_dd);
 
@@ -808,7 +813,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(vae_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons_inner), vae_lab);
 
-	vae_dd = gen_path_dd(VAES_PATH, NULL, 0, app_data->vae_string, NULL, app, 0);
+	vae_dd = gen_models_dd(VAES_PATH, app_data->vae_string);
+	if (vae_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_box_append (GTK_BOX (box_addons_inner), vae_dd);
 
 	//Set CNet Widgets
@@ -818,7 +824,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(cnet_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons_inner), cnet_lab);
 	
-	cnet_dd = gen_path_dd(CONTROLNET_PATH, NULL, 0, app_data->cnet_string, NULL, app, 0);
+	cnet_dd = gen_models_dd(CONTROLNET_PATH, app_data->cnet_string);
+	if (cnet_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_box_append (GTK_BOX (box_addons_inner), cnet_dd);
 	
 	//Set Upscaler Widgets
@@ -828,7 +835,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(upscaler_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons_inner), upscaler_lab);
 
-	upscaler_dd = gen_path_dd(UPSCALES_PATH, NULL, 0, app_data->upscaler_string, NULL, app, 0);
+	upscaler_dd = gen_models_dd(UPSCALES_PATH, app_data->upscaler_string);
+	if (upscaler_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_box_append (GTK_BOX (box_addons_inner), upscaler_dd);
 
 	//Set Clip_l Widgets
@@ -838,7 +846,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(clip_l_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons_inner), clip_l_lab);
 	
-	clip_l_dd = gen_path_dd(CLIPS_PATH, NULL, 0, app_data->clip_l_string, NULL, app, 0);
+	clip_l_dd = gen_models_dd(CLIPS_PATH, app_data->clip_l_string);
+	if (clip_l_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_box_append (GTK_BOX (box_addons_inner), clip_l_dd);
 	
 	//Set Clip_g Widgets
@@ -848,7 +857,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(clip_g_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons_inner), clip_g_lab);
 	
-	clip_g_dd = gen_path_dd(CLIPS_PATH, NULL, 0, app_data->clip_g_string, NULL, app, 0);
+	clip_g_dd = gen_models_dd(CLIPS_PATH, app_data->clip_g_string);
+	if (clip_g_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_box_append (GTK_BOX (box_addons_inner), clip_g_dd);
 	
 	//Set Text Encoder Widgets
@@ -864,7 +874,8 @@ app_activate (GApplication *app, gpointer user_data)
 	box_text_encoder_buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, SMALL_SPACING);
 	gtk_box_append (GTK_BOX (box_text_encoder), box_text_encoder_buttons);
 	
-	text_enc_dd = gen_path_dd(TEXT_ENCODERS_PATH, NULL, 0, app_data->text_enc_string, NULL, app, 0);
+	text_enc_dd = gen_models_dd(TEXT_ENCODERS_PATH, app_data->text_enc_string);
+	if (text_enc_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_widget_set_margin_bottom (text_enc_dd, LARGE_SPACING);
 	gtk_widget_set_hexpand (text_enc_dd, TRUE);
 	gtk_box_append (GTK_BOX (box_text_encoder_buttons), text_enc_dd);
@@ -882,7 +893,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(llm_vision_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons_inner), llm_vision_lab);
 	
-	llm_vision_dd = gen_path_dd(LLM_VISION_PATH, NULL, 0, app_data->llm_vision_string, NULL, app, 0);
+	llm_vision_dd = gen_models_dd(LLM_VISION_PATH, app_data->llm_vision_string);
+	if (llm_vision_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_box_append (GTK_BOX (box_addons_inner), llm_vision_dd);
 	
 	//Set Tokenizer Widgets
@@ -892,7 +904,8 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_widget_add_css_class(tokenizer_lab, "param_label");
 	gtk_box_append (GTK_BOX (box_addons_inner), tokenizer_lab);
 	
-	tokenizer_dd = gen_path_dd(TOKENIZER_PATH, NULL, 0, app_data->tokenizer_string, NULL, app, 0);
+	tokenizer_dd = gen_models_dd(TOKENIZER_PATH, app_data->tokenizer_string);
+	if (tokenizer_dd == NULL) g_application_quit(G_APPLICATION(app));
 	gtk_widget_set_margin_bottom (tokenizer_dd, MEDIUM_SPACING);
 	gtk_box_append (GTK_BOX (box_addons_inner), tokenizer_dd);
 

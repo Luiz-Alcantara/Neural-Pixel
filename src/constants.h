@@ -3,6 +3,16 @@
 
 #include <gtk/gtk.h>
 
+typedef enum {
+	ADAPTER_EMBEDDING = 0,
+	ADAPTER_LORA = 1,
+} AdapterType;
+
+typedef enum {
+	POSITIVE_EMBEDDING = 0,
+	NEGATIVE_EMBEDDING = 1,
+} EmbeddingType;
+
 extern const char* APP_NAME_VERSION;
 extern const char* APP_AUTHOR;
 extern const char* APP_DESC;

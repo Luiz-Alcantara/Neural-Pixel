@@ -13,6 +13,7 @@
 #endif
 #include "constants.h"
 #include "custom_widgets.h"
+#include "model_adapters.h"
 #include "widgets_cb.h"
 
 gchar *ascii_format_double(const char *format, double value)
@@ -178,8 +179,8 @@ char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, GtkWidget *
 	if (prompt == NULL) return NULL;
 	if (box_model_adapters_cards == NULL || adapter_dd == NULL) return g_strdup(prompt);
 
-	const char *open_tag = adapter_type ? "<lora:" : "(embedding:";
-	const char close_chr = adapter_type ? '>' : ')';
+	const char *open_tag = adapter_type == ADAPTER_LORA ? "<lora:" : "(embedding:";
+	const char close_chr = adapter_type == ADAPTER_LORA ? '>' : ')';
 	const size_t open_len = strlen(open_tag);
 
 	GString *out = g_string_new(NULL);
@@ -223,7 +224,7 @@ char *extract_adapters_from_prompt(GtkBox *box_model_adapters_cards, GtkWidget *
 						add_adapter_card(box_model_adapters_cards, name, value, adapter_type, negative_embedding);
 					} else {
 						g_string_append_printf(missing_adapters_list,
-							"%s: '%s' is missing.\n", adapter_type == 1 ? "LoRA" : "Embedding", name);
+							"%s: '%s' is missing.\n", adapter_type == ADAPTER_LORA ? "LoRA" : "Embedding", name);
 						missing_adapters = TRUE;
 					}
 				}

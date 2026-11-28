@@ -3,14 +3,16 @@
 
 #include <gtk/gtk.h>
 
-void add_adapter_card(GtkBox *box_model_adapters_cards, const char *name, double value, int adapter_type, int negative_embedding);
+void factory_setup_cb (GtkListItemFactory *factory, GtkListItem *list_item, gpointer user_data);
 
-gboolean adapter_exists(GtkWidget *box, const char *adapter_name, int adapter_type);
+void factory_bind_cb (GtkListItemFactory *factory, GtkListItem *list_item, gpointer user_data);
+
+GtkWidget *gen_checkpoint_dd(const char* path, GString *dd_item_str, GtkWidget *gen_btn);
+
+GtkWidget* gen_models_dd(const char* path, GString *dd_item_str);
 
 GtkWidget* gen_const_dd(const char** items, int *def_item);
 
-GtkWidget* gen_path_dd(const char* path, GtkWidget *box_model_adapters_inner, int adapter_type, GString *dd_item_str, GtkWidget *gen_btn, GApplication *app, int is_req);
-
-GtkWidget* gen_visibility_toggle_button(const char *btn_text, const char *css_class_str, GtkWidget *wgt);
+GtkWidget *gen_visibility_toggle_button(const char *btn_text, const char *css_class_str, GtkWidget *wgt);
 
 #endif // CUSTOM_WIDGETS_H

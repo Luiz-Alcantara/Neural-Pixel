@@ -60,8 +60,6 @@ void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_dd_const_destroy (GtkWidget* wgt, gpointer user_data);
 
-void on_dd_path_destroy (GtkWidget* wgt, gpointer user_data);
-
 void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data);
 
 void on_hide_img_btn_destroy (GtkWidget* wgt, gpointer user_data);

@@ -382,8 +382,13 @@ static void set_png_metadata(const gchar *path, MetadataTask copy_info, LoadPNGD
 
 				if (set_widgets && data->pos_tb) {
 					clear_adapter_cards(data->box_model_adapters_cards);
-					char *p2 = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards), data->lora_dd, 1, 0, p1);
-					char *pprompt = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards), data->embedding_dd, 0, 0, p2);
+					gtk_drop_down_set_selected(GTK_DROP_DOWN(data->lora_dd), 0);
+					gtk_drop_down_set_selected(GTK_DROP_DOWN(data->embedding_dd), 0);
+
+					char *p2 = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards),
+						data->lora_dd, ADAPTER_LORA, POSITIVE_EMBEDDING, p1);
+					char *pprompt = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards),
+						data->embedding_dd, ADAPTER_EMBEDDING, POSITIVE_EMBEDDING, p2);
 					gtk_text_buffer_set_text(data->pos_tb, pprompt, -1);
 
 					n_loaded++;
@@ -416,7 +421,8 @@ static void set_png_metadata(const gchar *path, MetadataTask copy_info, LoadPNGD
 				char *p1 = g_strndup(start, (gsize)(end - start));
 
 				if (set_widgets && data->neg_tb) {
-					char *nprompt = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards), data->embedding_dd, 0, 1, p1);
+					char *nprompt = extract_adapters_from_prompt(GTK_BOX(data->box_model_adapters_cards),
+						data->embedding_dd, ADAPTER_EMBEDDING, NEGATIVE_EMBEDDING, p1);
 					gtk_text_buffer_set_text(data->neg_tb, nprompt, -1);
 
 					n_loaded++;
