@@ -71,8 +71,7 @@ void gen_sd_string(GenerationSnapshotData *data)
 			g_ptr_array_add(data->sd_cmd_array, g_strdup("--control-strength"));
 			g_ptr_array_add(data->sd_cmd_array, ascii_format_double("%.2f", data->cnet_strength_value));
 		} else {
-			g_ptr_array_add(data->sd_cmd_array, g_strdup(data->kontext_enabled ? "--ref-image" : "--init-img"));
-			if (data->kontext_enabled || data->qwen_zero_cond_t_enabled) {
+			if (data->kontext_enabled || data->qwen_zero_cond_t_enabled || !data->sd_based_enabled) {
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--ref-image"));
 			} else {
 				g_ptr_array_add(data->sd_cmd_array, g_strdup("--init-img"));
