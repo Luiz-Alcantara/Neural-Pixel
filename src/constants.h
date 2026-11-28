@@ -6,7 +6,7 @@
 typedef enum {
 	ADAPTER_EMBEDDING = 0,
 	ADAPTER_LORA = 1,
-} AdapterType;
+} ModelAdapterType;
 
 typedef enum {
 	POSITIVE_EMBEDDING = 0,
